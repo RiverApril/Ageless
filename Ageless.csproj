@@ -51,6 +51,7 @@
     <Compile Include="Angle2.cs" />
     <Compile Include="Chunk.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="HeightMap.cs" />
     <Compile Include="Point2.cs" />
     <Compile Include="Point3.cs" />
     <Compile Include="Program.cs" />

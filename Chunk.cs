@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Ageless {
     public class Chunk {
 
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
-
-        public static readonly uint CHUNK_SIZE_X = 128;
-        public static readonly uint CHUNK_SIZE_Z = 128;
 
         Vector3[] cubePoints = new Vector3[] {
             new Vector3(-0.5f, -0.5f,  0.5f),
@@ -30,9 +29,7 @@ namespace Ageless {
 
         public Point2 Location;
 
-        public float[,] heightMap = new float[CHUNK_SIZE_X+1, CHUNK_SIZE_Z+1];
-
-        public int[,] tileMap = new int[CHUNK_SIZE_X, CHUNK_SIZE_Z];
+        public List<HeightMap> terrain = new List<HeightMap>();
 
         public uint[] VBOIDs = new uint[2];
         int elementCount = 0;
@@ -50,24 +47,80 @@ namespace Ageless {
         }
 
         public void load() {
-            if (false) { //Check if chunk file exists
-                //Load chunk file
-            } else {
 
-                Random rand = new Random();
+            /*HeightMap map = new HeightMap();
 
-                for (uint x = 0; x < CHUNK_SIZE_X; x++) {
-                    for (uint z = 0; z < CHUNK_SIZE_Z; z++) {
-                        tileMap[x, z] = Tile.tileGrass.index;
+            Random rand = new Random();
+
+            for (uint x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
+                for (uint z = 0; z < HeightMap.CHUNK_SIZE_Z; z++) {
+                    map.tiles[x, z] = Tile.tileGrass.index;
+                }
+            }
+
+            for (uint x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
+                for (uint z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
+                    map.heights[x, z] = (float)-rand.NextDouble();
+                }
+            }
+
+            terrain.Add(map);*/
+
+                    
+            float resolution = 0x10;
+            string letters = "abcdefghijklmnopqrstuvwxyz";
+            bool loadedLetter = true;
+            for (int i=0;i<26 && loadedLetter; i++) {
+                loadedLetter = false;
+                for (int fc = 0; fc < 2; fc++) {
+                    string s = "../../htmp_";
+                    s += Location.X >= 0 ? "p" : "n";
+                    s += Location.X.ToString("00");
+                    s += "_";
+                    s += Location.Y >= 0 ? "p" : "n";
+                    s += Location.Y.ToString("00");
+                    s += "_";
+                    s += fc == 0 ? "f" : "c";
+                    s += "_";
+                    s += letters[i];
+                    s += ".bmp";
+
+                    try {
+
+                        Console.WriteLine("Try to load: {0}", s);
+
+                        Bitmap bmp = new Bitmap(s);
+
+                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
+                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
+                        }
+
+                        HeightMap htmp = new HeightMap();
+
+                        htmp.isFloor = fc == 0;
+                        htmp.isCeiling = fc == 1;
+
+                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
+                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
+                                Color c = bmp.GetPixel(x, z);
+                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
+                                    htmp.tiles[x, z] = c.R;
+                                }
+                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
+                            }
+                        }
+
+                        terrain.Add(htmp);
+                        loadedLetter = true;
+                        Console.WriteLine("Success");
+
+
+                    } catch (FileNotFoundException) {
+                        continue;
+                    } catch (ArgumentException) {
+                        continue;
                     }
                 }
-
-                for (uint x = 0; x <= CHUNK_SIZE_X; x++) {
-                    for (uint z = 0; z <= CHUNK_SIZE_Z; z++) {
-                        heightMap[x, z] = (float)-rand.NextDouble();
-                    }
-                }
-
             }
         }
 
@@ -76,8 +129,8 @@ namespace Ageless {
             load();
         }
 
-        public void tryToAdd(Vector3 p, /*Vector3 normal,*/ Vector4 color, Vector2 UV, ref Dictionary<Vertex, ushort> vert, ref List<ushort> ind, ref ushort nextI) {
-            Vertex v = new Vertex(p, /*normal,*/ color, UV);
+        public void tryToAdd(Vector3 p, Vector3 normal, Vector4 color, Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
+            Vertex v = new Vertex(p, color, UV, normal);
             if (!vert.ContainsKey(v)) {
                 vert.Add(v, nextI);
                 nextI++;
@@ -85,62 +138,69 @@ namespace Ageless {
             ind.Add(vert[v]);
         }
 
-        public Tile getTile(int x, int z) {
-            return Tile.fromIndex(tileMap[x, z]);
-        }
-
         public void compile() {
 
-            Dictionary<Vertex, ushort> vert = new Dictionary<Vertex, ushort>();
-            List<ushort> ind = new List<ushort>();
-            ushort nextI = 0;
+            Console.WriteLine("Compiling Chunk");
 
-            Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(CHUNK_SIZE_X, 0, CHUNK_SIZE_Z));
+            Dictionary<Vertex, uint> vert = new Dictionary<Vertex, uint>();
+            List<uint> ind = new List<uint>();
+            uint nextI = 0;
+
+            Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(HeightMap.CHUNK_SIZE_X, 0, HeightMap.CHUNK_SIZE_Z));
 
             Tile tile;
             Vector4 color;
-            //Vector3 normal;
+            Vector3 normal;
             Vector3 p1, p2, p3;
-            //Vector3 u, v;
+            Vector3 u, v;
 
-            for (int x = 0; x < CHUNK_SIZE_X; x++) {
-                for (int z = 0; z < CHUNK_SIZE_Z; z++) {
+            foreach (HeightMap htmp in terrain) {
+                for (int x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
+                    for (int z = 0; z < HeightMap.CHUNK_SIZE_Z; z++) {
 
-                    tile = getTile(x, z);
+                        tile = htmp.getTile(x, z);
 
-                    if (tile.renderType == RenderType.Terrain) {
-                        color = tile.color;
+                        if (tile.renderType == RenderType.Terrain) {
+                            color = tile.color;
 
-                        p1 = new Vector3(x - GRID_HALF_SIZE, heightMap[x, z], z - GRID_HALF_SIZE) + offset;
-                        p2 = new Vector3(x + GRID_HALF_SIZE, heightMap[x + 1, z], z - GRID_HALF_SIZE) + offset;
-                        p3 = new Vector3(x - GRID_HALF_SIZE, heightMap[x, z + 1], z + GRID_HALF_SIZE) + offset;
-                        /*u = p2 - p1;
-                        v = p3 - p1;
-                        normal.X = (u.Y * v.Z) - (u.Z * v.Y);
-                        normal.Y = (u.Z * v.X) - (u.X * v.Z);
-                        normal.Z = (u.X * v.Y) - (u.Y * v.X);*/
-                        tryToAdd(p1, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-                        tryToAdd(p2, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
-                        tryToAdd(p3, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+                            if (htmp.isFloor) {
 
-                        p1 = new Vector3(x + GRID_HALF_SIZE, heightMap[x + 1, z + 1], z + GRID_HALF_SIZE) + offset;
-                        p2 = new Vector3(x - GRID_HALF_SIZE, heightMap[x, z + 1], z + GRID_HALF_SIZE) + offset;
-                        p3 = new Vector3(x + GRID_HALF_SIZE, heightMap[x + 1, z], z - GRID_HALF_SIZE) + offset;
-                        /*u = p2 - p1;
-                        v = p3 - p1;
-                        normal.X = (u.Y * v.Z) - (u.Z * v.Y);
-                        normal.Y = (u.Z * v.X) - (u.X * v.Z);
-                        normal.Z = (u.X * v.Y) - (u.Y * v.X);*/
-                        tryToAdd(p1, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
-                        tryToAdd(p2, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
-                        tryToAdd(p3, /*normal,*/ color, TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+                                p1 = new Vector3(x - GRID_HALF_SIZE, htmp.heights[x, z], z - GRID_HALF_SIZE) + offset;
+                                p2 = new Vector3(x + GRID_HALF_SIZE, htmp.heights[x + 1, z], z - GRID_HALF_SIZE) + offset;
+                                p3 = new Vector3(x - GRID_HALF_SIZE, htmp.heights[x, z + 1], z + GRID_HALF_SIZE) + offset;
+                                u = p2 - p1;
+                                v = p3 - p1;
+                                normal.X = (u.Y * v.Z) - (u.Z * v.Y);
+                                normal.Y = (u.Z * v.X) - (u.X * v.Z);
+                                normal.Z = (u.X * v.Y) - (u.Y * v.X);
+                                tryToAdd(p1, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
+                                tryToAdd(p2, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+                                tryToAdd(p3, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+
+                                p1 = new Vector3(x + GRID_HALF_SIZE, htmp.heights[x + 1, z + 1], z + GRID_HALF_SIZE) + offset;
+                                p2 = new Vector3(x - GRID_HALF_SIZE, htmp.heights[x, z + 1], z + GRID_HALF_SIZE) + offset;
+                                p3 = new Vector3(x + GRID_HALF_SIZE, htmp.heights[x + 1, z], z - GRID_HALF_SIZE) + offset;
+                                u = p2 - p1;
+                                v = p3 - p1;
+                                normal.X = (u.Y * v.Z) - (u.Z * v.Y);
+                                normal.Y = (u.Z * v.X) - (u.X * v.Z);
+                                normal.Z = (u.X * v.Y) - (u.Y * v.X);
+                                tryToAdd(p1, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
+                                tryToAdd(p2, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+                                tryToAdd(p3, normal, color, TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+                            }
+
+                            if (htmp.isCeiling) {
+                                //TODO
+                            }
+                        }
                     }
                 }
             }
 
             Vertex[] vertices = new Vertex[vert.Count];
             vert.Keys.CopyTo(vertices, 0);
-            ushort[] indecies = ind.ToArray();
+            uint[] indecies = ind.ToArray();
 
             elementCount = ind.Count;
 
@@ -158,7 +218,7 @@ namespace Ageless {
 
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(short) * indecies.Length), indecies, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indecies.Length), indecies, BufferUsageHint.StaticDraw);
 
         }
 
@@ -176,10 +236,6 @@ namespace Ageless {
             GL.EnableVertexAttribArray(a); //Positions
             GL.VertexAttribPointer(a, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition);
 
-            /*a++;
-            GL.EnableVertexAttribArray(a); //Normals
-            GL.VertexAttribPointer(a, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);*/
-
             a++;
             GL.EnableVertexAttribArray(a); //Colors
             GL.VertexAttribPointer(a, 4, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToColor);
@@ -188,9 +244,13 @@ namespace Ageless {
             GL.EnableVertexAttribArray(a); //UV
             GL.VertexAttribPointer(a, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV);
 
+            a++;
+            GL.EnableVertexAttribArray(a); //Normals
+            GL.VertexAttribPointer(a, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
-            GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedShort, (IntPtr)null);
+            GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null);
 
         }
 

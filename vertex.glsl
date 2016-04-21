@@ -1,23 +1,22 @@
 ﻿#version 420
 
-uniform mat4 ProjectionMatrix;
-uniform mat4 ModelMatrix;
-//uniform mat4 NormalMatrix;
+uniform mat4 WMPMatrix;
 
 in vec3 vertexPosition;
-//in vec3 vertexNormal;
 in vec4 vertexColor;
 in vec2 vertexUV;
+in vec3 vertexNormal;
 
-//out vec3 NormalTransfer;
-out vec4 ColorTransfer;
-out vec2 UVTransfer;
+out vec3 transferPosition;
+out vec4 transferColor;
+out vec2 transferUV;
+out vec3 transferNormal;
 
 void main() {
-	gl_Position = ProjectionMatrix * ModelMatrix * vec4(vertexPosition, 1.0f);
-
-  
-	//NormalTransfer = vertexNormal;
-	ColorTransfer = vertexColor;
-	UVTransfer = vertexUV;
+	gl_Position = WMPMatrix * vec4(vertexPosition, 1.0f);
+	
+	transferPosition = vertexPosition;
+	transferColor = vertexColor;
+	transferUV = vertexUV;
+	transferNormal = vertexNormal;
 }

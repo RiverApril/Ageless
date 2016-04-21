@@ -18,8 +18,11 @@ namespace Ageless {
         public ShaderProgram shader;
 
         public Matrix4 projection;
+        public Matrix4 world;
         public Matrix4 model;
-        //public Matrix4 normal;
+
+        public Matrix4 WMP;
+        public Matrix3 normal;
 
         public World loadedWorld;
 
@@ -33,6 +36,10 @@ namespace Ageless {
         private float camSpeed = 1.0f/8.0f;
         private float camRotSpeed = (float)(Math.PI / 180);
         private int camRegisterBorder = 10;
+
+
+        Vector3 lightPosition = new Vector3(0, -100, 0);
+        Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
 
         public Game() {
 
@@ -62,8 +69,8 @@ namespace Ageless {
 
             TryGL.Call(() => GL.ClearColor(0.1f, 0.0f, 0.1f, 1.0f));
             TryGL.Call(() => GL.Enable(EnableCap.DepthTest));
-            TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
-            TryGL.Call(() => GL.Enable(EnableCap.CullFace));
+            //TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
+            //TryGL.Call(() => GL.Enable(EnableCap.CullFace));
 
 
             shader = new ShaderProgram();
@@ -86,6 +93,8 @@ namespace Ageless {
             model = Matrix4.Identity;
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref model);
+
+            world = Matrix4.Identity;
         }
 
         void onUnload(object sender, EventArgs e) {
@@ -116,9 +125,22 @@ namespace Ageless {
             float dx = 0;
             float dz = 0;
 
+            if (k.IsKeyDown(Key.Left)) {
+                dx -= 1;
+            }
+            if (k.IsKeyDown(Key.Right)) {
+                dx += 1;
+            }
+            if (k.IsKeyDown(Key.Up)) {
+                dz -= 1;
+            }
+            if (k.IsKeyDown(Key.Down)) {
+                dz += 1;
+            }
+
             focusPos.X += dx;
             focusPos.Z += dz;
-            focusPos.Y = loadedWorld.getHeightAtPosition(focusPos.X, focusPos.Z);
+            focusPos.Y = loadedWorld.getFloorAtPosition(focusPos.X, focusPos.Y+10, focusPos.Z);
 
             int mx = gameWindow.Mouse.X;
             int my = gameWindow.Mouse.Y;
@@ -148,21 +170,24 @@ namespace Ageless {
 
             //lastMouse = m;
 
-            model = Matrix4.CreateTranslation(0.0f, -2.0f, 0.0f);
-            model *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
-            model *= Matrix4.CreateRotationY(camAngle.Phi);
-            model *= Matrix4.CreateRotationX(camAngle.Theta);
+            world = Matrix4.CreateTranslation(0.0f, -2.0f, 0.0f);
+            world *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
+            world *= Matrix4.CreateRotationY(camAngle.Phi);
+            world *= Matrix4.CreateRotationX(camAngle.Theta);
             //model *= Matrix4.CreateRotationZ(camAngle.Z);
 
             GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            //normal = Matrix4.Transpose(Matrix4.Invert(model));
+            WMP = world * model * projection;
+            normal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(model)));
 
-            GL.UniformMatrix4(shader.GetUniformID("ProjectionMatrix"), false, ref projection);
+            GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref WMP);
             GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref model);
-            //GL.UniformMatrix4(shader.GetUniformID("NormalMatrix"), false, ref normal);
+            GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref normal);
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
+            GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
+            GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
             loadedWorld.drawChunks();
 
