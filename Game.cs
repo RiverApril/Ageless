@@ -31,15 +31,15 @@ namespace Ageless {
         private Vector3 camPos = new Vector3();
         private Angle2 camAngle = new Angle2();
         private Vector3 focusPos = new Vector3();
-        private float focusSpeed = 1.0f / 8.0f;
         private float focusDistance = 20.0f;
-        private float camSpeed = 1.0f/8.0f;
         private float camRotSpeed = (float)(Math.PI / 180);
-        private int camRegisterBorder = 10;
 
+        public ActorPlayer player = new ActorPlayer();
 
         Vector3 lightPosition = new Vector3(0, -100, 0);
         Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
+
+        public KeyboardState keyboard;
 
         public Game() {
 
@@ -80,10 +80,14 @@ namespace Ageless {
 
             loadedWorld = new World(this);
             loadedWorld.loadChunk(new Point2(0, 0));
-            //loadedWorld.loadChunk(new Point2(0, 1));
-            //loadedWorld.loadChunk(new Point2(1, 0));
-            //loadedWorld.loadChunk(new Point2(0, -1));
-            //loadedWorld.loadChunk(new Point2(-1, 0));
+            loadedWorld.loadChunk(new Point2(0, 1));
+            loadedWorld.loadChunk(new Point2(1, 0));
+            loadedWorld.loadChunk(new Point2(1, 1));
+            loadedWorld.loadChunk(new Point2(-1, 1));
+            loadedWorld.loadChunk(new Point2(1, -1));
+            loadedWorld.loadChunk(new Point2(-1, -1));
+            loadedWorld.loadChunk(new Point2(-1, 0));
+            loadedWorld.loadChunk(new Point2(0, -1));
 
 
             projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, gameWindow.Width / (float)gameWindow.Height, 0.01f, 1024.0f);
@@ -95,6 +99,10 @@ namespace Ageless {
             GL.LoadMatrix(ref model);
 
             world = Matrix4.Identity;
+
+            player.position.X = 64;
+            player.position.Y = 100;
+            player.position.Z = 64;
         }
 
         void onUnload(object sender, EventArgs e) {
@@ -109,8 +117,33 @@ namespace Ageless {
 
         void onUpdateFrame(object sender, FrameEventArgs e) {
             UPS = 1.0 / e.Time;
+            keyboard = Keyboard.GetState();
 
             gameWindow.Title = string.Format("UPS: {0:F}  RPS: {1:F}", UPS, RPS);
+
+            player.update(this);
+            
+            int mx = gameWindow.Mouse.X;
+            int my = gameWindow.Mouse.Y;
+
+
+            if (/*mx <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.A)) {
+                camAngle.Phi += camRotSpeed;
+            } else if (/*mx >= gameWindow.Width - camRegisterBorder ||*/ keyboard.IsKeyDown(Key.D)) {
+                camAngle.Phi -= camRotSpeed;
+            }
+
+            if (/*my <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.W)) {
+                camAngle.Theta += camRotSpeed;
+            } else if (/*my >= gameWindow.Height - camRegisterBorder ||*/ keyboard.IsKeyDown(Key.S)) {
+                camAngle.Theta -= camRotSpeed;
+            }
+
+            if (camAngle.Theta < 0) {
+                camAngle.Theta = 0;
+            } else if (camAngle.Theta > Math.PI / 2) {
+                camAngle.Theta = (float)Math.PI / 2;
+            }
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
@@ -120,49 +153,9 @@ namespace Ageless {
 
             shader.use();
 
-            KeyboardState k = Keyboard.GetState();
+            player.render(this);
 
-            float dx = 0;
-            float dz = 0;
-
-            if (k.IsKeyDown(Key.Left)) {
-                dx -= 1;
-            }
-            if (k.IsKeyDown(Key.Right)) {
-                dx += 1;
-            }
-            if (k.IsKeyDown(Key.Up)) {
-                dz -= 1;
-            }
-            if (k.IsKeyDown(Key.Down)) {
-                dz += 1;
-            }
-
-            focusPos.X += dx;
-            focusPos.Z += dz;
-            focusPos.Y = loadedWorld.getFloorAtPosition(focusPos.X, focusPos.Y+10, focusPos.Z);
-
-            int mx = gameWindow.Mouse.X;
-            int my = gameWindow.Mouse.Y;
-
-
-            if (mx <= camRegisterBorder || k.IsKeyDown(Key.A)) {
-                camAngle.Phi += camRotSpeed;
-            } else if (mx >= gameWindow.Width - camRegisterBorder || k.IsKeyDown(Key.D)) {
-                camAngle.Phi -= camRotSpeed;
-            }
-
-            if (my <= camRegisterBorder || k.IsKeyDown(Key.W)) {
-                camAngle.Theta += camRotSpeed;
-            } else if (my >= gameWindow.Height - camRegisterBorder || k.IsKeyDown(Key.S)) {
-                camAngle.Theta -= camRotSpeed;
-            }
-
-            if (camAngle.Theta < 0) {
-                camAngle.Theta = 0;
-            } else if (camAngle.Theta > Math.PI / 2) {
-                camAngle.Theta = (float)Math.PI / 2;
-            }
+            focusPos = player.position;
 
             camPos.X = focusPos.X + -(float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);

@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actor.cs" />
+    <Compile Include="ActorPlayer.cs" />
     <Compile Include="Angle2.cs" />
     <Compile Include="Chunk.cs" />
     <Compile Include="Game.cs" />

@@ -6,7 +6,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-
+using System.Threading;
 
 namespace Ageless {
     public class World {
@@ -16,6 +16,9 @@ namespace Ageless {
         public Dictionary<Point2, Chunk> LoadedChunks = new Dictionary<Point2, Chunk>();
 
         public Game game;
+        private Thread thread;
+
+        public List<Chunk> compileList = new List<Chunk>();
 
         public static float Square(float a) {
             return a * a;
@@ -23,6 +26,17 @@ namespace Ageless {
 
         public World(Game game) {
             this.game = game;
+            thread = new Thread(compileChunks);
+            thread.Start();
+        }
+
+        private void compileChunks() {
+            while (true) {
+                while (compileList.Count > 0) {
+                    compileList[0].makeChunkVertices();
+                    compileList.RemoveAt(0);
+                }
+            }
         }
 
         public void loadChunk(Point2 location) {
@@ -48,6 +62,8 @@ namespace Ageless {
                 entry.Value.draw();
             }
         }
+
+        
 
         public float getFloorAtPosition(float x, float y, float z) {
             x /= Chunk.GRID_SIZE;
