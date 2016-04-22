@@ -11,6 +11,8 @@ namespace Ageless {
 
     public class Game {
 
+        public static bool exiting = false;
+
         GameWindow gameWindow;
 
         double UPS, RPS;
@@ -36,7 +38,7 @@ namespace Ageless {
 
         public ActorPlayer player = new ActorPlayer();
 
-        Vector3 lightPosition = new Vector3(0, -100, 0);
+        Vector3 lightPosition = new Vector3(0, 0, 0);
         Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
 
         public KeyboardState keyboard;
@@ -107,7 +109,7 @@ namespace Ageless {
 
         void onUnload(object sender, EventArgs e) {
             Console.Out.WriteLine("onUnload");
-
+            exiting = true;
         }
 
         void onResize(object sender, EventArgs e) {
@@ -144,6 +146,10 @@ namespace Ageless {
             } else if (camAngle.Theta > Math.PI / 2) {
                 camAngle.Theta = (float)Math.PI / 2;
             }
+
+            lightPosition.X = player.position.X;
+            lightPosition.Y = player.position.Y-128;
+            lightPosition.Z = player.position.Z;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {

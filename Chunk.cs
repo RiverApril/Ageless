@@ -10,7 +10,7 @@ using System.IO;
 using System.Threading;
 
 namespace Ageless {
-    public class Chunk {
+    public class Chunk : Renderable{
 
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
@@ -32,47 +32,19 @@ namespace Ageless {
 
         public List<HeightMap> terrain = new List<HeightMap>();
 
-        public uint[] VBOIDs = new uint[2];
-        int elementCount = 0;
+        public bool markForRemoval = false;
 
-        int compileState = -1;
-
-        //Temporary for compilation:
-        Dictionary<Vertex, uint> vert = null;
-        List<uint> ind = null;
-
-        public Chunk(World world, Point2 location) {
+        public Chunk(World world, Point2 location) : base(world.chunkMaker) {
             this.world = world;
             Location = location;
         }
 
         public void unload() {
-            compileState = -1;
-            vert = null;
-            ind = null;
+            cleanupRender();
         }
 
         public void load() {
-
-            /*HeightMap map = new HeightMap();
-
-            Random rand = new Random();
-
-            for (uint x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
-                for (uint z = 0; z < HeightMap.CHUNK_SIZE_Z; z++) {
-                    map.tiles[x, z] = Tile.tileGrass.index;
-                }
-            }
-
-            for (uint x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
-                for (uint z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
-                    map.heights[x, z] = (float)-rand.NextDouble();
-                }
-            }
-
-            terrain.Add(map);*/
-
-                    
+            
             float resolution = 0x10;
             string letters = "abcdefghijklmnopqrstuvwxyz";
             bool loadedLetter = true;
@@ -129,7 +101,7 @@ namespace Ageless {
                 }
             }
 
-            compileState = 0;
+            compileState = COMP_STATUS.READY_TO_MAKE;
 
         }
 
@@ -147,8 +119,8 @@ namespace Ageless {
             ind.Add(vert[v]);
         }
 
-        public void makeChunkVertices() {
-            Console.WriteLine("Compiling Chunk");
+        public override void makeRender() {
+            Console.WriteLine("Making Chunk");
 
             vert = new Dictionary<Vertex, uint>();
             ind = new List<uint>();
@@ -206,81 +178,7 @@ namespace Ageless {
                 }
             }
 
-            compileState = 2;
-
-        }
-
-        public void compileChunkVerticies() {
-            
-            Console.WriteLine("Array creation");
-
-            Vertex[] vertices = new Vertex[vert.Count];
-            vert.Keys.CopyTo(vertices, 0);
-            uint[] indecies = ind.ToArray();
-
-            elementCount = ind.Count;
-
-            Console.Out.WriteLine("Vert Count = " + vert.Count);
-            Console.Out.WriteLine("Ind Count = " + ind.Count);
-
-
-            Console.WriteLine("Opengl Chunk compilation calls");
-
-            if (VBOIDs[0] != 0) {
-                GL.DeleteBuffers(2, VBOIDs);
-            }
-            VBOIDs = new uint[2];
-            GL.GenBuffers(2, VBOIDs);
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.StrideToEnd * vertices.Length), vertices, BufferUsageHint.StaticDraw);
-
-
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indecies.Length), indecies, BufferUsageHint.StaticDraw);
-            
-            Console.WriteLine("done");
-
-            vert = null;
-            ind = null;
-
-            compileState = 3;
-
-        }
-
-        public void draw() {
-            //Console.Out.WriteLine("Draw chunk: " + Location.X + ", " + Location.Y);
-
-            switch (compileState) {
-                case 0: {
-                    world.compileList.Add(this);
-                    compileState = 1;
-                    return;
-                }
-                case 2: {
-                    compileChunkVerticies();
-                    return;
-                }
-                case 3: {
-
-                    GL.EnableVertexAttribArray(0); //Positions
-                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition);
-                        
-                    GL.EnableVertexAttribArray(1); //Colors
-                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToColor);
-                        
-                    GL.EnableVertexAttribArray(2); //UV
-                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV);
-                        
-                    GL.EnableVertexAttribArray(3); //Normals
-                    GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);
-
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
-                    GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null);
-                    return;
-                }
-            }
+            compileState = COMP_STATUS.READY_TO_COMPILE;
 
         }
 

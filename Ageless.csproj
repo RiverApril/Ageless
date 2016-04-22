@@ -58,6 +58,8 @@
     <Compile Include="Point3.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Renderable.cs" />
+    <Compile Include="RenderMaker.cs" />
     <Compile Include="RenderType.cs" />
     <Compile Include="ShaderProgram.cs" />
     <Compile Include="TextureControl.cs" />

@@ -12,13 +12,15 @@ namespace Ageless {
     public class World {
 
         public static readonly float SQRT2f = (float)Math.Sqrt(2);
-
-        public Dictionary<Point2, Chunk> LoadedChunks = new Dictionary<Point2, Chunk>();
+        
+        public Dictionary<Point2, Chunk> loadedChunks = new Dictionary<Point2, Chunk>();
+        public Dictionary<uint, Actor> loadedActors = new Dictionary<uint, Actor>();
 
         public Game game;
-        private Thread thread;
 
-        public List<Chunk> compileList = new List<Chunk>();
+        public RenderMaker chunkMaker = new RenderMaker();
+        public RenderMaker actorMaker = new RenderMaker();
+        private object chunksThatShouldBeLoaded;
 
         public static float Square(float a) {
             return a * a;
@@ -26,44 +28,44 @@ namespace Ageless {
 
         public World(Game game) {
             this.game = game;
-            thread = new Thread(compileChunks);
-            thread.Start();
-        }
-
-        private void compileChunks() {
-            while (true) {
-                while (compileList.Count > 0) {
-                    compileList[0].makeChunkVertices();
-                    compileList.RemoveAt(0);
-                }
-            }
+            chunkMaker.initRenderMaker();
+            actorMaker.initRenderMaker();
         }
 
         public void loadChunk(Point2 location) {
-            if (LoadedChunks.ContainsKey(location)) {
-                LoadedChunks[location].reload();
+            if (loadedChunks.ContainsKey(location)) {
+                loadedChunks[location].reload();
             } else {
                 Chunk chunk = new Chunk(this, location);
                 chunk.load();
-                LoadedChunks.Add(location, chunk);
+                loadedChunks.Add(location, chunk);
             }
         }
 
         public void unloadChunk(Point2 location) {
-            if (LoadedChunks.ContainsKey(location)) {
-                LoadedChunks[location].unload();
-                LoadedChunks.Remove(location);
+            if (loadedChunks.ContainsKey(location)) {
+                loadedChunks[location].unload();
+                loadedChunks.Remove(location);
+            }
+        }
+
+        public void update() {
+            HashSet<Point2> visible = new HashSet<Point2>();
+            visible.Add(new Point2(((int)Math.Round(game.player.position.X)) / (int)HeightMap.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)HeightMap.CHUNK_SIZE_Z));
+
+            foreach (Point2 p in visible) {
+                if (!loadedChunks.ContainsKey(p)) {
+                    loadChunk(p);
+                }
             }
         }
 
         public void drawChunks() {
 
-            foreach (KeyValuePair<Point2, Chunk> entry in LoadedChunks) {
-                entry.Value.draw();
+            foreach (KeyValuePair<Point2, Chunk> entry in loadedChunks) {
+                entry.Value.drawRender();
             }
         }
-
-        
 
         public float getFloorAtPosition(float x, float y, float z) {
             x /= Chunk.GRID_SIZE;
@@ -76,9 +78,9 @@ namespace Ageless {
             //Console.WriteLine("Chunk = {0}, {1}", c.X, c.Y);
             //Console.WriteLine("Pos = {0}, {1}", p.X, p.Y);
 
-            if (LoadedChunks.ContainsKey(c)) {
+            if (loadedChunks.ContainsKey(c)) {
 
-                Chunk chunk = LoadedChunks[c];
+                Chunk chunk = loadedChunks[c];
 
                 List<float> heights = new List<float>();
 

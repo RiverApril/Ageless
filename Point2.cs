@@ -13,6 +13,11 @@ namespace Ageless {
             this.Y = y;
         }
 
+        public Point2() {
+            this.X = 0;
+            this.Y = 0;
+        }
+
         public override int GetHashCode() {
             return 31 * X + Y;
         }
