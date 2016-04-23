@@ -19,12 +19,12 @@ namespace Ageless {
 
         public ShaderProgram shader;
 
-        public Matrix4 projection;
-        public Matrix4 world;
-        public Matrix4 model;
+        public Matrix4 matrixProjection;
+        public Matrix4 matrixWorld;
+        public Matrix4 matrixModel;
 
-        public Matrix4 WMP;
-        public Matrix3 normal;
+		public Matrix4 matrixWMP;
+        public Matrix3 matrixNormal;
 
         public World loadedWorld;
 
@@ -36,7 +36,7 @@ namespace Ageless {
         private float focusDistance = 20.0f;
         private float camRotSpeed = (float)(Math.PI / 180);
 
-        public ActorPlayer player = new ActorPlayer();
+        public ActorPlayer player;
 
         Vector3 lightPosition = new Vector3(0, 0, 0);
         Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
@@ -63,8 +63,11 @@ namespace Ageless {
 
             gameWindow.VSync = VSyncMode.On;
 
+			Console.WriteLine("OpenGL version: {0}", GL.GetString(StringName.Version));
+			Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+
             Version version = new Version(GL.GetString(StringName.Version).Substring(0, 3));
-            Version target = new Version(4, 0);
+            Version target = new Version(2, 0);
             if (version < target) {
                 throw new NotSupportedException(String.Format("OpenGL {0} is required. Current version is {1}.", target, version));
             }
@@ -91,16 +94,18 @@ namespace Ageless {
             loadedWorld.loadChunk(new Point2(-1, 0));
             loadedWorld.loadChunk(new Point2(0, -1));
 
+			player = new ActorPlayer(loadedWorld.actorMaker);
 
-            projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, gameWindow.Width / (float)gameWindow.Height, 0.01f, 1024.0f);
+
+            matrixProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, gameWindow.Width / (float)gameWindow.Height, 0.01f, 1024.0f);
             GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref projection);
+            GL.LoadMatrix(ref matrixProjection);
 
-            model = Matrix4.Identity;
+            matrixModel = Matrix4.Identity;
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref model);
+            GL.LoadMatrix(ref matrixModel);
 
-            world = Matrix4.Identity;
+            matrixWorld = Matrix4.Identity;
 
             player.position.X = 64;
             player.position.Y = 100;
@@ -169,21 +174,21 @@ namespace Ageless {
 
             //lastMouse = m;
 
-            world = Matrix4.CreateTranslation(0.0f, -2.0f, 0.0f);
-            world *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
-            world *= Matrix4.CreateRotationY(camAngle.Phi);
-            world *= Matrix4.CreateRotationX(camAngle.Theta);
+            matrixWorld = Matrix4.CreateTranslation(0.0f, -2.0f, 0.0f);
+            matrixWorld *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
+            matrixWorld *= Matrix4.CreateRotationY(camAngle.Phi);
+            matrixWorld *= Matrix4.CreateRotationX(camAngle.Theta);
             //model *= Matrix4.CreateRotationZ(camAngle.Z);
 
             GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            WMP = world * model * projection;
-            normal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(model)));
+			matrixWMP = matrixWorld * matrixModel * matrixProjection;
+            matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
 
-            GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref WMP);
-            GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref model);
-            GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref normal);
+            GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref matrixWMP);
+            GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref matrixModel);
+            GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
             GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
             GL.Uniform3(shader.GetUniformID("light.color"), lightColor);

@@ -65,39 +65,45 @@ namespace Ageless {
 
                     try {
 
-                        Console.WriteLine("Try to load: {0}", s);
 
-                        Bitmap bmp = new Bitmap(s);
+						if(File.Exists(s)){
 
-                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
-                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
-                        }
+	                        Console.WriteLine("Try to load: {0}", s);
 
-                        HeightMap htmp = new HeightMap();
+							using(Bitmap bmp = new Bitmap(s)){
 
-                        htmp.isFloor = fc == 0;
-                        htmp.isCeiling = fc == 1;
+		                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
+		                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
+		                        }
 
-                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
-                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
-                                Color c = bmp.GetPixel(x, z);
-                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
-                                    htmp.tiles[x, z] = c.R;
-                                }
-                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
-                            }
-                        }
+		                        HeightMap htmp = new HeightMap();
 
-                        terrain.Add(htmp);
-                        loadedLetter = true;
-                        Console.WriteLine("Success");
+		                        htmp.isFloor = fc == 0;
+		                        htmp.isCeiling = fc == 1;
+
+		                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
+		                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
+		                                Color c = bmp.GetPixel(x, z);
+		                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
+		                                    htmp.tiles[x, z] = c.R;
+		                                }
+		                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
+		                            }
+		                        }
+
+		                        terrain.Add(htmp);
+		                        loadedLetter = true;
+		                        Console.WriteLine("Success");
+
+								bmp.Dispose();
+							}
+						}
 
 
-                    } catch (FileNotFoundException) {
+					} catch (FileNotFoundException) {
+						Console.WriteLine("File not found");
                         continue;
-                    } catch (ArgumentException) {
-                        continue;
-                    }
+					}
                 }
             }
 
@@ -120,7 +126,7 @@ namespace Ageless {
         }
 
         public override void makeRender() {
-            Console.WriteLine("Making Chunk");
+			Console.WriteLine("Making Chunk {0}, {1}", Location.X, Location.Y);
 
             vert = new Dictionary<Vertex, uint>();
             ind = new List<uint>();
@@ -133,6 +139,8 @@ namespace Ageless {
             Vector3 normal;
             Vector3 p1, p2, p3;
             Vector3 u, v;
+
+			Console.WriteLine("Heightmap count: {0}", terrain.Count);
 
             foreach (HeightMap htmp in terrain) {
                 for (int x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
@@ -177,6 +185,8 @@ namespace Ageless {
                     }
                 }
             }
+
+			Console.WriteLine("Made Chunk {0}, {1}", Location.X, Location.Y);
 
             compileState = COMP_STATUS.READY_TO_COMPILE;
 

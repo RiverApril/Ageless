@@ -20,10 +20,14 @@ namespace Ageless {
         
         private void compilerRenders() {
             while (!Game.exiting) {
-                while (!Game.exiting && list.Count > 0) {
-                    list[0].makeRender();
-                    list.RemoveAt(0);
-                }
+				if(list != null){
+	                while (!Game.exiting && list.Count > 0) {
+						if(list[0] != null){
+	                    	list[0].makeRender();
+	                    	list.RemoveAt(0);
+						}
+	                }
+				}
             }
         }
     }

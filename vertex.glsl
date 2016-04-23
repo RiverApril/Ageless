@@ -1,16 +1,16 @@
-﻿#version 420
+﻿#version 120
 
 uniform mat4 WMPMatrix;
 
-in vec3 vertexPosition;
-in vec4 vertexColor;
-in vec2 vertexUV;
-in vec3 vertexNormal;
+attribute vec3 vertexPosition;
+attribute vec4 vertexColor;
+attribute vec2 vertexUV;
+attribute vec3 vertexNormal;
 
-out vec3 transferPosition;
-out vec4 transferColor;
-out vec2 transferUV;
-out vec3 transferNormal;
+varying vec3 transferPosition;
+varying vec4 transferColor;
+varying vec2 transferUV;
+varying vec3 transferNormal;
 
 void main() {
 	gl_Position = WMPMatrix * vec4(vertexPosition, 1.0f);

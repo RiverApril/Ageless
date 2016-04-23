@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 namespace Ageless {
     public class ActorPlayer : Actor {
 
+		public ActorPlayer(RenderMaker renderMaker) : base(renderMaker) {
+
+		}
+
         public void update(Game game) {
 
             Vector2 diff = new Vector2();

@@ -1,4 +1,4 @@
-﻿#version 420
+﻿#version 120
 
 struct Light{
     vec3 position;
@@ -12,12 +12,12 @@ uniform Light light;
 uniform mat4 ModelMatrix;
 uniform mat3 NormalMatrix;
 
-in vec3 transferPosition;
-in vec4 transferColor;
-in vec2 transferUV;
-in vec3 transferNormal;
+varying vec3 transferPosition;
+varying vec4 transferColor;
+varying vec2 transferUV;
+varying vec3 transferNormal;
 
-out vec4 fragColor;
+vec4 fragColor;
 
 void main() {
 
