@@ -126,7 +126,7 @@ namespace Ageless {
         }
 
         public override void makeRender() {
-			Console.WriteLine("Making Chunk {0}, {1}", Location.X, Location.Y);
+			Console.WriteLine("(Render) Making Chunk {0}, {1}", Location.X, Location.Y);
 
             vert = new Dictionary<Vertex, uint>();
             ind = new List<uint>();
@@ -140,9 +140,14 @@ namespace Ageless {
 			Vector3 p1, p2, p3;
 			Vector3 u, v;
 
-			Console.WriteLine("Heightmap count: {0}", terrain.Count);
+			int htmpi = 0;
 
-            foreach (HeightMap htmp in terrain) {
+			foreach (HeightMap htmp in terrain) {
+
+				htmpi++;
+
+				Console.WriteLine("(Render) Making Heightmap {0} of {1}", htmpi, terrain.Count);
+
                 for (int x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
                     for (int z = 0; z < HeightMap.CHUNK_SIZE_Z; z++) {
 
@@ -186,7 +191,7 @@ namespace Ageless {
                 }
             }
 
-			Console.WriteLine("Made Chunk {0}, {1}", Location.X, Location.Y);
+			Console.WriteLine("(Render) Made Chunk {0}, {1}", Location.X, Location.Y);
 
             compileState = COMP_STATUS.READY_TO_COMPILE;
 

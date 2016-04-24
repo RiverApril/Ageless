@@ -49,7 +49,7 @@ namespace Ageless {
 
         public void compileRender() {
 
-            Console.WriteLine("Array creation");
+			//Console.WriteLine("(Render) Array creation");
 
             Vertex[] vertices = new Vertex[vert.Count];
             vert.Keys.CopyTo(vertices, 0);
@@ -57,11 +57,11 @@ namespace Ageless {
 
             elementCount = ind.Count;
 
-            Console.Out.WriteLine("Vert Count = " + vert.Count);
-            Console.Out.WriteLine("Ind Count = " + ind.Count);
+			//Console.Out.WriteLine("(Render) Vert Count = " + vert.Count);
+			//Console.Out.WriteLine("(Render) Ind Count = " + ind.Count);
 
 
-            Console.WriteLine("Opengl Chunk compilation calls");
+			//Console.WriteLine("(Render) Opengl Chunk compilation calls");
 
             if (VBOIDs[0] != 0) {
                 GL.DeleteBuffers(2, VBOIDs);
@@ -76,7 +76,7 @@ namespace Ageless {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
             GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indecies.Length), indecies, BufferUsageHint.StaticDraw);
 
-            Console.WriteLine("done");
+			//Console.WriteLine("(Render) done");
 
             vert = null;
             ind = null;

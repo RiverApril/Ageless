@@ -20,7 +20,7 @@ namespace Ageless {
 
         GameWindow gameWindow;
 
-        double UPS, RPS;
+        double FPS;
 
         public ShaderProgram shader;
 
@@ -132,10 +132,9 @@ namespace Ageless {
         }
 
         void onUpdateFrame(object sender, FrameEventArgs e) {
-            UPS = 1.0 / e.Time;
             keyboard = Keyboard.GetState();
 
-            gameWindow.Title = string.Format("UPS: {0:F}  RPS: {1:F}", UPS, RPS);
+            gameWindow.Title = string.Format("FPS: {0:F}", FPS);
 
 			loadedWorld.update(this);
             
@@ -167,7 +166,7 @@ namespace Ageless {
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
-            RPS = 1.0 / e.Time;
+            FPS = 1.0 / e.Time;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -203,11 +202,13 @@ namespace Ageless {
 			GL.Uniform1(shader.GetUniformID("Texture"), 0);
 			loadedWorld.drawChunks();
 
+
 			GL.BindTexture(TextureTarget.Texture2D, TextureControl.actors);
 			GL.ActiveTexture(TextureUnit.Texture1);
 
 			GL.Uniform1(shader.GetUniformID("Texture"), 1);
 			loadedWorld.drawActors();
+
 
             gameWindow.SwapBuffers();
         }
