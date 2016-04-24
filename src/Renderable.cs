@@ -38,7 +38,7 @@ namespace Ageless {
         abstract public void makeRender();
 
 		
-		public void tryToAdd(Vector3 p, Vector3 normal, Vector4 color, Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
+		public void tryToAdd(ref Vector3 p, ref Vector3 normal, ref Vector4 color, ref Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
 			Vertex v = new Vertex(p, color, UV, normal);
 			if (!vert.ContainsKey(v)) {
 				vert.Add(v, nextI);

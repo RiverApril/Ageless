@@ -13,7 +13,7 @@ namespace Ageless{
         [STAThread]
         static void Main(string[] args) {
 
-            var game = new Game();
+            new Game();
 
         }
 

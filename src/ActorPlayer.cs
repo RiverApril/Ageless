@@ -64,32 +64,40 @@ namespace Ageless {
 
 			Vector4 color = new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
 			Vector3 normal = new Vector3();
-			Vector3 p1, p2, p3;
-			Vector3 u, v;
+			Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
+			Vector3 u = new Vector3(), v = new Vector3();
 
-			p1 = new Vector3(position.X - RENDER_HALF_SIZE, position.Y, position.Z - RENDER_HALF_SIZE);
-			p2 = new Vector3(position.X + RENDER_HALF_SIZE, position.Y, position.Z - RENDER_HALF_SIZE);
-			p3 = new Vector3(position.X - RENDER_HALF_SIZE, position.Y, position.Z + RENDER_HALF_SIZE);
-			u = p2 - p1;
-			v = p3 - p1;
+			p1.X = position.X - RENDER_HALF_SIZE;   p1.Y = position.Y;   p1.Z = position.Z - RENDER_HALF_SIZE;
+			p2.X = position.X + RENDER_HALF_SIZE;   p2.Y = position.Y;   p2.Z = position.Z - RENDER_HALF_SIZE;
+			p3.X = position.X - RENDER_HALF_SIZE;   p3.Y = position.Y;   p3.Z = position.Z + RENDER_HALF_SIZE;
+
+			u.X = p2.X - p1.X;   u.Y = p2.Y - p1.Y;   u.Z = p2.Z - p1.Z;
+			v.X = p3.X - p1.X;   v.Y = p3.Y - p1.Y;   v.Z = p3.Z - p1.Z;
+
 			normal.X = (u.Y * v.Z) - (u.Z * v.Y);
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
-			tryToAdd(p1, normal, color, TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
-			tryToAdd(p2, normal, color, TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
-			tryToAdd(p3, normal, color, TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
 
-			p1 = new Vector3(position.X + RENDER_HALF_SIZE, position.Y, position.Z + RENDER_HALF_SIZE);
-			p2 = new Vector3(position.X - RENDER_HALF_SIZE, position.Y, position.Z + RENDER_HALF_SIZE);
-			p3 = new Vector3(position.X + RENDER_HALF_SIZE, position.Y, position.Z - RENDER_HALF_SIZE);
-			u = p2 - p1;
-			v = p3 - p1;
+			tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+
+
+
+			p1.X = position.X + RENDER_HALF_SIZE;   p1.Y = position.Y;   p1.Z = position.Z + RENDER_HALF_SIZE;
+			p2.X = position.X - RENDER_HALF_SIZE;   p2.Y = position.Y;   p2.Z = position.Z + RENDER_HALF_SIZE;
+			p3.X = position.X + RENDER_HALF_SIZE;   p3.Y = position.Y;   p3.Z = position.Z - RENDER_HALF_SIZE;
+
+			u.X = p2.X - p1.X;   u.Y = p2.Y - p1.Y;   u.Z = p2.Z - p1.Z;
+			v.X = p3.X - p1.X;   v.Y = p3.Y - p1.Y;   v.Z = p3.Z - p1.Z;
+
 			normal.X = (u.Y * v.Z) - (u.Z * v.Y);
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
-			tryToAdd(p1, normal, color, TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
-			tryToAdd(p2, normal, color, TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
-			tryToAdd(p3, normal, color, TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+
+			tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
 			Console.WriteLine("Made Player");

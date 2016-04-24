@@ -78,7 +78,7 @@ namespace Ageless {
                 throw new NotSupportedException(String.Format("OpenGL {0} is required. Current version is {1}.", target, version));
             }
 
-            TryGL.Call(() => GL.ClearColor(0.1f, 0.0f, 0.1f, 1.0f));
+            TryGL.Call(() => GL.ClearColor(0.2f, 0.0f, 0.2f, 1.0f));
             TryGL.Call(() => GL.Enable(EnableCap.DepthTest));
             //TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
             //TryGL.Call(() => GL.Enable(EnableCap.CullFace));

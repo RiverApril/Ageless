@@ -23,12 +23,17 @@ namespace Ageless {
 
             int k = 0;
 
+			float x1;
+			float y1;
+			float x2;
+			float y2;
+
             for (int y = 0; y < 16; y++) {
                 for (int x = 0; x < 16; x++) {
-                    float x1 = x * (1.0f / 16.0f);
-                    float y1 = y * (1.0f / 16.0f);
-                    float x2 = (x + 1) * (1.0f / 16.0f);
-                    float y2 = (y + 1) * (1.0f / 16.0f);
+                    x1 = x * (1.0f / 16.0f);
+                    y1 = y * (1.0f / 16.0f);
+                    x2 = (x + 1) * (1.0f / 16.0f);
+                    y2 = (y + 1) * (1.0f / 16.0f);
                     tex16x16Coords[k, 0] = new Vector2(x1, y1);
                     tex16x16Coords[k, 1] = new Vector2(x2, y1);
                     tex16x16Coords[k, 2] = new Vector2(x1, y2);
