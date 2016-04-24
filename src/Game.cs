@@ -69,7 +69,8 @@ namespace Ageless {
             gameWindow.VSync = VSyncMode.On;
 
 			Console.WriteLine("OpenGL version: {0}", GL.GetString(StringName.Version));
-			Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+			//Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+			int glslVersion = int.Parse(GL.GetString(StringName.ShadingLanguageVersion).Replace(".", ""));
 
             Version version = new Version(GL.GetString(StringName.Version).Substring(0, 3));
             Version target = new Version(2, 0);
@@ -84,23 +85,23 @@ namespace Ageless {
 
 
             shader = new ShaderProgram();
-			shader.CompileProgram(File.ReadAllText(dirSdr+"vertex.glsl"), File.ReadAllText(dirSdr+"fragment.glsl"));
+			Console.WriteLine("Current GLSL version: {0}", glslVersion);
+			while(!File.Exists(dirSdr+"vertex."+glslVersion+".glsl")){
+				glslVersion--;
+				if(glslVersion <= 0){
+					Console.WriteLine("Shader with required version not found.");
+					throw new NotSupportedException(String.Format("Please create shader files with version {0} or lower.", GL.GetString(StringName.ShadingLanguageVersion)));
+				}
+			}
+			Console.WriteLine("Using shader with GLSL version: {0}", glslVersion);
+			shader.CompileProgram(File.ReadAllText(dirSdr+"vertex."+glslVersion+".glsl"), File.ReadAllText(dirSdr+"fragment."+glslVersion+".glsl"));
 
             TextureControl.loadTextures();
 
             loadedWorld = new World(this);
-            loadedWorld.loadChunk(new Point2(0, 0));
-            loadedWorld.loadChunk(new Point2(0, 1));
-            loadedWorld.loadChunk(new Point2(1, 0));
-            loadedWorld.loadChunk(new Point2(1, 1));
-            loadedWorld.loadChunk(new Point2(-1, 1));
-            loadedWorld.loadChunk(new Point2(1, -1));
-            loadedWorld.loadChunk(new Point2(-1, -1));
-            loadedWorld.loadChunk(new Point2(-1, 0));
-            loadedWorld.loadChunk(new Point2(0, -1));
 
 			player = new ActorPlayer(loadedWorld.actorMaker);
-
+			loadedWorld.newActor(player);
 
             matrixProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, gameWindow.Width / (float)gameWindow.Height, 0.01f, 1024.0f);
             GL.MatrixMode(MatrixMode.Projection);
@@ -114,12 +115,15 @@ namespace Ageless {
 
             player.position.X = 64;
             player.position.Y = 100;
-            player.position.Z = 64;
+			player.position.Z = 64;
+
         }
 
         void onUnload(object sender, EventArgs e) {
             Console.Out.WriteLine("onUnload");
-            exiting = true;
+			exiting = true;
+			loadedWorld.actorMaker.thread.Abort();
+			loadedWorld.chunkMaker.thread.Abort();
         }
 
         void onResize(object sender, EventArgs e) {
@@ -133,10 +137,10 @@ namespace Ageless {
 
             gameWindow.Title = string.Format("UPS: {0:F}  RPS: {1:F}", UPS, RPS);
 
-            player.update(this);
+			loadedWorld.update(this);
             
-            int mx = gameWindow.Mouse.X;
-            int my = gameWindow.Mouse.Y;
+            //int mx = gameWindow.Mouse.X;
+            //int my = gameWindow.Mouse.Y;
 
 
             if (/*mx <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.A)) {
@@ -153,7 +157,7 @@ namespace Ageless {
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
-            } else if (camAngle.Theta > Math.PI / 2) {
+			} else if (camAngle.Theta > Math.PI / 2) {
                 camAngle.Theta = (float)Math.PI / 2;
             }
 
@@ -169,8 +173,6 @@ namespace Ageless {
 
             shader.use();
 
-            player.render(this);
-
             focusPos = player.position;
 
             camPos.X = focusPos.X - (float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
@@ -185,20 +187,27 @@ namespace Ageless {
             matrixWorld *= Matrix4.CreateRotationX(camAngle.Theta);
             //model *= Matrix4.CreateRotationZ(camAngle.Z);
 
-            GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
-            GL.ActiveTexture(TextureUnit.Texture0);
-
 			matrixWMP = matrixWorld * matrixModel * matrixProjection;
             matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
 
             GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref matrixWMP);
             GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref matrixModel);
             GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
-            GL.Uniform1(shader.GetUniformID("Texture"), 0);
             GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
             GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
-            loadedWorld.drawChunks();
+
+			GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
+			GL.ActiveTexture(TextureUnit.Texture0);
+
+			GL.Uniform1(shader.GetUniformID("Texture"), 0);
+			loadedWorld.drawChunks();
+
+			GL.BindTexture(TextureTarget.Texture2D, TextureControl.actors);
+			GL.ActiveTexture(TextureUnit.Texture1);
+
+			GL.Uniform1(shader.GetUniformID("Texture"), 1);
+			loadedWorld.drawActors();
 
             gameWindow.SwapBuffers();
         }

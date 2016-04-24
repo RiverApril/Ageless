@@ -44,6 +44,8 @@ namespace Ageless {
         }
 
         public void load() {
+
+			Console.WriteLine("Loading Chunk: {0}, {1}", Location.X, Location.Y);
             
             float resolution = 0x10;
             string letters = "abcdefghijklmnopqrstuvwxyz";
@@ -68,7 +70,7 @@ namespace Ageless {
 
 						if(File.Exists(path)){
 
-	                        Console.WriteLine("Try to load: {0}", path);
+	                        Console.WriteLine("Try to load Heightmap: {0}", path);
 
 
 
@@ -97,7 +99,7 @@ namespace Ageless {
 
 			                        terrain.Add(htmp);
 			                        loadedLetter = true;
-			                        Console.WriteLine("Success");
+									Console.WriteLine("Loaded Heightmap: {0}", path);
 
 									bmp.Dispose();
 								}
@@ -110,7 +112,9 @@ namespace Ageless {
                         continue;
 					}
                 }
-            }
+			}
+
+			Console.WriteLine("Loaded Chunk: {0}, {1}", Location.X, Location.Y);
 
             compileState = COMP_STATUS.READY_TO_MAKE;
 
@@ -119,15 +123,6 @@ namespace Ageless {
         public void reload() {
             unload();
             load();
-        }
-
-        public void tryToAdd(Vector3 p, Vector3 normal, Vector4 color, Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
-            Vertex v = new Vertex(p, color, UV, normal);
-            if (!vert.ContainsKey(v)) {
-                vert.Add(v, nextI);
-                nextI++;
-            }
-            ind.Add(vert[v]);
         }
 
         public override void makeRender() {
@@ -140,10 +135,10 @@ namespace Ageless {
             Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(HeightMap.CHUNK_SIZE_X, 0, HeightMap.CHUNK_SIZE_Z));
 
             Tile tile;
-            Vector4 color;
-            Vector3 normal;
-            Vector3 p1, p2, p3;
-            Vector3 u, v;
+			Vector4 color;
+			Vector3 normal = new Vector3();
+			Vector3 p1, p2, p3;
+			Vector3 u, v;
 
 			Console.WriteLine("Heightmap count: {0}", terrain.Count);
 

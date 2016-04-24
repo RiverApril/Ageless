@@ -10,14 +10,16 @@ using System.Drawing.Imaging;
 namespace Ageless {
     class TextureControl {
 
-        public static int terrain;
+		public static int terrain;
+		public static int actors;
 
         public static Vector2[,] tex16x16Coords = new Vector2[16*16, 4];
 
 
 
         public static void loadTextures() {
-            terrain = loadTexture(Game.dirTex+"terrain.png");
+			terrain = loadTexture(Game.dirTex+"terrain.png");
+			actors = loadTexture(Game.dirTex+"actors.png");
 
             int k = 0;
 
@@ -56,6 +58,7 @@ namespace Ageless {
 					bmp.UnlockBits(bmpData);
 
 					bmp.Dispose();
+					Console.WriteLine("Texture loaded: {0}", path);
 				}
 			} else {
 				Console.WriteLine("{0} does not exist.", path);

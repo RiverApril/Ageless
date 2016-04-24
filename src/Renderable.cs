@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +36,16 @@ namespace Ageless {
         }
 
         abstract public void makeRender();
+
+		
+		public void tryToAdd(Vector3 p, Vector3 normal, Vector4 color, Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
+			Vertex v = new Vertex(p, color, UV, normal);
+			if (!vert.ContainsKey(v)) {
+				vert.Add(v, nextI);
+				nextI++;
+			}
+			ind.Add(vert[v]);
+		}
 
         public void compileRender() {
 

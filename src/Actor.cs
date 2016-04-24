@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Ageless {
-    public class Actor : Renderable {
+	public abstract class Actor : Renderable {
+
+		public uint ID;
 
         protected float movementSpeed = 1.0f / 8.0f;
         protected float maxSlope = 1.0f;
@@ -15,10 +17,8 @@ namespace Ageless {
 
         public Actor(RenderMaker renderMaker) : base(renderMaker) {
 
-        }
+		}
 
-        public override void makeRender() {
-            throw new NotImplementedException();
-        }
+		public abstract void update(Game game);
     }
 }

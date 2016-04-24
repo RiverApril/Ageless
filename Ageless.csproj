@@ -53,7 +53,6 @@
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Renderable.cs" />
     <Compile Include="src\RenderMaker.cs" />
-    <Compile Include="src\RenderType.cs" />
     <Compile Include="src\ShaderProgram.cs" />
     <Compile Include="src\TextureControl.cs" />
     <Compile Include="src\Tile.cs" />
@@ -69,4 +68,10 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <None Include="sdr\fragment.120.glsl" />
+    <None Include="sdr\fragment.420.glsl" />
+    <None Include="sdr\vertex.120.glsl" />
+    <None Include="sdr\vertex.420.glsl" />
+  </ItemGroup>
 </Project>

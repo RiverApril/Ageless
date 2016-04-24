@@ -5,7 +5,7 @@ using System.Threading;
 namespace Ageless {
     public class RenderMaker {
 
-        private Thread thread = null;
+		public Thread thread = null;
 
         public List<Renderable> list = new List<Renderable>();
 

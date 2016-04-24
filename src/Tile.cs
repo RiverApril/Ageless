@@ -3,6 +3,11 @@ using System;
 using System.Collections.Generic;
 
 namespace Ageless {
+
+	public enum RenderType {
+		None, Terrain
+	}
+
     public class Tile {
 
         public static Dictionary<byte, Tile> tileList = new Dictionary<byte, Tile>();

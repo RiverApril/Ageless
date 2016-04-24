@@ -16,11 +16,12 @@ namespace Ageless {
         public Dictionary<Point2, Chunk> loadedChunks = new Dictionary<Point2, Chunk>();
         public Dictionary<uint, Actor> loadedActors = new Dictionary<uint, Actor>();
 
+		public uint nextActorID = 0;
+
         public Game game;
 
         public RenderMaker chunkMaker = new RenderMaker();
         public RenderMaker actorMaker = new RenderMaker();
-        private object chunksThatShouldBeLoaded;
 
         public static float Square(float a) {
             return a * a;
@@ -42,6 +43,12 @@ namespace Ageless {
             }
         }
 
+		public void newActor(Actor actor){
+			actor.ID = nextActorID;
+			loadedActors.Add(nextActorID, actor);
+			nextActorID++;
+		}
+
         public void unloadChunk(Point2 location) {
             if (loadedChunks.ContainsKey(location)) {
                 loadedChunks[location].unload();
@@ -49,15 +56,36 @@ namespace Ageless {
             }
         }
 
-        public void update() {
-            HashSet<Point2> visible = new HashSet<Point2>();
-            visible.Add(new Point2(((int)Math.Round(game.player.position.X)) / (int)HeightMap.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)HeightMap.CHUNK_SIZE_Z));
+		public void revaluateChunks(){
+			HashSet<Point2> visible = new HashSet<Point2>();
+			Point2 center = new Point2(((int)Math.Round(game.player.position.X)) / (int)HeightMap.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)HeightMap.CHUNK_SIZE_Z);
+			for(int x = -1; x <= 1; x++){
+				for(int y = -1; y <= 1; y++){
+					visible.Add(new Point2(center.X + x, center.Y + y));
+				}
+			}
+			HashSet<Point2> chunksToUnload = new HashSet<Point2>();
+			foreach(KeyValuePair<Point2, Chunk> entry in loadedChunks){
+				if(!visible.Contains(entry.Key)){
+					chunksToUnload.Add(entry.Key);
+				}
+			}
+			foreach(Point2 entry in chunksToUnload){
+				unloadChunk(entry);
+			}
+			foreach (Point2 p in visible) {
+				if (!loadedChunks.ContainsKey(p)) {
+					loadChunk(p);
+				}
+			}
+		}
 
-            foreach (Point2 p in visible) {
-                if (!loadedChunks.ContainsKey(p)) {
-                    loadChunk(p);
-                }
-            }
+		public void update(Game game) {
+			revaluateChunks(); //TODO make this happen less often
+
+			foreach(KeyValuePair<uint, Actor> entry in loadedActors){
+				entry.Value.update(game);
+			}
         }
 
         public void drawChunks() {
@@ -66,6 +94,12 @@ namespace Ageless {
                 entry.Value.drawRender();
             }
         }
+
+		public void drawActors() {
+			foreach (KeyValuePair<uint, Actor> entry in loadedActors){
+				entry.Value.drawRender();
+			}
+		}
 
         public float getFloorAtPosition(float x, float y, float z) {
             x /= Chunk.GRID_SIZE;
