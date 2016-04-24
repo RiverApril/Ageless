@@ -9,7 +9,12 @@ using System.Drawing.Imaging;
 
 namespace Ageless {
 
-    public class Game {
+	public class Game {
+
+		public static readonly string dir = "../../";
+		public static readonly string dirMap = dir+"map/";
+		public static readonly string dirTex = dir+"tex/";
+		public static readonly string dirSdr = dir+"sdr/";
 
         public static bool exiting = false;
 
@@ -79,7 +84,7 @@ namespace Ageless {
 
 
             shader = new ShaderProgram();
-            shader.CompileProgram(File.ReadAllText("../../vertex.glsl"), File.ReadAllText("../../fragment.glsl"));
+			shader.CompileProgram(File.ReadAllText(dirSdr+"vertex.glsl"), File.ReadAllText(dirSdr+"fragment.glsl"));
 
             TextureControl.loadTextures();
 
@@ -168,7 +173,7 @@ namespace Ageless {
 
             focusPos = player.position;
 
-            camPos.X = focusPos.X + -(float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
+            camPos.X = focusPos.X - (float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 

@@ -17,7 +17,7 @@ namespace Ageless {
 
 
         public static void loadTextures() {
-            terrain = loadTexture("../../terrain.png");
+            terrain = loadTexture(Game.dirTex+"terrain.png");
 
             int k = 0;
 
@@ -57,6 +57,8 @@ namespace Ageless {
 
 					bmp.Dispose();
 				}
+			} else {
+				Console.WriteLine("{0} does not exist.", path);
 			}
 
             return id;

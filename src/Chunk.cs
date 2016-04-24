@@ -15,7 +15,7 @@ namespace Ageless {
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
 
-        Vector3[] cubePoints = new Vector3[] {
+        /*Vector3[] cubePoints = new Vector3[] {
             new Vector3(-0.5f, -0.5f,  0.5f),
             new Vector3( 0.5f, -0.5f,  0.5f),
             new Vector3( 0.5f,  0.5f,  0.5f),
@@ -24,7 +24,7 @@ namespace Ageless {
             new Vector3( 0.5f, -0.5f, -0.5f),
             new Vector3( 0.5f,  0.5f, -0.5f),
             new Vector3(-0.5f,  0.5f, -0.5f),
-        };
+        };*/
 
         public World world;
 
@@ -51,51 +51,56 @@ namespace Ageless {
             for (int i=0;i<26 && loadedLetter; i++) {
                 loadedLetter = false;
                 for (int fc = 0; fc < 2; fc++) {
-                    string s = "../../map/htmp_";
-                    s += Location.X >= 0 ? "p" : "n";
-                    s += Math.Abs(Location.X).ToString("00");
-                    s += "_";
-                    s += Location.Y >= 0 ? "p" : "n";
-                    s += Math.Abs(Location.Y).ToString("00");
-                    s += "_";
-                    s += fc == 0 ? "f" : "c";
-                    s += "_";
-                    s += letters[i];
-                    s += ".bmp";
+					string path = Game.dirMap+"htmp_";
+                    path += Location.X >= 0 ? "p" : "n";
+                    path += Math.Abs(Location.X).ToString("00");
+                    path += "_";
+                    path += Location.Y >= 0 ? "p" : "n";
+                    path += Math.Abs(Location.Y).ToString("00");
+                    path += "_";
+                    path += fc == 0 ? "f" : "c";
+                    path += "_";
+                    path += letters[i];
+                    path += ".png";
 
                     try {
 
 
-						if(File.Exists(s)){
+						if(File.Exists(path)){
 
-	                        Console.WriteLine("Try to load: {0}", s);
+	                        Console.WriteLine("Try to load: {0}", path);
 
-							using(Bitmap bmp = new Bitmap(s)){
 
-		                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
-		                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
-		                        }
 
-		                        HeightMap htmp = new HeightMap();
+							using(Image img = Image.FromFile(path)){
 
-		                        htmp.isFloor = fc == 0;
-		                        htmp.isCeiling = fc == 1;
+								using(Bitmap bmp = new Bitmap(img)){
 
-		                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
-		                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
-		                                Color c = bmp.GetPixel(x, z);
-		                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
-		                                    htmp.tiles[x, z] = c.R;
-		                                }
-		                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
-		                            }
-		                        }
+			                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
+			                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
+			                        }
 
-		                        terrain.Add(htmp);
-		                        loadedLetter = true;
-		                        Console.WriteLine("Success");
+			                        HeightMap htmp = new HeightMap();
 
-								bmp.Dispose();
+			                        htmp.isFloor = fc == 0;
+			                        htmp.isCeiling = fc == 1;
+
+			                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
+			                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
+			                                Color c = bmp.GetPixel(x, z);
+			                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
+			                                    htmp.tiles[x, z] = c.R;
+			                                }
+			                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
+			                            }
+			                        }
+
+			                        terrain.Add(htmp);
+			                        loadedLetter = true;
+			                        Console.WriteLine("Success");
+
+									bmp.Dispose();
+								}
 							}
 						}
 
