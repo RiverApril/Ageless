@@ -11,7 +11,6 @@ namespace Ageless {
     class TextureControl {
 
 		public static int terrain;
-		public static int actors;
 
         public static Vector2[,] tex16x16Coords = new Vector2[16*16, 4];
 
@@ -19,7 +18,6 @@ namespace Ageless {
 
         public static void loadTextures() {
 			terrain = loadTexture(Game.dirTex+"terrain.png");
-			actors = loadTexture(Game.dirTex+"actors.png");
 
             int k = 0;
 

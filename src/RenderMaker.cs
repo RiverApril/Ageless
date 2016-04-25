@@ -19,9 +19,9 @@ namespace Ageless {
         }
         
         private void compilerRenders() {
-            while (!Game.exiting) {
+            while (true) {
 				if(list != null){
-	                while (!Game.exiting && list.Count > 0) {
+	                while (list.Count > 0) {
 						if(list[0] != null){
 	                    	list[0].makeRender();
 	                    	list.RemoveAt(0);

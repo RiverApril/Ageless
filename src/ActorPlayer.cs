@@ -11,11 +11,11 @@ namespace Ageless {
 
 		public static readonly float RENDER_HALF_SIZE = 0.5f;
 
-		public static int UVIndex = 0;
+		public static int UVIndex = 1;
 
 		public ActorPlayer(RenderMaker renderMaker) : base(renderMaker) {
 
-		}
+        }
 
         public override void update(Game game) {
 
@@ -56,7 +56,7 @@ namespace Ageless {
         }
 
 		public override void makeRender() {
-			Console.WriteLine("Making Player");
+			Console.WriteLine("(Render) Making Player");
 
 			vert = new Dictionary<Vertex, uint>();
 			ind = new List<uint>();
@@ -100,7 +100,7 @@ namespace Ageless {
 			tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
-			Console.WriteLine("Made Player");
+			Console.WriteLine("(Render) Made Player");
 
 			compileState = COMP_STATUS.READY_TO_COMPILE;
 		}

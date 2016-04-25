@@ -24,7 +24,7 @@ namespace Ageless {
         public RenderMaker actorMaker = new RenderMaker();
 
 
-		public int chunkRenderDistance = 1;
+		public int chunkRenderDistance = 0;
 
 
         public static float Square(float a) {
@@ -38,20 +38,12 @@ namespace Ageless {
         }
 
         public void loadChunk(Point2 location) {
-            if (loadedChunks.ContainsKey(location)) {
-                loadedChunks[location].reload();
-            } else {
+            if (!loadedChunks.ContainsKey(location)) {
                 Chunk chunk = new Chunk(this, location);
                 chunk.load();
                 loadedChunks.Add(location, chunk);
             }
         }
-
-		public void newActor(Actor actor){
-			actor.ID = nextActorID;
-			loadedActors.Add(nextActorID, actor);
-			nextActorID++;
-		}
 
         public void unloadChunk(Point2 location) {
             if (loadedChunks.ContainsKey(location)) {
@@ -59,6 +51,13 @@ namespace Ageless {
                 loadedChunks.Remove(location);
             }
         }
+
+        public void newActor(Actor actor) {
+            actor.compileState = COMP_STATUS.READY_TO_MAKE;
+            actor.ID = nextActorID;
+			loadedActors.Add(nextActorID, actor);
+			nextActorID++;
+		}
 
 		public void revaluateChunks(){
 			HashSet<Point2> visible = new HashSet<Point2>();
@@ -80,10 +79,8 @@ namespace Ageless {
 			foreach(Point2 entry in chunksToUnload){
 				unloadChunk(entry);
 			}
-			foreach (Point2 p in visible) {
-				if (!loadedChunks.ContainsKey(p)) {
-					loadChunk(p);
-				}
+			foreach (Point2 entry in visible) {
+				loadChunk(entry);
 			}
 		}
 
@@ -96,7 +93,6 @@ namespace Ageless {
         }
 
         public void drawChunks() {
-
             foreach (KeyValuePair<Point2, Chunk> entry in loadedChunks) {
                 entry.Value.drawRender();
             }

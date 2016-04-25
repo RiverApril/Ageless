@@ -69,8 +69,10 @@ namespace Ageless {
             gameWindow.VSync = VSyncMode.On;
 
 			Console.WriteLine("OpenGL version: {0}", GL.GetString(StringName.Version));
-			//Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
-			int glslVersion = int.Parse(GL.GetString(StringName.ShadingLanguageVersion).Replace(".", ""));
+            //Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+            string glslVersionS = GL.GetString(StringName.ShadingLanguageVersion);
+            glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" "));
+            int glslVersion = int.Parse(glslVersionS.Replace(".", ""));
 
             Version version = new Version(GL.GetString(StringName.Version).Substring(0, 3));
             Version target = new Version(2, 0);
@@ -86,7 +88,8 @@ namespace Ageless {
 
             shader = new ShaderProgram();
 			Console.WriteLine("Current GLSL version: {0}", glslVersion);
-			while(!File.Exists(dirSdr+"vertex."+glslVersion+".glsl")){
+
+            while (!File.Exists(dirSdr+"vertex."+glslVersion+".glsl")){
 				glslVersion--;
 				if(glslVersion <= 0){
 					Console.WriteLine("Shader with required version not found.");
@@ -196,17 +199,12 @@ namespace Ageless {
             GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
 
-			GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
-			GL.ActiveTexture(TextureUnit.Texture0);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
 
-			GL.Uniform1(shader.GetUniformID("Texture"), 0);
-			loadedWorld.drawChunks();
+            GL.Uniform1(shader.GetUniformID("Texture"), 0);
+            loadedWorld.drawChunks();
 
-
-			GL.BindTexture(TextureTarget.Texture2D, TextureControl.actors);
-			GL.ActiveTexture(TextureUnit.Texture1);
-
-			GL.Uniform1(shader.GetUniformID("Texture"), 1);
 			loadedWorld.drawActors();
 
 

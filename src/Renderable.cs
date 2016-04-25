@@ -19,7 +19,7 @@ namespace Ageless {
 
         protected uint[] VBOIDs = new uint[2];
         protected int elementCount = 0;
-        protected COMP_STATUS compileState = COMP_STATUS.NO_RENDER;
+        public COMP_STATUS compileState = COMP_STATUS.NO_RENDER;
         
 
         protected Dictionary<Vertex, uint> vert = null;
@@ -100,6 +100,12 @@ namespace Ageless {
                     return;
                 }
                 case COMP_STATUS.READY_TO_RENDER: {
+
+                    if (this as Chunk != null) {
+                        Console.Out.WriteLine("Draw chunk: " + (this as Chunk).Location.X + ", " + (this as Chunk).Location.Y);
+                    }else if (this as Actor != null) {
+                        Console.Out.WriteLine("Draw actor");
+                    }
 
                     GL.EnableVertexAttribArray(0); //Positions
                     GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition);

@@ -120,11 +120,6 @@ namespace Ageless {
 
         }
 
-        public void reload() {
-            unload();
-            load();
-        }
-
         public override void makeRender() {
 			Console.WriteLine("(Render) Making Chunk {0}, {1}", Location.X, Location.Y);
 
