@@ -71,7 +71,9 @@ namespace Ageless {
 			Console.WriteLine("OpenGL version: {0}", GL.GetString(StringName.Version));
             //Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
             string glslVersionS = GL.GetString(StringName.ShadingLanguageVersion);
-            glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" "));
+			if(glslVersionS.Contains(" ")){
+				glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" "));
+			}
             int glslVersion = int.Parse(glslVersionS.Replace(".", ""));
 
             Version version = new Version(GL.GetString(StringName.Version).Substring(0, 3));
