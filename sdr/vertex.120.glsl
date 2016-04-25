@@ -1,6 +1,4 @@
-﻿#version 120
-
-uniform mat4 WMPMatrix;
+﻿uniform mat4 WMPMatrix;
 
 attribute vec3 vertexPosition;
 attribute vec4 vertexColor;
@@ -13,7 +11,7 @@ varying vec2 transferUV;
 varying vec3 transferNormal;
 
 void main() {
-	gl_Position = WMPMatrix * vec4(vertexPosition, 1.0f);
+	gl_Position = WMPMatrix * vec4(vertexPosition, 1);
 	
 	transferPosition = vertexPosition;
 	transferColor = vertexColor;

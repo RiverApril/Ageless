@@ -11,7 +11,7 @@ namespace Ageless {
 
 		public static readonly float RENDER_HALF_SIZE = 0.5f;
 
-		public static int UVIndex = 1;
+		public static int UVIndex = 0;
 
 		public ActorPlayer(RenderMaker renderMaker) : base(renderMaker) {
 
@@ -67,9 +67,9 @@ namespace Ageless {
 			Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
 			Vector3 u = new Vector3(), v = new Vector3();
 
-			p1.X = position.X - RENDER_HALF_SIZE;   p1.Y = position.Y;   p1.Z = position.Z - RENDER_HALF_SIZE;
-			p2.X = position.X + RENDER_HALF_SIZE;   p2.Y = position.Y;   p2.Z = position.Z - RENDER_HALF_SIZE;
-			p3.X = position.X - RENDER_HALF_SIZE;   p3.Y = position.Y;   p3.Z = position.Z + RENDER_HALF_SIZE;
+			p1.X = - RENDER_HALF_SIZE;   p1.Y = 0;   p1.Z = - RENDER_HALF_SIZE;
+			p2.X =   RENDER_HALF_SIZE;   p2.Y = 0;   p2.Z = - RENDER_HALF_SIZE;
+			p3.X = - RENDER_HALF_SIZE;   p3.Y = 0;   p3.Z =   RENDER_HALF_SIZE;
 
 			u.X = p2.X - p1.X;   u.Y = p2.Y - p1.Y;   u.Z = p2.Z - p1.Z;
 			v.X = p3.X - p1.X;   v.Y = p3.Y - p1.Y;   v.Z = p3.Z - p1.Z;
@@ -84,9 +84,9 @@ namespace Ageless {
 
 
 
-			p1.X = position.X + RENDER_HALF_SIZE;   p1.Y = position.Y;   p1.Z = position.Z + RENDER_HALF_SIZE;
-			p2.X = position.X - RENDER_HALF_SIZE;   p2.Y = position.Y;   p2.Z = position.Z + RENDER_HALF_SIZE;
-			p3.X = position.X + RENDER_HALF_SIZE;   p3.Y = position.Y;   p3.Z = position.Z - RENDER_HALF_SIZE;
+			p1.X =   RENDER_HALF_SIZE;   p1.Y = 0;   p1.Z =   RENDER_HALF_SIZE;
+			p2.X = - RENDER_HALF_SIZE;   p2.Y = 0;   p2.Z =   RENDER_HALF_SIZE;
+			p3.X =   RENDER_HALF_SIZE;   p3.Y = 0;   p3.Z = - RENDER_HALF_SIZE;
 
 			u.X = p2.X - p1.X;   u.Y = p2.Y - p1.Y;   u.Z = p2.Z - p1.Z;
 			v.X = p3.X - p1.X;   v.Y = p3.Y - p1.Y;   v.Z = p3.Z - p1.Z;

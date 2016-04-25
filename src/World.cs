@@ -24,7 +24,7 @@ namespace Ageless {
         public RenderMaker actorMaker = new RenderMaker();
 
 
-		public int chunkRenderDistance = 0;
+		public int chunkRenderDistance = 1;
 
 
         public static float Square(float a) {
@@ -92,14 +92,18 @@ namespace Ageless {
 			}
         }
 
-        public void drawChunks() {
+		public void drawChunks(Game game) {
             foreach (KeyValuePair<Point2, Chunk> entry in loadedChunks) {
                 entry.Value.drawRender();
             }
         }
 
-		public void drawActors() {
+		public void drawActors(Game game) {
+
 			foreach (KeyValuePair<uint, Actor> entry in loadedActors){
+
+				game.matrixModel = Matrix4.CreateTranslation(entry.Value.position);
+				game.setWMP();
 				entry.Value.drawRender();
 			}
 		}

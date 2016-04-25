@@ -32,15 +32,13 @@ namespace Ageless {
 
         public List<HeightMap> terrain = new List<HeightMap>();
 
-        public bool markForRemoval = false;
-
         public Chunk(World world, Point2 location) : base(world.chunkMaker) {
             this.world = world;
             Location = location;
         }
 
         public void unload() {
-            cleanupRender();
+			markForRemoval = true;
         }
 
         public void load() {

@@ -99,7 +99,7 @@ namespace Ageless {
 				}
 			}
 			Console.WriteLine("Using shader with GLSL version: {0}", glslVersion);
-			shader.CompileProgram(File.ReadAllText(dirSdr+"vertex."+glslVersion+".glsl"), File.ReadAllText(dirSdr+"fragment."+glslVersion+".glsl"));
+			shader.LoadAndCompileProrgam(dirSdr+"vertex."+glslVersion+".glsl", dirSdr+"fragment."+glslVersion+".glsl");
 
             TextureControl.loadTextures();
 
@@ -107,6 +107,8 @@ namespace Ageless {
 
 			player = new ActorPlayer(loadedWorld.actorMaker);
 			loadedWorld.newActor(player);
+			//loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
+			//loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
 
             matrixProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, gameWindow.Width / (float)gameWindow.Height, 0.01f, 1024.0f);
             GL.MatrixMode(MatrixMode.Projection);
@@ -119,7 +121,7 @@ namespace Ageless {
             matrixWorld = Matrix4.Identity;
 
             player.position.X = 64;
-            player.position.Y = 100;
+            player.position.Y = 128;
 			player.position.Z = 64;
 
         }
@@ -175,7 +177,10 @@ namespace Ageless {
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            shader.use();
+			shader.use();
+
+			GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
+			GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
             focusPos = player.position;
 
@@ -185,33 +190,37 @@ namespace Ageless {
 
             //lastMouse = m;
 
-            matrixWorld = Matrix4.CreateTranslation(0.0f, -2.0f, 0.0f);
+            matrixWorld = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
             matrixWorld *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
             matrixWorld *= Matrix4.CreateRotationY(camAngle.Phi);
             matrixWorld *= Matrix4.CreateRotationX(camAngle.Theta);
             //model *= Matrix4.CreateRotationZ(camAngle.Z);
 
-			matrixWMP = matrixWorld * matrixModel * matrixProjection;
-            matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
+			matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
+			GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
 
-            GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref matrixWMP);
-            GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref matrixModel);
-            GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
-            GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
-            GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
+			matrixModel = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
+			setWMP();
 
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
 
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
-            loadedWorld.drawChunks();
+            loadedWorld.drawChunks(this);
 
-			loadedWorld.drawActors();
+
+			loadedWorld.drawActors(this);
 
 
             gameWindow.SwapBuffers();
         }
+
+		public void setWMP(){
+			matrixWMP = matrixModel * matrixWorld * matrixProjection;
+			GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref matrixWMP);
+			GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref matrixModel);
+		}
 
         void onKeyDown(object sender, KeyboardKeyEventArgs e) {
             switch (e.Key) {

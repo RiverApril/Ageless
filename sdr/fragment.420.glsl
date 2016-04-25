@@ -17,8 +17,6 @@ in vec4 transferColor;
 in vec2 transferUV;
 in vec3 transferNormal;
 
-out vec4 fragColor;
-
 void main() {
 
 	vec3 normal = normalize(NormalMatrix * transferNormal);
@@ -31,5 +29,5 @@ void main() {
 
 	vec4 surfaceColor = texture2D(Texture, transferUV) * transferColor;
 
-	fragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
+	gl_FragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
 }

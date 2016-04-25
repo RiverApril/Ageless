@@ -13,7 +13,7 @@ out vec2 transferUV;
 out vec3 transferNormal;
 
 void main() {
-	gl_Position = WMPMatrix * vec4(vertexPosition, 1.0f);
+	gl_Position = WMPMatrix * vec4(vertexPosition, 1);
 	
 	transferPosition = vertexPosition;
 	transferColor = vertexColor;

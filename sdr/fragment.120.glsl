@@ -1,6 +1,4 @@
-﻿#version 120
-
-struct Light{
+﻿struct Light{
     vec3 position;
     vec3 color;
 };
@@ -17,8 +15,6 @@ varying vec4 transferColor;
 varying vec2 transferUV;
 varying vec3 transferNormal;
 
-vec4 fragColor;
-
 void main() {
 
 	vec3 normal = normalize(NormalMatrix * transferNormal);
@@ -31,5 +27,5 @@ void main() {
 
 	vec4 surfaceColor = texture2D(Texture, transferUV) * transferColor;
 
-	fragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
+	gl_FragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
 }

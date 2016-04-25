@@ -5,6 +5,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.Collections.Generic;
+using System.IO;
 
 
 
@@ -24,7 +25,7 @@ namespace Ageless {
         }
 
         private string LoadShader(string path) {
-            throw new NotImplementedException();
+			return File.ReadAllText(path);
         }
 
         private void CompileShader(string code, ShaderType type) {

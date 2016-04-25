@@ -17,13 +17,15 @@ namespace Ageless {
 
         protected RenderMaker renderMaker;
 
-        protected uint[] VBOIDs = new uint[2];
+        protected uint[] VBOIDs;
         protected int elementCount = 0;
         public COMP_STATUS compileState = COMP_STATUS.NO_RENDER;
         
 
         protected Dictionary<Vertex, uint> vert = null;
-        protected List<uint> ind = null;
+		protected List<uint> ind = null;
+
+		public bool markForRemoval = false;
 
         public Renderable(RenderMaker renderMaker) {
             this.renderMaker = renderMaker;
@@ -32,7 +34,11 @@ namespace Ageless {
         protected void cleanupRender() {
             compileState = COMP_STATUS.NO_RENDER;
             vert = null;
-            ind = null;
+			ind = null;
+			if (VBOIDs[0] != 0) {
+				GL.DeleteBuffers(2, VBOIDs);
+			}
+			markForRemoval = false;
         }
 
         abstract public void makeRender();
@@ -57,17 +63,17 @@ namespace Ageless {
 
             elementCount = ind.Count;
 
-			//Console.Out.WriteLine("(Render) Vert Count = " + vert.Count);
-			//Console.Out.WriteLine("(Render) Ind Count = " + ind.Count);
+			Console.Out.WriteLine("(Render) Vert Count = " + vert.Count);
+			Console.Out.WriteLine("(Render) Ind Count = " + ind.Count);
 
 
 			//Console.WriteLine("(Render) Opengl Chunk compilation calls");
 
-            if (VBOIDs[0] != 0) {
-                GL.DeleteBuffers(2, VBOIDs);
-            }
-            VBOIDs = new uint[2];
-            GL.GenBuffers(2, VBOIDs);
+			if(VBOIDs == null) {
+				VBOIDs = new uint[2];
+				GL.GenBuffers(2, VBOIDs);
+				Console.WriteLine("New Buffers: [{0}, {1}]", VBOIDs[0], VBOIDs[1]);
+			}
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.StrideToEnd * vertices.Length), vertices, BufferUsageHint.StaticDraw);
@@ -89,6 +95,11 @@ namespace Ageless {
         public void drawRender() {
             //Console.Out.WriteLine("Draw chunk: " + Location.X + ", " + Location.Y);
 
+			if(markForRemoval){
+				cleanupRender();
+				return;
+			}
+
             switch (compileState) {
                 case COMP_STATUS.READY_TO_MAKE: {
                     renderMaker.list.Add(this);
@@ -102,9 +113,9 @@ namespace Ageless {
                 case COMP_STATUS.READY_TO_RENDER: {
 
                     if (this as Chunk != null) {
-                        Console.Out.WriteLine("Draw chunk: " + (this as Chunk).Location.X + ", " + (this as Chunk).Location.Y);
+						Console.Out.WriteLine("Draw chunk: {0},{1}  VBO:[{2}, {3}]", (this as Chunk).Location.X, (this as Chunk).Location.Y, VBOIDs[0], VBOIDs[1]);
                     }else if (this as Actor != null) {
-                        Console.Out.WriteLine("Draw actor");
+						Console.Out.WriteLine("Draw actor: {0}  VBO:[{1}, {2}]", (this as Actor).ID, VBOIDs[0], VBOIDs[1]);
                     }
 
                     GL.EnableVertexAttribArray(0); //Positions
