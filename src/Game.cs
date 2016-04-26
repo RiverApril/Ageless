@@ -25,10 +25,10 @@ namespace Ageless {
         public ShaderProgram shader;
 
         public Matrix4 matrixProjection;
-        public Matrix4 matrixWorld;
+        public Matrix4 matrixCamera;
         public Matrix4 matrixModel;
 
-		public Matrix4 matrixWMP;
+		public Matrix4 matrixView;
         public Matrix3 matrixNormal;
 
         public World loadedWorld;
@@ -118,7 +118,7 @@ namespace Ageless {
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref matrixModel);
 
-            matrixWorld = Matrix4.Identity;
+            matrixCamera = Matrix4.Identity;
 
             player.position.X = 64;
             player.position.Y = 128;
@@ -146,7 +146,7 @@ namespace Ageless {
 			loadedWorld.update(this);
             
             //int mx = gameWindow.Mouse.X;
-            //int my = gameWindow.Mouse.Y;
+			//int my = gameWindow.Mouse.Y;
 
 
             if (/*mx <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.A)) {
@@ -165,7 +165,13 @@ namespace Ageless {
                 camAngle.Theta = 0;
 			} else if (camAngle.Theta > Math.PI / 2) {
                 camAngle.Theta = (float)Math.PI / 2;
-            }
+			}
+
+			focusPos = player.position;
+
+			camPos.X = focusPos.X - (float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
+			camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
+			camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
             lightPosition.X = player.position.X;
             lightPosition.Y = player.position.Y-128;
@@ -182,44 +188,31 @@ namespace Ageless {
 			GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
 			GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
-            focusPos = player.position;
-
-            camPos.X = focusPos.X - (float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
-            camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
-            camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
-
-            //lastMouse = m;
-
-            matrixWorld = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
-            matrixWorld *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
-            matrixWorld *= Matrix4.CreateRotationY(camAngle.Phi);
-            matrixWorld *= Matrix4.CreateRotationX(camAngle.Theta);
-            //model *= Matrix4.CreateRotationZ(camAngle.Z);
-
-			matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
-			GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
-
-			matrixModel = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
-			setWMP();
+            matrixCamera = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
+            matrixCamera *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
+            matrixCamera *= Matrix4.CreateRotationY(camAngle.Phi);
+			matrixCamera *= Matrix4.CreateRotationX(camAngle.Theta);
 
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
-
-            GL.Uniform1(shader.GetUniformID("Texture"), 0);
-            loadedWorld.drawChunks(this);
-
+			GL.ActiveTexture(TextureUnit.Texture0);
+			GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
+			GL.Uniform1(shader.GetUniformID("Texture"), 0);
 
 			loadedWorld.drawActors(this);
+			loadedWorld.drawChunks(this);
 
 
             gameWindow.SwapBuffers();
         }
 
-		public void setWMP(){
-			matrixWMP = matrixModel * matrixWorld * matrixProjection;
-			GL.UniformMatrix4(shader.GetUniformID("WMPMatrix"), false, ref matrixWMP);
+		public void setModel(){
 			GL.UniformMatrix4(shader.GetUniformID("ModelMatrix"), false, ref matrixModel);
+
+			matrixView = matrixModel * matrixCamera * matrixProjection;
+			GL.UniformMatrix4(shader.GetUniformID("ViewMatrix"), false, ref matrixView);
+
+			matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
+			GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
 		}
 
         void onKeyDown(object sender, KeyboardKeyEventArgs e) {

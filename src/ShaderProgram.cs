@@ -68,9 +68,8 @@ namespace Ageless {
             int statusCode = -1;
 			
             TryGL.Call(() => GL.BindAttribLocation(ProgramID, 0, "vertexPosition"));
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 1, "vertexColor"));
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 2, "vertexUV"));
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 3, "vertexNormal"));
+            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 1, "vertexUV"));
+            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 2, "vertexNormal"));
 
             TryGL.Call(() => GL.LinkProgram(ProgramID));
             TryGL.Call(() => GL.GetProgramInfoLog(ProgramID, out info));

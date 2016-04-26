@@ -11,7 +11,7 @@ namespace Ageless {
 
 		public static readonly float RENDER_HALF_SIZE = 0.5f;
 
-		public static int UVIndex = 0;
+		public static int UVIndex = 1;
 
 		public ActorPlayer(RenderMaker renderMaker) : base(renderMaker) {
 
@@ -56,13 +56,15 @@ namespace Ageless {
         }
 
 		public override void makeRender() {
+			if(compileState != COMP_STATUS.MAKING){
+				Console.Error.WriteLine("ERROR!!");
+			}
 			Console.WriteLine("(Render) Making Player");
 
 			vert = new Dictionary<Vertex, uint>();
 			ind = new List<uint>();
 			uint nextI = 0;
 
-			Vector4 color = new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
 			Vector3 normal = new Vector3();
 			Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
 			Vector3 u = new Vector3(), v = new Vector3();
@@ -78,9 +80,9 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
 
 
 
@@ -95,9 +97,9 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+			tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
 			Console.WriteLine("(Render) Made Player");

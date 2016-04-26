@@ -11,7 +11,6 @@ uniform mat4 ModelMatrix;
 uniform mat3 NormalMatrix;
 
 varying vec3 transferPosition;
-varying vec4 transferColor;
 varying vec2 transferUV;
 varying vec3 transferNormal;
 
@@ -25,7 +24,7 @@ void main() {
 
 	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
 
-	vec4 surfaceColor = texture2D(Texture, transferUV) * transferColor;
+	vec4 surfaceColor = texture2D(Texture, transferUV);
 
 	gl_FragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
 }

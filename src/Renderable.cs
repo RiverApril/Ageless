@@ -35,8 +35,9 @@ namespace Ageless {
             compileState = COMP_STATUS.NO_RENDER;
             vert = null;
 			ind = null;
-			if (VBOIDs[0] != 0) {
+			if (VBOIDs != null) {
 				GL.DeleteBuffers(2, VBOIDs);
+				VBOIDs = null;
 			}
 			markForRemoval = false;
         }
@@ -44,8 +45,8 @@ namespace Ageless {
         abstract public void makeRender();
 
 		
-		public void tryToAdd(ref Vector3 p, ref Vector3 normal, ref Vector4 color, ref Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
-			Vertex v = new Vertex(p, color, UV, normal);
+		public void tryToAdd(ref Vector3 p, ref Vector3 normal, ref Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
+			Vertex v = new Vertex(p, UV, normal);
 			if (!vert.ContainsKey(v)) {
 				vert.Add(v, nextI);
 				nextI++;
@@ -53,7 +54,10 @@ namespace Ageless {
 			ind.Add(vert[v]);
 		}
 
-        public void compileRender() {
+		public void compileRender() {
+			if(compileState != COMP_STATUS.READY_TO_COMPILE){
+				Console.Error.WriteLine("ERROR!!");
+			}
 
 			//Console.WriteLine("(Render) Array creation");
 
@@ -77,10 +81,11 @@ namespace Ageless {
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.StrideToEnd * vertices.Length), vertices, BufferUsageHint.StaticDraw);
-
+			//GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
             GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indecies.Length), indecies, BufferUsageHint.StaticDraw);
+			//GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
 			//Console.WriteLine("(Render) done");
 
@@ -104,35 +109,37 @@ namespace Ageless {
                 case COMP_STATUS.READY_TO_MAKE: {
                     renderMaker.list.Add(this);
                     compileState = COMP_STATUS.MAKING;
-                    return;
+					return;
                 }
                 case COMP_STATUS.READY_TO_COMPILE: {
                     compileRender();
-                    return;
+					drawRender();
+					return;
                 }
                 case COMP_STATUS.READY_TO_RENDER: {
 
                     if (this as Chunk != null) {
-						Console.Out.WriteLine("Draw chunk: {0},{1}  VBO:[{2}, {3}]", (this as Chunk).Location.X, (this as Chunk).Location.Y, VBOIDs[0], VBOIDs[1]);
+						Console.Out.WriteLine("Draw chunk: {0}, {1}  VBO:[{2}, {3}] elCount={4}", (this as Chunk).Location.X, (this as Chunk).Location.Y, VBOIDs[0], VBOIDs[1], elementCount);
                     }else if (this as Actor != null) {
-						Console.Out.WriteLine("Draw actor: {0}  VBO:[{1}, {2}]", (this as Actor).ID, VBOIDs[0], VBOIDs[1]);
-                    }
+						Console.Out.WriteLine("Draw actor: {0}  VBO:[{1}, {2}] elCount={3}", (this as Actor).ID, VBOIDs[0], VBOIDs[1], elementCount);
+					}
+
+					GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
+					GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
 
                     GL.EnableVertexAttribArray(0); //Positions
                     GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition);
 
-                    GL.EnableVertexAttribArray(1); //Colors
-                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToColor);
+                    GL.EnableVertexAttribArray(1); //UV
+                    GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV);
 
-                    GL.EnableVertexAttribArray(2); //UV
-                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV);
+                    GL.EnableVertexAttribArray(2); //Normals
+                    GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);
 
-                    GL.EnableVertexAttribArray(3); //Normals
-                    GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);
+					GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null);
+					//GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+					//GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
-                    GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null);
                     return;
                 }
             }

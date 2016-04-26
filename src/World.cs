@@ -93,17 +93,21 @@ namespace Ageless {
         }
 
 		public void drawChunks(Game game) {
+			
+			game.matrixModel = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
+			game.setModel();
+
             foreach (KeyValuePair<Point2, Chunk> entry in loadedChunks) {
                 entry.Value.drawRender();
             }
         }
 
 		public void drawActors(Game game) {
-
 			foreach (KeyValuePair<uint, Actor> entry in loadedActors){
 
 				game.matrixModel = Matrix4.CreateTranslation(entry.Value.position);
-				game.setWMP();
+				game.setModel();
+
 				entry.Value.drawRender();
 			}
 		}

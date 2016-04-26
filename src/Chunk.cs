@@ -119,6 +119,9 @@ namespace Ageless {
         }
 
         public override void makeRender() {
+			if(compileState != COMP_STATUS.MAKING){
+				Console.Error.WriteLine("ERROR!!");
+			}
 			Console.WriteLine("(Render) Making Chunk {0}, {1}", Location.X, Location.Y);
 
             vert = new Dictionary<Vertex, uint>();
@@ -128,7 +131,6 @@ namespace Ageless {
             Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(HeightMap.CHUNK_SIZE_X, 0, HeightMap.CHUNK_SIZE_Z));
 
             Tile tile;
-			Vector4 color;
 			Vector3 normal = new Vector3();
 			Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
 			Vector3 u = new Vector3(), v = new Vector3();
@@ -147,7 +149,6 @@ namespace Ageless {
                         tile = htmp.getTile(x, z);
 
                         if (tile.renderType == RenderType.Terrain) {
-                            color = tile.color;
 
                             if (htmp.isFloor) {
 
@@ -162,9 +163,9 @@ namespace Ageless {
                                 normal.Y = (u.Z * v.X) - (u.X * v.Z);
                                 normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-								tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
 
 
                                 p1.X = x + GRID_HALF_SIZE + offset.X;   p1.Y = htmp.heights[x + 1, z + 1] + offset.Y;   p1.Z = z + GRID_HALF_SIZE + offset.Z;
@@ -178,9 +179,9 @@ namespace Ageless {
                                 normal.Y = (u.Z * v.X) - (u.X * v.Z);
                                 normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-								tryToAdd(ref p1, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p2, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p3, ref normal, ref color, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+								tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
                             }
 
                             if (htmp.isCeiling) {

@@ -36,7 +36,8 @@ namespace Ageless {
                     tex16x16Coords[k, 1] = new Vector2(x2, y1);
                     tex16x16Coords[k, 2] = new Vector2(x1, y2);
                     tex16x16Coords[k, 3] = new Vector2(x2, y2);
-                    k++;
+					//Console.WriteLine("Tex Coord: {0}, {1}, {2}, {3}", tex16x16Coords[k, 0]*16, tex16x16Coords[k, 1]*16, tex16x16Coords[k, 2]*16, tex16x16Coords[k, 3]*16);
+					k++;
                 }
             }
 

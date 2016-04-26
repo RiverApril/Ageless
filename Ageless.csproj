@@ -70,8 +70,6 @@
   -->
   <ItemGroup>
     <None Include="sdr\fragment.120.glsl" />
-    <None Include="sdr\fragment.420.glsl" />
     <None Include="sdr\vertex.120.glsl" />
-    <None Include="sdr\vertex.420.glsl" />
   </ItemGroup>
 </Project>
