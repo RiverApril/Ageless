@@ -61,7 +61,7 @@ namespace Ageless {
 			}
 			Console.WriteLine("(Render) Making Player");
 
-			vert = new Dictionary<Vertex, uint>();
+			vert = new List<Vertex>();
 			ind = new List<uint>();
 			uint nextI = 0;
 
@@ -80,9 +80,9 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+			addVert(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 0], ref vert, ref ind, ref nextI);
+			addVert(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+			addVert(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
 
 
 
@@ -97,9 +97,11 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
-			tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
+			addVert(ref p1, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 3], ref vert, ref ind, ref nextI);
+			addInd(ref nextI, -2);
+			addInd(ref nextI, -3);
+			//tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);
+			//tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
 			Console.WriteLine("(Render) Made Player");

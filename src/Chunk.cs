@@ -124,7 +124,7 @@ namespace Ageless {
 			}
 			Console.WriteLine("(Render) Making Chunk {0}, {1}", Location.X, Location.Y);
 
-            vert = new Dictionary<Vertex, uint>();
+			vert = new List<Vertex>();
             ind = new List<uint>();
             uint nextI = 0;
 
@@ -163,9 +163,9 @@ namespace Ageless {
                                 normal.Y = (u.Z * v.X) - (u.X * v.Z);
                                 normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-								tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+								addVert(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
+								addVert(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+								addVert(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
 
 
                                 p1.X = x + GRID_HALF_SIZE + offset.X;   p1.Y = htmp.heights[x + 1, z + 1] + offset.Y;   p1.Z = z + GRID_HALF_SIZE + offset.Z;
@@ -179,9 +179,11 @@ namespace Ageless {
                                 normal.Y = (u.Z * v.X) - (u.X * v.Z);
                                 normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-								tryToAdd(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
-								tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+								addVert(ref p1, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
+								addInd(ref nextI, -2);
+								addInd(ref nextI, -3);
+								//tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+								//tryToAdd(ref p3, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
                             }
 
                             if (htmp.isCeiling) {

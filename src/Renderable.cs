@@ -22,7 +22,7 @@ namespace Ageless {
         public COMP_STATUS compileState = COMP_STATUS.NO_RENDER;
         
 
-        protected Dictionary<Vertex, uint> vert = null;
+		protected List<Vertex> vert = null;
 		protected List<uint> ind = null;
 
 		public bool markForRemoval = false;
@@ -44,15 +44,26 @@ namespace Ageless {
 
         abstract public void makeRender();
 
-		
-		public void tryToAdd(ref Vector3 p, ref Vector3 normal, ref Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
+		public void addVert(ref Vector3 p, ref Vector3 normal, ref Vector2 UV, ref List<Vertex> vert, ref List<uint> ind, ref uint nextI) {
+			Vertex v = new Vertex(p, UV, normal);
+			vert.Add(v);
+			ind.Add(nextI);
+			nextI++;
+		}
+
+		public void addInd(ref uint nextI, int offset){
+			ind.Add((uint)(nextI + offset));
+		}
+
+		//HORRIBLY SLOW:
+		/*public void tryToAdd(ref Vector3 p, ref Vector3 normal, ref Vector2 UV, ref Dictionary<Vertex, uint> vert, ref List<uint> ind, ref uint nextI) {
 			Vertex v = new Vertex(p, UV, normal);
 			if (!vert.ContainsKey(v)) {
 				vert.Add(v, nextI);
 				nextI++;
 			}
 			ind.Add(vert[v]);
-		}
+		}*/
 
 		public void compileRender() {
 			if(compileState != COMP_STATUS.READY_TO_COMPILE){
@@ -61,8 +72,7 @@ namespace Ageless {
 
 			//Console.WriteLine("(Render) Array creation");
 
-            Vertex[] vertices = new Vertex[vert.Count];
-            vert.Keys.CopyTo(vertices, 0);
+			Vertex[] vertices = vert.ToArray();
             uint[] indecies = ind.ToArray();
 
             elementCount = ind.Count;
@@ -118,11 +128,11 @@ namespace Ageless {
                 }
                 case COMP_STATUS.READY_TO_RENDER: {
 
-                    if (this as Chunk != null) {
+                    /*if (this as Chunk != null) {
 						Console.Out.WriteLine("Draw chunk: {0}, {1}  VBO:[{2}, {3}] elCount={4}", (this as Chunk).Location.X, (this as Chunk).Location.Y, VBOIDs[0], VBOIDs[1], elementCount);
                     }else if (this as Actor != null) {
 						Console.Out.WriteLine("Draw actor: {0}  VBO:[{1}, {2}] elCount={3}", (this as Actor).ID, VBOIDs[0], VBOIDs[1], elementCount);
-					}
+					}*/
 
 					GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
 					GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
