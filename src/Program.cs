@@ -12,9 +12,7 @@ namespace Ageless{
 
         [STAThread]
         static void Main(string[] args) {
-
-            new Game();
-
+			new Game();
         }
 
     }
