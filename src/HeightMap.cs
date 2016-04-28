@@ -1,12 +1,11 @@
 ﻿namespace Ageless {
     public class HeightMap {
+        
+        public float[,] heights = new float[Chunk.CHUNK_SIZE_X + 1, Chunk.CHUNK_SIZE_Z + 1];
+        
+        public byte[,] tiles = new byte[Chunk.CHUNK_SIZE_X, Chunk.CHUNK_SIZE_Z];
 
-        public static readonly uint CHUNK_SIZE_X = 128;
-        public static readonly uint CHUNK_SIZE_Z = 128;
-        
-        public float[,] heights = new float[CHUNK_SIZE_X + 1, CHUNK_SIZE_Z + 1];
-        
-        public byte[,] tiles = new byte[CHUNK_SIZE_X, CHUNK_SIZE_Z];
+		public float min, max;
 
         public bool isFloor = true;
         public bool isCeiling = false;

@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 namespace Ageless {
 	public abstract class Actor : Renderable {
 
+		public static readonly float GRAVITY = 0.1f;
+
 		public uint ID;
 
         protected float movementSpeed = 1.0f / 8.0f;
-        protected float maxSlope = 1.0f;
+        public float maxSlope = 1.0f;
 
         public Vector3 position;
 

@@ -12,6 +12,9 @@ using System.Threading;
 namespace Ageless {
     public class Chunk : Renderable{
 
+		public static readonly uint CHUNK_SIZE_X = 128;
+		public static readonly uint CHUNK_SIZE_Z = 128;
+
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
 
@@ -76,8 +79,8 @@ namespace Ageless {
 
 								using(Bitmap bmp = new Bitmap(img)){
 
-			                        if (bmp.Width != HeightMap.CHUNK_SIZE_X + 1 || bmp.Height != HeightMap.CHUNK_SIZE_Z + 1) {
-			                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", HeightMap.CHUNK_SIZE_X + 1, HeightMap.CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
+			                        if (bmp.Width != CHUNK_SIZE_X + 1 || bmp.Height != CHUNK_SIZE_Z + 1) {
+			                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", CHUNK_SIZE_X + 1, CHUNK_SIZE_Z + 1, bmp.Width, bmp.Height));
 			                        }
 
 			                        HeightMap htmp = new HeightMap();
@@ -85,15 +88,23 @@ namespace Ageless {
 			                        htmp.isFloor = fc == 0;
 			                        htmp.isCeiling = fc == 1;
 
-			                        for (int x = 0; x <= HeightMap.CHUNK_SIZE_X; x++) {
-			                            for (int z = 0; z <= HeightMap.CHUNK_SIZE_Z; z++) {
+									float min = 256 * 256;
+									float max = 0;
+
+			                        for (int x = 0; x <= CHUNK_SIZE_X; x++) {
+			                            for (int z = 0; z <= CHUNK_SIZE_Z; z++) {
 			                                Color c = bmp.GetPixel(x, z);
-			                                if (x < HeightMap.CHUNK_SIZE_X && z < HeightMap.CHUNK_SIZE_Z) {
+			                                if (x < CHUNK_SIZE_X && z < CHUNK_SIZE_Z) {
 			                                    htmp.tiles[x, z] = c.R;
 			                                }
 			                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
+											min = Math.Min(htmp.heights[x, z], min);
+											max = Math.Max(htmp.heights[x, z], max);
 			                            }
 			                        }
+
+									htmp.min = min;
+									htmp.max = max;
 
 			                        terrain.Add(htmp);
 			                        loadedLetter = true;
@@ -128,7 +139,7 @@ namespace Ageless {
             ind = new List<uint>();
             uint nextI = 0;
 
-            Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(HeightMap.CHUNK_SIZE_X, 0, HeightMap.CHUNK_SIZE_Z));
+            Vector3 offset = (new Vector3(Location.X, 0, Location.Y) * new Vector3(CHUNK_SIZE_X, 0, CHUNK_SIZE_Z));
 
             Tile tile;
 			Vector3 normal = new Vector3();
@@ -143,8 +154,8 @@ namespace Ageless {
 
 				Console.WriteLine("(Render) Making Heightmap {0} of {1}", htmpi, terrain.Count);
 
-                for (int x = 0; x < HeightMap.CHUNK_SIZE_X; x++) {
-                    for (int z = 0; z < HeightMap.CHUNK_SIZE_Z; z++) {
+                for (int x = 0; x < CHUNK_SIZE_X; x++) {
+                    for (int z = 0; z < CHUNK_SIZE_Z; z++) {
 
                         tile = htmp.getTile(x, z);
 

@@ -61,7 +61,7 @@ namespace Ageless {
 
 		public void revaluateChunks(){
 			HashSet<Point2> visible = new HashSet<Point2>();
-			Point2 center = new Point2(((int)Math.Round(game.player.position.X)) / (int)HeightMap.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)HeightMap.CHUNK_SIZE_Z);
+			Point2 center = new Point2(((int)Math.Round(game.player.position.X)) / (int)Chunk.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)Chunk.CHUNK_SIZE_Z);
 			int r = chunkRenderDistance * 2;
 			for(int i=0; i<=r; i++){
 				for(int j=0; j<=r; j++){
@@ -117,8 +117,8 @@ namespace Ageless {
             z /= Chunk.GRID_SIZE;
             x += 0.5f;
             z += 0.5f;
-            Point2 c = new Point2((int)Math.Floor(x / HeightMap.CHUNK_SIZE_X), (int)Math.Floor(z / HeightMap.CHUNK_SIZE_Z));
-            Vector2d p = new Vector2d(x - (c.X * HeightMap.CHUNK_SIZE_X), z - (c.Y * HeightMap.CHUNK_SIZE_Z));
+            Point2 c = new Point2((int)Math.Floor(x / Chunk.CHUNK_SIZE_X), (int)Math.Floor(z / Chunk.CHUNK_SIZE_Z));
+            Vector2d p = new Vector2d(x - (c.X * Chunk.CHUNK_SIZE_X), z - (c.Y * Chunk.CHUNK_SIZE_Z));
 
             //Console.WriteLine("Chunk = {0}, {1}", c.X, c.Y);
             //Console.WriteLine("Pos = {0}, {1}", p.X, p.Y);
