@@ -88,8 +88,8 @@ namespace Ageless {
 			                        htmp.isFloor = fc == 0;
 			                        htmp.isCeiling = fc == 1;
 
-									float min = 256 * 256;
-									float max = 0;
+                                    htmp.min = 256 * 256;
+                                    htmp.max = 0;
 
 			                        for (int x = 0; x <= CHUNK_SIZE_X; x++) {
 			                            for (int z = 0; z <= CHUNK_SIZE_Z; z++) {
@@ -98,13 +98,10 @@ namespace Ageless {
 			                                    htmp.tiles[x, z] = c.R;
 			                                }
 			                                htmp.heights[x, z] = (((int)c.G) | (((int)c.B) << 0x100)) / resolution;
-											min = Math.Min(htmp.heights[x, z], min);
-											max = Math.Max(htmp.heights[x, z], max);
+                                            htmp.min = Math.Min(htmp.heights[x, z], htmp.min);
+                                            htmp.max = Math.Max(htmp.heights[x, z], htmp.max);
 			                            }
 			                        }
-
-									htmp.min = min;
-									htmp.max = max;
 
 			                        terrain.Add(htmp);
 			                        loadedLetter = true;
