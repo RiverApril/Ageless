@@ -138,33 +138,35 @@ namespace Ageless {
                         //f1-f2
                         //| / |
                         //f3-f4
-                        float f1 = htmp.heights[x1, y1];
-                        float f2 = htmp.heights[x2, y1];
-                        float f3 = htmp.heights[x1, y2];
-                        float f4 = htmp.heights[x2, y2];
-                        //Console.WriteLine("{0}, {1}, {2}, {3}", f1, f2, f3, f4);
+                        if (htmp.getTile(x1, y1).solid) {
+                            float f1 = htmp.heights[x1, y1];
+                            float f2 = htmp.heights[x2, y1];
+                            float f3 = htmp.heights[x1, y2];
+                            float f4 = htmp.heights[x2, y2];
+                            //Console.WriteLine("{0}, {1}, {2}, {3}", f1, f2, f3, f4);
 
-                        //Console.WriteLine("x1: {0}, y1: {1}, x2: {2}, y2: {3}", x1, y1, x2, y2);
-                        //Console.WriteLine("f1: {0}, f2: {1}, f3: {2}, f4: {3}", f1, f2, f3, f4);
+                            //Console.WriteLine("x1: {0}, y1: {1}, x2: {2}, y2: {3}", x1, y1, x2, y2);
+                            //Console.WriteLine("f1: {0}, f2: {1}, f3: {2}, f4: {3}", f1, f2, f3, f4);
 
-                        float dx = (float)(p.X - x1);
-                        float dy = (float)(p.Y - y1);
-                        float dd = 1 - (dx + dy);
-                        //Console.WriteLine("dx: {0}, dy: {1}\n", dx, dy);
-
-
-                        if (dx + dy <= 1f) {//f1, f2, f3
-                            float f = (f1 * dd) + (f2 * dx) + (f3 * dy);
-                            //Console.WriteLine("f = {0}\n", f);
-                            heights.Add(f);
-                        } else {//f2, f3, f4
-                            dx = 1 - dx;
-                            dy = 1 - dy;
-                            dd = 1 - (dx + dy);
+                            float dx = (float)(p.X - x1);
+                            float dy = (float)(p.Y - y1);
+                            float dd = 1 - (dx + dy);
                             //Console.WriteLine("dx: {0}, dy: {1}\n", dx, dy);
-                            float f = (f4 * dd) + (f2 * dy) + (f3 * dx);
-                            //Console.WriteLine("f = {0}\n", f);
-                            heights.Add(f);
+
+
+                            if (dx + dy <= 1f) {//f1, f2, f3
+                                float f = (f1 * dd) + (f2 * dx) + (f3 * dy);
+                                //Console.WriteLine("f = {0}\n", f);
+                                heights.Add(f);
+                            } else {//f2, f3, f4
+                                dx = 1 - dx;
+                                dy = 1 - dy;
+                                dd = 1 - (dx + dy);
+                                //Console.WriteLine("dx: {0}, dy: {1}\n", dx, dy);
+                                float f = (f4 * dd) + (f2 * dy) + (f3 * dx);
+                                //Console.WriteLine("f = {0}\n", f);
+                                heights.Add(f);
+                            }
                         }
                     }
                 }
