@@ -131,6 +131,8 @@ namespace Ageless {
 			player.position.Y = 128;
 			player.position.Z = 64;
 
+            player.target = player.position;
+
 		}
 
 		void onUnload(object sender, EventArgs e) {
@@ -321,22 +323,24 @@ namespace Ageless {
 	
 					foreach (Chunk c in loadedWorld.loadedChunks.Values) {
 						foreach (HeightMap h in c.terrain) {
-	
-							Vector3 offset = new Vector3(c.Location.X * Chunk.CHUNK_SIZE_X, 0, c.Location.Y * Chunk.CHUNK_SIZE_Z);
-	
-							for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
-								for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
-									p1.X = x - Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x, z] + offset.Y; p1.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
-									p2.X = x + Chunk.GRID_HALF_SIZE + offset.X; p2.Y = h.heights[x + 1, z] + offset.Y; p2.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
-									p3.X = x - Chunk.GRID_HALF_SIZE + offset.X; p3.Y = h.heights[x, z + 1] + offset.Y; p3.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
-									p4.X = x + Chunk.GRID_HALF_SIZE + offset.X; p4.Y = h.heights[x + 1, z + 1] + offset.Y; p4.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
-	
-	
-									if (intercectTriangleRay(p1, p2, p3, origin, direction) || intercectTriangleRay(p3, p2, p4, origin, direction)) {
-										options.Add(new Vector3(x + offset.X, (h.heights[x, z] + h.heights[x + 1, z] + h.heights[x, z + 1] + h.heights[x + 1, z + 1]) / 4, z + offset.Z));
-									}
-								}
-							}
+                            if (h.isSolid) {
+
+                                Vector3 offset = new Vector3(c.Location.X * Chunk.CHUNK_SIZE_X, 0, c.Location.Y * Chunk.CHUNK_SIZE_Z);
+
+                                for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
+                                    for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
+                                        p1.X = x - Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x, z] + offset.Y; p1.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
+                                        p2.X = x + Chunk.GRID_HALF_SIZE + offset.X; p2.Y = h.heights[x + 1, z] + offset.Y; p2.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
+                                        p3.X = x - Chunk.GRID_HALF_SIZE + offset.X; p3.Y = h.heights[x, z + 1] + offset.Y; p3.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
+                                        p4.X = x + Chunk.GRID_HALF_SIZE + offset.X; p4.Y = h.heights[x + 1, z + 1] + offset.Y; p4.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
+
+
+                                        if (intercectTriangleRay(p1, p2, p3, origin, direction) || intercectTriangleRay(p3, p2, p4, origin, direction)) {
+                                            options.Add(new Vector3(x + offset.X, (h.heights[x, z] + h.heights[x + 1, z] + h.heights[x, z + 1] + h.heights[x + 1, z + 1]) / 4, z + offset.Z));
+                                        }
+                                    }
+                                }
+                            }
 						}
 					}
 	

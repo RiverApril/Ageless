@@ -9,10 +9,15 @@
 
         public bool isFloor = true;
         public bool isCeiling = false;
+        public bool isSolid = true;
 
         
         public Tile getTile(int x, int z) {
             return Tile.fromIndex(tiles[x, z]);
+        }
+
+        public byte getIndex(int x, int z) {
+            return tiles[x, z];
         }
 
 

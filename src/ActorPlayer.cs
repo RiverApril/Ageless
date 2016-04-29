@@ -40,7 +40,7 @@ namespace Ageless {
 			float ch = game.loadedWorld.getFloorAtPosition(position.X, position.Y, position.Z);
 			float nh;
 
-			if(diff.LengthSquared > Game.FLOAT_EPSILON) {
+			if(diff.Length > movementSpeed) {
 				/*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
 
 				diff.X = (float)(Math.Cos(angle) * movementSpeed);
