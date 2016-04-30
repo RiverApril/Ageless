@@ -245,5 +245,6 @@ ModelManifest.xml
 .fake/
 
 # Heightmaps
+map/htmp.*.png
 
 
