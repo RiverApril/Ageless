@@ -42,6 +42,7 @@ namespace Ageless {
 
         public void unload() {
 			markForRemoval = true;
+            Console.WriteLine("Unloaded Chunk: {0}, {1}", Location.X, Location.Y);
         }
 
         public void load() {
@@ -56,9 +57,9 @@ namespace Ageless {
                 for (int fc = 0; fc < 2; fc++) {
                     for (int st = 0; st < 2; st++) {
                         string path = Game.dirMap + "htmp.";
-                        path += Location.X.ToString("000");
+                        path += Location.X.ToString();
                         path += ".";
-                        path += Location.Y.ToString("000");
+                        path += Location.Y.ToString();
                         path += ".";
                         path += fc == 0 ? "f" : "c"; //floor, ceiling
                         path += ".";

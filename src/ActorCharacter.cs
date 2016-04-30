@@ -7,7 +7,7 @@ namespace Ageless {
 
 		public static readonly float RENDER_HALF_SIZE = 0.5f;
 
-		public static int UVIndex = 1;
+		public static int UVIndex = 0;
 
 		public ActorCharacter(RenderMaker renderMaker) : base(renderMaker) {
 

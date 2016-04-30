@@ -61,11 +61,14 @@ namespace Ageless {
 
 		public void revaluateChunks(){
 			HashSet<Point2> visible = new HashSet<Point2>();
-			Point2 center = new Point2(((int)Math.Round(game.player.position.X)) / (int)Chunk.CHUNK_SIZE_X, ((int)Math.Round(game.player.position.Z)) / (int)Chunk.CHUNK_SIZE_Z);
+			Vector2 center = new Vector2(
+                (game.player.position.X / Chunk.CHUNK_SIZE_X) - .5f, 
+                (game.player.position.Z / Chunk.CHUNK_SIZE_Z) - .5f
+                );
 			int r = chunkRenderDistance * 2;
 			for(int i=0; i<=r; i++){
 				for(int j=0; j<=r; j++){
-					visible.Add(new Point2(center.X + (i % 2 == 0 ? i/2 : -(i/2+1)), center.Y + (j % 2 == 0 ? j/2 : -(j/2+1))));
+					visible.Add(new Point2((int)center.X + (i % 2 == 0 ? i/2 : -(i/2+1)), (int)center.Y + (j % 2 == 0 ? j/2 : -(j/2+1))));
 					//Console.WriteLine("{0}, {1}", x, y);
 				}
 			}
