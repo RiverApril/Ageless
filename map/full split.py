@@ -13,9 +13,9 @@ def crop(path, name, nameformat, chunkX, chunkY, chunkW, chunkH, overlap):
             box = (j, i, j + chunkW + overlap, i + chunkH + overlap)
             a = im.crop(box)
             try:
-                a.save(os.path.join(path, nameformat.format((j / chunkW) - chunkX, (i / chunkH) - chunkY)))
+                a.save(os.path.join(path, nameformat.format((j / chunkW) + chunkX, (i / chunkH) + chunkY)))
             except:
                 print "Failed to save"
 
 
-crop(path, "full.png", "htmp.{}.{}.f.s.a.png", 3, 3, 128, 128, 1)
+crop(path, "full.png", "htmp.{}.{}.f.s.a.png", -2, -2, 128, 128, 1)
