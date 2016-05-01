@@ -13,7 +13,7 @@ namespace Ageless {
 
 		public Vector3 target = new Vector3();
 
-		public ActorPlayer(RenderMaker renderMaker) : base(renderMaker) {
+		public ActorPlayer() : base() {
 			
         }
 

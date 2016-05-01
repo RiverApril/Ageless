@@ -12,12 +12,12 @@ namespace Ageless {
 
 		public uint ID;
 
-        protected float movementSpeed = 1.0f / 8.0f;
+        protected float movementSpeed = 1.0f / 2.0f;
         public float maxSlope = 1.0f;
 
         public Vector3 position;
 
-        public Actor(RenderMaker renderMaker) : base(renderMaker) {
+        public Actor() : base() {
 
 		}
 

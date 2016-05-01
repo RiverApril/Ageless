@@ -26,12 +26,14 @@ namespace Ageless {
 			float x2;
 			float y2;
 
+            //float pixelSize = 1.0f / 256.0f;
+
             for (int y = 0; y < 16; y++) {
                 for (int x = 0; x < 16; x++) {
-                    x1 = x * (1.0f / 16.0f);
-                    y1 = y * (1.0f / 16.0f);
-                    x2 = (x + 1) * (1.0f / 16.0f);
-                    y2 = (y + 1) * (1.0f / 16.0f);
+                    x1 = (x * (1.0f / 16.0f));// + (pixelSize * 0.5f);
+                    y1 = (y * (1.0f / 16.0f));// + (pixelSize * 0.5f);
+                    x2 = ((x + 1) * (1.0f / 16.0f));// + (pixelSize * 0.5f);
+                    y2 = ((y + 1) * (1.0f / 16.0f));// + (pixelSize * 0.5f);
                     tex16x16Coords[k, 0] = new Vector2(x1, y1);
                     tex16x16Coords[k, 1] = new Vector2(x2, y1);
                     tex16x16Coords[k, 2] = new Vector2(x1, y2);

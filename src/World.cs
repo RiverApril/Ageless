@@ -20,11 +20,8 @@ namespace Ageless {
 
         public Game game;
 
-        public RenderMaker chunkMaker = new RenderMaker();
-        public RenderMaker actorMaker = new RenderMaker();
 
-
-		public int chunkRenderDistance = 1;
+		public int chunkRenderDistance = 2;
 
 
         public static float Square(float a) {
@@ -33,8 +30,6 @@ namespace Ageless {
 
         public World(Game game) {
             this.game = game;
-            chunkMaker.initRenderMaker();
-            actorMaker.initRenderMaker();
         }
 
         public void loadChunk(Point2 location) {
@@ -53,7 +48,7 @@ namespace Ageless {
         }
 
         public void newActor(Actor actor) {
-            actor.compileState = COMP_STATUS.READY_TO_MAKE;
+            actor.compileState = COMP_STATUS.NEEDS_TO_BE_MADE;
             actor.ID = nextActorID;
 			loadedActors.Add(nextActorID, actor);
 			nextActorID++;

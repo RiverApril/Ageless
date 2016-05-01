@@ -9,7 +9,7 @@ namespace Ageless {
 
 		public static int UVIndex = 0;
 
-		public ActorCharacter(RenderMaker renderMaker) : base(renderMaker) {
+		public ActorCharacter() : base() {
 
 		}
 
@@ -18,9 +18,7 @@ namespace Ageless {
 		}
 
 		public override void makeRender() {
-			if(compileState != COMP_STATUS.MAKING) {
-				Console.Error.WriteLine("ERROR!!");
-			}
+
 			Console.WriteLine("(Render) Making ActorCharacter");
 
 			vert = new List<Vertex>();
@@ -67,8 +65,6 @@ namespace Ageless {
 
 
 			Console.WriteLine("(Render) Made ActorCharacter");
-
-			compileState = COMP_STATUS.READY_TO_COMPILE;
 		}
 	}
 }

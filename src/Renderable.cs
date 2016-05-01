@@ -10,36 +10,31 @@ using System.Threading.Tasks;
 namespace Ageless {
 
     public enum COMP_STATUS {
-        NO_RENDER, READY_TO_MAKE, MAKING, READY_TO_COMPILE, READY_TO_RENDER
+        DO_NOT_RENDER, NEEDS_TO_BE_MADE, READY_TO_RENDER, NEEDS_TO_BE_REMOVED
     }
 
     public abstract class Renderable {
 
-        protected RenderMaker renderMaker;
-
-        protected uint[] VBOIDs;
-        protected int elementCount = 0;
-        public COMP_STATUS compileState = COMP_STATUS.NO_RENDER;
+        private uint[] VBOIDs;
+        private int elementCount = 0;
+        public COMP_STATUS compileState = COMP_STATUS.DO_NOT_RENDER;
         
 
 		protected List<Vertex> vert = null;
 		protected List<uint> ind = null;
 
-		public bool markForRemoval = false;
+        public Renderable() {
 
-        public Renderable(RenderMaker renderMaker) {
-            this.renderMaker = renderMaker;
         }
 
         protected void cleanupRender() {
-            compileState = COMP_STATUS.NO_RENDER;
+            compileState = COMP_STATUS.DO_NOT_RENDER;
             vert = null;
 			ind = null;
 			if (VBOIDs != null) {
 				GL.DeleteBuffers(2, VBOIDs);
 				VBOIDs = null;
 			}
-			markForRemoval = false;
         }
 
         abstract public void makeRender();
@@ -66,9 +61,6 @@ namespace Ageless {
 		}*/
 
 		public void compileRender() {
-			if(compileState != COMP_STATUS.READY_TO_COMPILE){
-				Console.Error.WriteLine("ERROR!!");
-			}
 
 			//Console.WriteLine("(Render) Array creation");
 
@@ -86,7 +78,7 @@ namespace Ageless {
 			if(VBOIDs == null) {
 				VBOIDs = new uint[2];
 				GL.GenBuffers(2, VBOIDs);
-				Console.WriteLine("New Buffers: [{0}, {1}]", VBOIDs[0], VBOIDs[1]);
+				Console.WriteLine("(Render) New Buffers: [{0}, {1}]", VBOIDs[0], VBOIDs[1]);
 			}
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
@@ -102,29 +94,18 @@ namespace Ageless {
             vert = null;
             ind = null;
 
-            compileState = COMP_STATUS.READY_TO_RENDER;
-
         }
 
 
         public void drawRender() {
             //Console.Out.WriteLine("Draw chunk: " + Location.X + ", " + Location.Y);
 
-			if(markForRemoval){
-				cleanupRender();
-				return;
-			}
-
             switch (compileState) {
-                case COMP_STATUS.READY_TO_MAKE: {
-                    renderMaker.list.Add(this);
-                    compileState = COMP_STATUS.MAKING;
-					return;
-                }
-                case COMP_STATUS.READY_TO_COMPILE: {
+                case COMP_STATUS.NEEDS_TO_BE_MADE: {
+                    makeRender();
                     compileRender();
-					drawRender();
-					return;
+                    compileState = COMP_STATUS.READY_TO_RENDER;
+                    return;
                 }
                 case COMP_STATUS.READY_TO_RENDER: {
 
@@ -150,6 +131,10 @@ namespace Ageless {
 					//GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 					//GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
+                    return;
+                }
+                case COMP_STATUS.NEEDS_TO_BE_REMOVED: {
+                    cleanupRender();
                     return;
                 }
             }

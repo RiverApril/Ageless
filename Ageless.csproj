@@ -51,8 +51,9 @@
     <Compile Include="src\Point2.cs" />
     <Compile Include="src\Point3.cs" />
     <Compile Include="src\Program.cs" />
+    <Compile Include="src\Prop.cs" />
     <Compile Include="src\Renderable.cs" />
-    <Compile Include="src\RenderMaker.cs" />
+    <Compile Include="src\Settings.cs" />
     <Compile Include="src\ShaderProgram.cs" />
     <Compile Include="src\TextureControl.cs" />
     <Compile Include="src\Tile.cs" />

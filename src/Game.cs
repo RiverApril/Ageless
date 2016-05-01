@@ -45,7 +45,8 @@ namespace Ageless {
         public Angle2 camAngle = new Angle2();
         public Vector3 focusPos = new Vector3();
         public float focusDistance = 20.0f;
-        private float camRotSpeed = (float)(Math.PI / 180);
+
+        public Settings settings;
 
         public ActorPlayer player;
 
@@ -56,7 +57,10 @@ namespace Ageless {
 
         public Game() {
 
-            gameWindow = new GameWindow();
+            settings = new Settings(dir + "settings.txt");
+            settings.load();
+
+            gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight);
 
             gameWindow.Load += onLoad;
             gameWindow.Unload += onUnload;
@@ -91,8 +95,8 @@ namespace Ageless {
 
             TryGL.Call(() => GL.ClearColor(0.2f, 0.0f, 0.2f, 1.0f));
             TryGL.Call(() => GL.Enable(EnableCap.DepthTest));
-            //TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
-            //TryGL.Call(() => GL.Enable(EnableCap.CullFace));
+            TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
+            TryGL.Call(() => GL.Enable(EnableCap.CullFace));
 
 
             shader = new ShaderProgram();
@@ -112,7 +116,7 @@ namespace Ageless {
 
             loadedWorld = new World(this);
 
-            player = new ActorPlayer(loadedWorld.actorMaker);
+            player = new ActorPlayer();
             loadedWorld.newActor(player);
             //loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
             //loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
@@ -138,13 +142,15 @@ namespace Ageless {
         void onUnload(object sender, EventArgs e) {
             Console.Out.WriteLine("onUnload");
             exiting = true;
-            loadedWorld.actorMaker.thread.Abort();
-            loadedWorld.chunkMaker.thread.Abort();
         }
 
         void onResize(object sender, EventArgs e) {
             GL.Viewport(0, 0, gameWindow.Width, gameWindow.Height);
 
+            settings.windowWidth.value = gameWindow.Width;
+            settings.windowHeight.value = gameWindow.Height;
+
+            settings.save();
         }
 
         void onUpdateFrame(object sender, FrameEventArgs e) {
@@ -154,21 +160,19 @@ namespace Ageless {
 
             loadedWorld.update(this);
 
-            //int mx = gameWindow.Mouse.X;
-            //int my = gameWindow.Mouse.Y;
 
-
-            if (/*mx <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.A)) {
-                camAngle.Phi += camRotSpeed;
-            } else if (/*mx >= gameWindow.Width - camRegisterBorder ||*/ keyboard.IsKeyDown(Key.D)) {
-                camAngle.Phi -= camRotSpeed;
+            if (keyboard.IsKeyDown(Key.A)) {
+                camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
+            } else if (keyboard.IsKeyDown(Key.D)) {
+                camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
             }
 
-            if (/*my <= camRegisterBorder ||*/ keyboard.IsKeyDown(Key.W)) {
-                camAngle.Theta += camRotSpeed;
-            } else if (/*my >= gameWindow.Height - camRegisterBorder ||*/ keyboard.IsKeyDown(Key.S)) {
-                camAngle.Theta -= camRotSpeed;
+            if (keyboard.IsKeyDown(Key.W)) {
+                camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
+            } else if (keyboard.IsKeyDown(Key.S)) {
+                camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
             }
+
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
@@ -183,7 +187,7 @@ namespace Ageless {
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
             lightPosition.X = player.position.X;
-            lightPosition.Y = player.position.Y - 128;
+            lightPosition.Y = player.position.Y - 80000;
             lightPosition.Z = player.position.Z;
         }
 
@@ -197,8 +201,8 @@ namespace Ageless {
             GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
             GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
-            matrixCamera = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
-            matrixCamera *= Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
+            //matrixCamera = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
+            matrixCamera = Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
             matrixCamera *= Matrix4.CreateRotationY(camAngle.Phi);
             matrixCamera *= Matrix4.CreateRotationX(camAngle.Theta);
 
