@@ -247,4 +247,7 @@ ModelManifest.xml
 # Heightmaps
 map/htmp.*.png
 
+# Ageless
+settings.txt
+
 
