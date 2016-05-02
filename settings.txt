@@ -1,6 +1,0 @@
-# Ageless Settings
-Invert Camera X:false
-Invert Camera Y:false
-Camera Rotation Speed:0.01745329
-Window Width:1051
-Window Height:747
