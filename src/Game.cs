@@ -7,6 +7,7 @@ using OpenTK.Input;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ageless {
 
@@ -26,7 +27,7 @@ namespace Ageless {
 
         public GameWindow gameWindow;
 
-        double FPS;
+        double FPS, UPS;
 
         public ShaderProgram shader;
 
@@ -55,7 +56,14 @@ namespace Ageless {
 
         public KeyboardState keyboard;
 
+		private Point2 mouseClickedPosition = new Point2(-1, -1);
+
+		private Thread heavyThread;
+
         public Game() {
+
+			heavyThread = new Thread(heavy);
+			heavyThread.Start();
 
             settings = new Settings(dir + "settings.txt");
             settings.load();
@@ -83,7 +91,7 @@ namespace Ageless {
             //Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
             string glslVersionS = GL.GetString(StringName.ShadingLanguageVersion);
             if (glslVersionS.Contains(" ")) {
-                glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" "));
+                glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" ", StringComparison.CurrentCulture));
             }
             int glslVersion = int.Parse(glslVersionS.Replace(".", ""));
 
@@ -154,9 +162,10 @@ namespace Ageless {
         }
 
         void onUpdateFrame(object sender, FrameEventArgs e) {
+        	UPS = 1.0 / e.Time;
             keyboard = Keyboard.GetState();
 
-            gameWindow.Title = string.Format("FPS: {0:F}", FPS);
+            gameWindow.Title = string.Format("UPS: {0:F}, FPS: {0:F}", UPS, FPS);
 
             loadedWorld.update(this);
 
@@ -339,6 +348,8 @@ namespace Ageless {
 
             float t;
 
+			loadedWorld.lockChunks();
+
             foreach (Chunk c in loadedWorld.loadedChunks.Values) {
                 foreach (HeightMap h in c.terrain) {
                     if (h.isSolid) {
@@ -368,6 +379,9 @@ namespace Ageless {
                     }
                 }
             }
+
+			loadedWorld.unlockChunks();
+			
             outLocation = origin + (direction * closest);//new Vector3(close.X, loadedWorld.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
             return closest < FAR;
         }
@@ -376,18 +390,26 @@ namespace Ageless {
             switch (e.Button) {
                 case MouseButton.Left: {
 
-                    Vector3 o;
-
-                    if (getTerrainAtWindowLocation(new Point2(gameWindow.Mouse.X, gameWindow.Mouse.Y), out o)) {
-                        player.target = o;
-                        //ActorCharacter a = new ActorCharacter(loadedWorld.actorMaker);
-                        //a.position = o;
-                        //loadedWorld.newActor(a);
-                    }
+					mouseClickedPosition.X = e.X;
+					mouseClickedPosition.Y = e.Y;
 
                     break;
                 }
             }
         }
+        
+        private void heavy() {
+			while (!exiting) {
+			
+				if (mouseClickedPosition.X >= 0) {
+					Vector3 o;
+                    if (getTerrainAtWindowLocation(mouseClickedPosition, out o)) {
+                        player.target = o;
+                    }
+					mouseClickedPosition.X = -1;
+				}
+				
+			}
+		}
     }
 }

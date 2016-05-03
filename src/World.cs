@@ -19,6 +19,8 @@ namespace Ageless {
 		public uint nextActorID = 0;
 
         public Game game;
+        
+        public bool chunksLocked = false;
 
 
 		public int chunkRenderDistance = 2;
@@ -31,6 +33,14 @@ namespace Ageless {
         public World(Game game) {
             this.game = game;
         }
+
+		public void lockChunks() {
+			chunksLocked = true;
+		}
+
+		public void unlockChunks() {
+			chunksLocked = false;
+		}
 
         public void loadChunk(Point2 location) {
             if (!loadedChunks.ContainsKey(location)) {
@@ -83,7 +93,9 @@ namespace Ageless {
 		}
 
 		public void update(Game game) {
-			revaluateChunks(); //TODO make this happen less often
+			if (!chunksLocked) {
+				revaluateChunks(); //TODO make this happen less often
+			}
 
 			foreach(KeyValuePair<uint, Actor> entry in loadedActors){
 				entry.Value.update(game);

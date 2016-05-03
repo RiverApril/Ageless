@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Ageless {
 
     public enum COMP_STATUS {
-        DO_NOT_RENDER, NEEDS_TO_BE_MADE, READY_TO_RENDER, NEEDS_TO_BE_REMOVED
+        DO_NOT_RENDER, NEEDS_TO_BE_MADE, CURRENTLY_MAKING, NEEDS_TO_BE_COMPILED, READY_TO_RENDER, NEEDS_TO_BE_REMOVED
     }
 
     public abstract class Renderable {
@@ -23,8 +24,10 @@ namespace Ageless {
 		protected List<Vertex> vert = null;
 		protected List<uint> ind = null;
 
-        public Renderable() {
+		public Thread makeThread = null;
 
+        public Renderable() {
+			makeThread = new Thread(privateMakeRender);
         }
 
         protected void cleanupRender() {
@@ -96,13 +99,22 @@ namespace Ageless {
 
         }
 
+		private void privateMakeRender() {
+			makeRender();
+			compileState = COMP_STATUS.NEEDS_TO_BE_COMPILED;
+		}
+
 
         public void drawRender() {
             //Console.Out.WriteLine("Draw chunk: " + Location.X + ", " + Location.Y);
 
             switch (compileState) {
                 case COMP_STATUS.NEEDS_TO_BE_MADE: {
-                    makeRender();
+					compileState = COMP_STATUS.CURRENTLY_MAKING;
+					makeThread.Start();
+					return;
+				}
+                case COMP_STATUS.NEEDS_TO_BE_COMPILED: {
                     compileRender();
                     compileState = COMP_STATUS.READY_TO_RENDER;
                     return;
