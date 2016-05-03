@@ -228,8 +228,23 @@ namespace Ageless {
             GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
         }
 
-        bool intercectRectangularPrismRay(Vector3 prismA, Vector3 prismB, Vector3 origin, Vector3 direction) {
-            throw new NotImplementedException();
+        bool intercectAABBRay(Vector3 min, Vector3 max, Vector3 origin, Vector3 direction) {
+            float tmin = 0, tmax = 0;
+            for (int a = 0; a < 3; a++) {
+                float invD = 1.0f / direction[a];
+                float t0 = (min[a] - origin[a]) * invD;
+                float t1 = (max[a] - origin[a]) * invD;
+                if (invD < 0.0f) {
+                    float tmp = t0;
+                    t0 = t1;
+                    t1 = tmp;
+                }
+                tmin = a==0 ? t0 : (t0 > tmin ? t0 : tmin);
+                tmax = a==0 ? t1 : (t1 < tmax ? t1 : tmax);
+                if (tmax <= tmin)
+                    return false;
+            }
+            return true;
         }
 
         bool intercectTriangleRay(Vector3 V1, Vector3 V2, Vector3 V3, Vector3 O, Vector3 D, out float outt) {
@@ -312,7 +327,6 @@ namespace Ageless {
             Vector3 p1 = new Vector3();
             Vector3 p2 = new Vector3();
             Vector3 p3 = new Vector3();
-            Vector3 p4 = new Vector3();
 
             /*for(float i = 0; i < 20; i += 1) {
                 ActorCharacter p = new ActorCharacter(loadedWorld.actorMaker);
@@ -331,22 +345,26 @@ namespace Ageless {
 
                         Vector3 offset = new Vector3(c.Location.X * Chunk.CHUNK_SIZE_X, 0, c.Location.Y * Chunk.CHUNK_SIZE_Z);
 
-                        for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
-                            for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
-                                p1.X = x - Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x, z] + offset.Y; p1.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
-                                p2.X = x + Chunk.GRID_HALF_SIZE + offset.X; p2.Y = h.heights[x + 1, z] + offset.Y; p2.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
-                                p3.X = x - Chunk.GRID_HALF_SIZE + offset.X; p3.Y = h.heights[x, z + 1] + offset.Y; p3.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
+                        if (intercectAABBRay(new Vector3(offset.X, h.min, offset.Z), new Vector3(offset.X + Chunk.CHUNK_SIZE_X, h.max, offset.Z + Chunk.CHUNK_SIZE_Z), origin, direction)) {
 
-                                if (intercectTriangleRay(p1, p2, p3, origin, direction, out t)) {
-                                    closest = Math.Min(closest, t);
-                                } else {
-                                    p4.X = x + Chunk.GRID_HALF_SIZE + offset.X; p4.Y = h.heights[x + 1, z + 1] + offset.Y; p4.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
-                                    if (intercectTriangleRay(p3, p2, p4, origin, direction, out t)) {
+                            for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
+                                for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
+                                    p1.X = x - Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x, z] + offset.Y; p1.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
+                                    p2.X = x + Chunk.GRID_HALF_SIZE + offset.X; p2.Y = h.heights[x + 1, z] + offset.Y; p2.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
+                                    p3.X = x - Chunk.GRID_HALF_SIZE + offset.X; p3.Y = h.heights[x, z + 1] + offset.Y; p3.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
+
+                                    if (intercectTriangleRay(p1, p2, p3, origin, direction, out t)) {
                                         closest = Math.Min(closest, t);
+                                    } else {
+                                        p1.X = x + Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x + 1, z + 1] + offset.Y; p1.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
+                                        if (intercectTriangleRay(p3, p2, p1, origin, direction, out t)) {
+                                            closest = Math.Min(closest, t);
+                                        }
                                     }
                                 }
                             }
                         }
+
                     }
                 }
             }

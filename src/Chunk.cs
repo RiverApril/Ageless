@@ -93,8 +93,8 @@ namespace Ageless {
                                         htmp.isCeiling = fc == 1;
                                         htmp.isSolid = st == 0;
 
-                                        htmp.min = 256 * 256;
-                                        htmp.max = 0;
+                                        htmp.min = float.MaxValue;
+                                        htmp.max = float.MinValue;
 
                                         for (int x = 0; x < CHUNK_SIZE_X + 2; x++) {
                                             for (int z = 0; z < CHUNK_SIZE_Z + 2; z++) {
