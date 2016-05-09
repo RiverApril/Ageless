@@ -22,7 +22,7 @@ void main() {
 
 	vec3 surfaceToLight = light.position - position;
 
-	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
+	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)) + 0.1;
 
 	vec4 surfaceColor = texture2D(Texture, transferUV);
 

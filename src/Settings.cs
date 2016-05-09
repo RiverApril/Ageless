@@ -137,18 +137,20 @@ namespace Ageless {
         public readonly SettingBool invertCameraX = new SettingBool("Invert Camera X", false);
         public readonly SettingBool invertCameraY = new SettingBool("Invert Camera Y", false);
         public readonly SettingFloat cameraScrollSpeed = new SettingFloat("Camera Rotation Speed", (float)(Math.PI / 180));
+		public readonly SettingFloat cameraZoomSpeed = new SettingFloat("Camera Zoom Speed", 10);
         
         public readonly SettingInt windowWidth = new SettingInt("Window Width", 640);
         public readonly SettingInt windowHeight = new SettingInt("Window Height", 480);
 
         private string fileName;
 
-        public Settings(string fileName) {
+		public Settings(string fileName) {
             this.fileName = fileName;
 
             settingList.Add(invertCameraX.name, invertCameraX); settingEditableList.Add(invertCameraX, new SettingRangeBool());
             settingList.Add(invertCameraY.name, invertCameraY); settingEditableList.Add(invertCameraY, new SettingRangeBool());
             settingList.Add(cameraScrollSpeed.name, cameraScrollSpeed); settingEditableList.Add(cameraScrollSpeed, new SettingRangeFloat((float)(Math.PI / 360), (float)(Math.PI / 16), 0.187622894589f, false, false));
+            settingList.Add(cameraZoomSpeed.name, cameraZoomSpeed); settingEditableList.Add(cameraZoomSpeed, new SettingRangeFloat(1, 2, 0.01f, false, false));
 
             settingList.Add(windowWidth.name, windowWidth);
             settingList.Add(windowHeight.name, windowHeight);

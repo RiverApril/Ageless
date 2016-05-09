@@ -1,0 +1,6 @@
+#Props for chunk 0,0
+
+p cutCube 9.3 a+.8 9.9 10 45 0
+p cutCube 1.4 a+.8 4.4 20 30 50
+p cutCube 5.5 a+.8 2.3 90 187 20
+p cutCube 2.6 a+.7 7.3 10 320 2

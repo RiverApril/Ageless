@@ -25,6 +25,8 @@ namespace Ageless {
 
 		public int chunkRenderDistance = 2;
 
+		private bool unloadAll = false;
+
 
         public static float Square(float a) {
             return a * a;
@@ -56,6 +58,10 @@ namespace Ageless {
                 loadedChunks.Remove(location);
             }
         }
+
+		internal void unloadAllChunks() {
+			unloadAll = true;
+		}
 
         public void newActor(Actor actor) {
             actor.compileState = COMP_STATUS.NEEDS_TO_BE_MADE;
@@ -95,10 +101,19 @@ namespace Ageless {
 		public void update(Game game) {
 			if (!chunksLocked) {
 				revaluateChunks(); //TODO make this happen less often
+
+				if (unloadAll) {
+					while (loadedChunks.Count > 0) {
+						var e = loadedChunks.Keys.GetEnumerator();
+						e.MoveNext();
+						unloadChunk(e.Current);
+					}
+					unloadAll = false;
+				}
 			}
 
-			foreach(KeyValuePair<uint, Actor> entry in loadedActors){
-				entry.Value.update(game);
+			foreach(Actor actor in loadedActors.Values){
+				actor.update(game);
 			}
         }
 
@@ -107,9 +122,13 @@ namespace Ageless {
 			game.matrixModel = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
 			game.setModel();
 
-            foreach (KeyValuePair<Point2, Chunk> entry in loadedChunks) {
-                entry.Value.drawRender();
+            foreach (Chunk chunk in loadedChunks.Values) {
+                chunk.drawRender();
             }
+
+			foreach (Chunk chunk in loadedChunks.Values) {
+				chunk.drawProps(game);
+			}
         }
 
 		public void drawActors(Game game) {
@@ -135,66 +154,13 @@ namespace Ageless {
 
             if (loadedChunks.ContainsKey(c)) {
 
-                Chunk chunk = loadedChunks[c];
-
-                List<float> heights = new List<float>();
-
-                foreach (HeightMap htmp in chunk.terrain) {
-                    if (htmp.isSolid) {
-                        int x1 = (int)Math.Floor(p.X);
-                        int x2 = (int)Math.Floor(p.X + 1);
-                        int y1 = (int)Math.Floor(p.Y);
-                        int y2 = (int)Math.Floor(p.Y + 1);
-                        //f1-f2
-                        //| / |
-                        //f3-f4
-                        if (htmp.getTile(x1, y1).solid) {
-                            float f1 = htmp.heights[x1, y1];
-                            float f2 = htmp.heights[x2, y1];
-                            float f3 = htmp.heights[x1, y2];
-                            float f4 = htmp.heights[x2, y2];
-                            //Console.WriteLine("{0}, {1}, {2}, {3}", f1, f2, f3, f4);
-
-                            //Console.WriteLine("x1: {0}, y1: {1}, x2: {2}, y2: {3}", x1, y1, x2, y2);
-                            //Console.WriteLine("f1: {0}, f2: {1}, f3: {2}, f4: {3}", f1, f2, f3, f4);
-
-                            float dx = (float)(p.X - x1);
-                            float dy = (float)(p.Y - y1);
-                            float dd = 1 - (dx + dy);
-                            //Console.WriteLine("dx: {0}, dy: {1}\n", dx, dy);
-
-
-                            if (dx + dy <= 1f) {//f1, f2, f3
-                                float f = (f1 * dd) + (f2 * dx) + (f3 * dy);
-                                //Console.WriteLine("f = {0}\n", f);
-                                heights.Add(f);
-                            } else {//f2, f3, f4
-                                dx = 1 - dx;
-                                dy = 1 - dy;
-                                dd = 1 - (dx + dy);
-                                //Console.WriteLine("dx: {0}, dy: {1}\n", dx, dy);
-                                float f = (f4 * dd) + (f2 * dy) + (f3 * dx);
-                                //Console.WriteLine("f = {0}\n", f);
-                                heights.Add(f);
-                            }
-                        }
-                    }
-                }
-
-                float h = 0;
-
-                foreach (float f in heights) {
-                    if (f > h && f <= y) {
-                        h = f;
-                    }
-                }
-
-                return h;
+				return loadedChunks[c].getFloorAtPosition(p, y);
 
             }
 
-            return 0;
+            return -1;
 
         }
-    }
+
+}
 }

@@ -16,9 +16,10 @@ namespace Ageless {
         public static readonly float FLOAT_EPSILON = 0.0001f;
 
         public static readonly string dir = "../../";
-        public static readonly string dirMap = dir + "map/";
-        public static readonly string dirTex = dir + "tex/";
-        public static readonly string dirSdr = dir + "sdr/";
+        public static readonly string dirMaps = dir + "maps/";
+        public static readonly string dirTextures = dir + "textures/";
+        public static readonly string dirShaders = dir + "shaders/";
+        public static readonly string dirModels = dir + "models/";
 
         public static readonly float NEAR = 0.1f;
         public static readonly float FAR = 1024.0f;
@@ -110,7 +111,7 @@ namespace Ageless {
             shader = new ShaderProgram();
             Console.WriteLine("Current GLSL version: {0}", glslVersion);
 
-            while (!File.Exists(dirSdr + "vertex." + glslVersion + ".glsl")) {
+            while (!File.Exists(dirShaders + "vertex." + glslVersion + ".glsl")) {
                 glslVersion--;
                 if (glslVersion <= 0) {
                     Console.WriteLine("Shader with required version not found.");
@@ -118,7 +119,7 @@ namespace Ageless {
                 }
             }
             Console.WriteLine("Using shader with GLSL version: {0}", glslVersion);
-            shader.LoadAndCompileProrgam(dirSdr + "vertex." + glslVersion + ".glsl", dirSdr + "fragment." + glslVersion + ".glsl");
+            shader.LoadAndCompileProrgam(dirShaders + "vertex." + glslVersion + ".glsl", dirShaders + "fragment." + glslVersion + ".glsl");
 
             TextureControl.loadTextures();
 
@@ -172,16 +173,25 @@ namespace Ageless {
 
             if (keyboard.IsKeyDown(Key.A)) {
                 camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
-            } else if (keyboard.IsKeyDown(Key.D)) {
+            }
+			if (keyboard.IsKeyDown(Key.D)) {
                 camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
             }
 
             if (keyboard.IsKeyDown(Key.W)) {
                 camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
-            } else if (keyboard.IsKeyDown(Key.S)) {
+            }
+			if (keyboard.IsKeyDown(Key.S)) {
                 camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
             }
 
+			if (keyboard.IsKeyDown(Key.Plus)) {
+				focusDistance = Math.Max(NEAR, focusDistance / settings.cameraZoomSpeed);
+			}
+
+			if (keyboard.IsKeyDown(Key.Minus)) {
+				focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
+			}
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
@@ -195,9 +205,9 @@ namespace Ageless {
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
-            lightPosition.X = player.position.X;
+            lightPosition.X = player.position.X - 20000;
             lightPosition.Y = player.position.Y - 80000;
-            lightPosition.Z = player.position.Z;
+            lightPosition.Z = player.position.Z - 20000;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
@@ -307,6 +317,10 @@ namespace Ageless {
                     gameWindow.Exit();
                     break;
                 }
+				case Key.U: {
+					loadedWorld.unloadAllChunks();
+					break;
+				}
             }
         }
 

@@ -51,14 +51,14 @@ namespace Ageless {
 
             Console.WriteLine("Loading Chunk: {0}, {1}", Location.X, Location.Y);
 
-            float resolution = 0x04;
+            float resolution = 0x08;
             string letters = "abcdefghijklmnopqrstuvwxyz";
             bool loadedLetter = true;
             for (int i = 0; i < 26 && loadedLetter; i++) {
                 loadedLetter = false;
                 for (int fc = 0; fc < 2; fc++) {
                     for (int st = 0; st < 2; st++) {
-                        string path = Game.dirMap + "htmp.";
+                        string path = Game.dirMaps + "htmp.";
                         path += Location.X.ToString();
                         path += ".";
                         path += Location.Y.ToString();
@@ -87,7 +87,7 @@ namespace Ageless {
                                             throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", CHUNK_SIZE_X + 2, CHUNK_SIZE_Z + 2, bmp.Width, bmp.Height));
                                         }
 
-                                        HeightMap htmp = new HeightMap();
+                                        HeightMap htmp = new HeightMap(letters[i]);
 
                                         htmp.isFloor = fc == 0;
                                         htmp.isCeiling = fc == 1;
@@ -124,6 +124,65 @@ namespace Ageless {
                 }
             }
 
+			for (int st = 0; st < 2; st++) {
+				string path = Game.dirMaps + "props.";
+				path += Location.X.ToString();
+				path += ".";
+				path += Location.Y.ToString();
+				path += ".";
+				path += st == 0 ? "s" : "d"; //solid, decorative
+				path += ".txt";
+
+				if (File.Exists(path)) {
+
+					Console.WriteLine("Loading Prop File: {0}", path);
+					
+					string[] lines = File.ReadAllLines(path);
+					foreach (string line in lines) {
+						if (line.StartsWith("p ", StringComparison.Ordinal)) {
+							string[] split = line.Split(' ');
+
+							string name = split[1];
+							float x = float.Parse(split[2]);
+							float z = float.Parse(split[4]);
+							float y = 0;
+							bool yset = false;
+							foreach (HeightMap htmp in terrain) {
+								if (htmp.letter == split[3][0]) {
+
+									htmp.getHeightAtPosition(new Vector2d(x, z), out y);
+									
+									if (split[3].Substring(1).Length > 0) {
+										y += float.Parse(split[3].Substring(1));
+									}			
+									
+									yset = true;
+									break;
+								}
+							}
+							if(!yset) {
+								y = float.Parse(split[3]);
+							}
+
+							float xr = MathHelper.DegreesToRadians(float.Parse(split[5]));
+							float yr = MathHelper.DegreesToRadians(float.Parse(split[6]));
+							float zr = MathHelper.DegreesToRadians(float.Parse(split[7]));
+
+							Prop p = new Prop(ModelControl.getModel(name), st == 0);
+							p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
+							p.rotation = new Vector3(xr, yr, zr);
+							p.setupModelMatrix();
+							props.Add(p);
+
+							Console.WriteLine("New prop at: {0}", p.position);
+							
+						}
+					}
+
+					Console.WriteLine("Loaded Prop File: {0}", path);
+				}
+			}
+
             Console.WriteLine("Loaded Chunk: {0}, {1}", Location.X, Location.Y);
 
             if (terrain.Count > 0) {
@@ -132,7 +191,7 @@ namespace Ageless {
 
         }
 
-        public Vector3 calcNorm(HeightMap htmp, int x, int z) {
+		public Vector3 calcNorm(HeightMap htmp, int x, int z) {
             Vector3 sum = Vector3.Zero;
 
             Vector3 side1 = new Vector3(x + 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
@@ -240,5 +299,32 @@ namespace Ageless {
 			Console.WriteLine("(Render) Made Chunk {0}, {1}", Location.X, Location.Y);
 
         }
+
+		public void drawProps(Game game) {
+			foreach (Prop prop in props) {
+				prop.draw(game);
+			}
+		}
+
+		public float getFloorAtPosition(Vector2d p, float y) {
+            List<float> heights = new List<float>();
+
+            foreach (HeightMap htmp in terrain) {
+				float o;
+				if (htmp.getHeightAtPosition(p, out o)) {
+					heights.Add(o);
+				}
+            }
+
+            float h = 0;
+
+            foreach (float f in heights) {
+                if (f > h && f <= y) {
+                    h = f;
+                }
+            }
+
+            return h;
+		}
     }
 }

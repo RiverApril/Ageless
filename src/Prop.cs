@@ -3,7 +3,7 @@ using OpenTK;
 using System.Collections.Generic;
 
 namespace Ageless {
-    public class Prop : Renderable{
+    public class Prop {
 
         public Matrix4 modelMatrix;
 
@@ -15,26 +15,25 @@ namespace Ageless {
 
         public string name;
 
+		public Model model;
+
+		public bool solid;
+
+		public Prop(Model model, bool solid) {
+			this.model = model;
+			this.solid = solid;
+		}
+
         public void setupModelMatrix() {
-            modelMatrix = Matrix4.CreateTranslation(position) * Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z);
+            modelMatrix = Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z) * Matrix4.CreateTranslation(position);
         }
 
-        public override void makeRender() {
-            Console.WriteLine("(Render) Making Prop {0}", name);
-
-            vert = new List<Vertex>();
-            ind = new List<uint>();
-            uint nextI = 0;
-
-            Tile tile;
-            Vector3 normal = new Vector3();
-            Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
-            Vector3 u = new Vector3(), v = new Vector3();
-
-
-
-            Console.WriteLine("(Render) Made Prop {0}", name);
-        }
+		public void draw(Game game) {
+			game.matrixModel = modelMatrix;
+			game.setModel();
+			
+			model.drawRender();
+		}
 
 
     }

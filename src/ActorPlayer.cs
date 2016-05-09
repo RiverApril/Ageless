@@ -38,38 +38,41 @@ namespace Ageless {
 
 
 			float ch = game.loadedWorld.getFloorAtPosition(position.X, position.Y, position.Z);
-			float nh;
+			if (ch >= 0) { // Wait until chunks are loaded
+				float nh;
 
-			if(diff.Length > movementSpeed) {
-				/*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
+				if (diff.Length > movementSpeed) {
+					/*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
 
-				diff.X = (float)(Math.Cos(angle) * movementSpeed);
-				diff.Y = (float)(Math.Sin(angle) * movementSpeed);*/
+					diff.X = (float)(Math.Cos(angle) * movementSpeed);
+					diff.Y = (float)(Math.Sin(angle) * movementSpeed);*/
 
-				diff.Normalize();
-				diff *= movementSpeed;
+					diff.Normalize();
+					diff *= movementSpeed;
 
-				nh = game.loadedWorld.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
+					nh = game.loadedWorld.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
 
-				if((nh - ch) / diff.Length <= maxSlope) {
-					position.X += diff.X;
-					position.Z += diff.Y;
+					if ((nh - ch) / diff.Length <= maxSlope) {
+						position.X += diff.X;
+						position.Z += diff.Y;
+					}
+				} else {
+					nh = ch;
 				}
-			} else {
-				nh = ch;
-			}
 
-			if(position.Y > nh) {
-				volocityY -= GRAVITY;
-				if(position.Y + volocityY <= nh) {
+				if (position.Y > nh) {
+					volocityY -= GRAVITY;
+					if (position.Y + volocityY <= nh) {
+						position.Y = nh;
+						volocityY = 0;
+					} else {
+						position.Y += volocityY;
+					}
+				} else {
 					position.Y = nh;
 					volocityY = 0;
-				} else {
-					position.Y += volocityY;
 				}
-			} else {
-				position.Y = nh;
-				volocityY = 0;
+
 			}
 
 

@@ -61,6 +61,12 @@
     <Compile Include="src\Vertex.cs" />
     <Compile Include="src\World.cs" />
     <Compile Include="src\ActorCharacter.cs" />
+    <Compile Include="src\Model.cs" />
+    <Compile Include="src\ModelControl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\fragment.120.glsl" />
+    <None Include="shaders\vertex.120.glsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -70,8 +76,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <None Include="sdr\fragment.120.glsl" />
-    <None Include="sdr\vertex.120.glsl" />
-  </ItemGroup>
 </Project>

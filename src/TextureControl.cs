@@ -17,7 +17,7 @@ namespace Ageless {
 
 
         public static void loadTextures() {
-			terrain = loadTexture(Game.dirTex+"terrain.png");
+			terrain = loadTexture(Game.dirTextures+"terrain.png");
 
             int k = 0;
 
@@ -57,6 +57,9 @@ namespace Ageless {
 			if(File.Exists(path)) {
 
 				using(Bitmap bmp = new Bitmap(path)) {
+
+					bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+				
 					BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
 					GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpData.Width, bmpData.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);

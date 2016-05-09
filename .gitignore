@@ -245,7 +245,7 @@ ModelManifest.xml
 .fake/
 
 # Heightmaps
-map/htmp.*.png
+maps/htmp.*.png
 
 # Ageless
 settings.txt
