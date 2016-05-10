@@ -27,7 +27,7 @@ void main() {
 
 	float brightness = max(dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)), 0.2);
 
-	vec4 surfaceColor = replaceColor ? color : texture2D(Texture, transferUV) * color;
+	vec4 surfaceColor = texture2D(Texture, transferUV);
 
-	gl_FragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
+	gl_FragColor = replaceColor ? color : vec4(brightness * light.color * surfaceColor.rgb * color, surfaceColor.a);
 }

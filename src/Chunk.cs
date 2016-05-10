@@ -304,11 +304,20 @@ namespace Ageless {
 
         }
 
+        public void update(Game game) {
+            foreach (Prop prop in props) {
+                prop.update(game);
+            }
+        }
+
 		public void drawProps(Game game) {
 			foreach (Prop prop in props) {
 				prop.draw(game);
-			}
-		}
+            }
+            foreach (Prop prop in props) {
+                prop.secondaryDraw(game);
+            }
+        }
 
 		public float getFloorAtPosition(Vector2d p, float y) {
             List<float> heights = new List<float>();

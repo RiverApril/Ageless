@@ -98,8 +98,8 @@ namespace Ageless {
 
 			if (!keepVerts) {
 				vert = null;
-			}
-            ind = null;
+                ind = null;
+            }
 
         }
 

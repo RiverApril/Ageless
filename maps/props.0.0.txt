@@ -1,7 +1,24 @@
-#Props for chunk 0,0
+# Props for chunk 0,0
+
+#                     position      rotation
+# p[options] [model] [x] [y] [z] [rx] [ry] [rz]
+
+# Options:
+# p: prop
+# s: solid
+# i: interactable
+
+# y value can be [letter]+[number] or [letter]-[number]
+# the letter represents the heightmap index
+
+# rx, ry, rz are the rotation values in degrees
 
 psi cutCube 9.3 a+.8 9.9 10 45 0
-ps cutCube 1.4 a+.8 4.4 20 30 50
 psi cutCube 5.5 a+.8 2.3 90 187 20
 psi cutCube 2.6 a+.7 7.3 10 320 2
+
+
+ps cutCube 1.4 a+.8 4.4 20 30 50
+
+psi arch 20 a 20 0 90 0
 

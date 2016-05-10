@@ -18,27 +18,27 @@ namespace Ageless {
         }
 
         public override void draw(Game game) {
+            base.draw(game);
+        }
 
+        public override void secondaryDraw(Game game) {
             if (highlightTimeout > 0) {
+
                 GL.Disable(EnableCap.DepthTest);
                 game.setColor(game.highlightColor, true);
-                game.matrixModel = Matrix4.CreateScale(1.1f) * modelMatrix;
-                game.setModel();
-                model.drawRender();
-            } else {
-                base.draw(game);
-            }
+                game.additiveBlending();
 
-            if (highlightTimeout > 0) {
-                GL.Enable(EnableCap.DepthTest);
-                game.resetColor();
                 game.matrixModel = modelMatrix;
                 game.setModel();
                 model.drawRender();
-            }
 
-            if (highlightTimeout > 0 && game.rayWasUpdated) {
-                highlightTimeout--;
+                GL.Enable(EnableCap.DepthTest);
+                game.resetColor();
+                game.resetBlending();
+
+                if (game.rayWasUpdated) {
+                    highlightTimeout--;
+                }
             }
         }
     }

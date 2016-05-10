@@ -114,7 +114,11 @@ namespace Ageless {
 
 			foreach(Actor actor in loadedActors.Values){
 				actor.update(game);
-			}
+            }
+
+            foreach (Chunk chunk in loadedChunks.Values) {
+                chunk.update(game);
+            }
         }
 
 		public void drawChunks(Game game) {

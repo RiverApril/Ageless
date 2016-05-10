@@ -21,8 +21,8 @@ namespace Ageless {
         public static readonly string dirShaders = dir + "shaders/";
         public static readonly string dirModels = dir + "models/";
 
-        public static readonly float NEAR = 0.1f;
-        public static readonly float FAR = 1024.0f;
+        public const float NEAR = 0.1f;
+        public const float FAR = 1024.0f;
 
         public static bool exiting = false;
 
@@ -113,9 +113,15 @@ namespace Ageless {
             }
 
             TryGL.Call(() => GL.ClearColor(0.2f, 0.0f, 0.2f, 1.0f));
+
             TryGL.Call(() => GL.Enable(EnableCap.DepthTest));
-            TryGL.Call(() => GL.CullFace(CullFaceMode.Back));
+            
             TryGL.Call(() => GL.Enable(EnableCap.CullFace));
+            TryGL.Call(() => GL.CullFace(CullFaceMode.Back));
+
+            TryGL.Call(() => GL.Enable(EnableCap.Blend));
+            resetBlending();
+            TryGL.Call(() => GL.BlendEquation(BlendEquationMode.FuncAdd));
 
 
             shader = new ShaderProgram();
@@ -158,6 +164,14 @@ namespace Ageless {
 
             player.target = player.position;
 
+        }
+
+        public void resetBlending() {
+            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha));
+        }
+
+        public void additiveBlending() {
+            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One));
         }
 
         void onUnload(object sender, EventArgs e) {
@@ -378,7 +392,7 @@ namespace Ageless {
             direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
 		}
 
-        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 outLocation) {
+        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 outLocation, float far = FAR) {
             
 
             Vector3 p1 = new Vector3();
@@ -392,7 +406,7 @@ namespace Ageless {
                 Console.WriteLine(p.position);
             }*/
 
-            float closest = FAR;
+            float closest = far;
 
             float t;
 
@@ -431,37 +445,49 @@ namespace Ageless {
 			loadedWorld.unlockChunks();
 			
             outLocation = origin + (direction * closest);//new Vector3(close.X, loadedWorld.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
-            return closest < FAR;
+            return closest < far;
         }
 
-		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp) {
+		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, float far = FAR) {
 
 			closestProp = null;
-			float close = FAR;
+			float close = far;
 		
 			foreach (Chunk c in loadedWorld.loadedChunks.Values) {
 				foreach (Prop p in c.props) {
 					if (intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
-						float l = (origin - (p.frameMax - p.frameMin)).Length;
-						if (l < close) {
-							close = l;
-							closestProp = p;
-						}
+                        bool hit = false;
+                        float d = FAR;
+
+                        for (int i = 0; i < p.model.ind.Count; i+=3) {
+                            if (intercectTriangleRay(p.transformedPoints[(int)p.model.ind[i]], p.transformedPoints[(int)p.model.ind[i+1]], p.transformedPoints[(int)p.model.ind[i+2]], ref origin, ref direction, out d)) {
+                                hit = true;
+                                break;
+                            }
+                        }
+                        if (hit) {
+                            if (d < close) {
+                                close = d;
+                                closestProp = p;
+                            }
+                        }
 					}
 				}
 			}
 			
-			return close < FAR;
+			return close < far;
 		}
 
         void onMouseDown(object sender, MouseButtonEventArgs e) {
             switch (e.Button) {
                 case MouseButton.Left: {
                     mouseLeftClicked = true;
+                    rayShouldUpdate = true;
                     break;
                 }
                 case MouseButton.Right: {
                     mouseRightClicked = true;
+                    rayShouldUpdate = true;
                     break;
                 }
             }
@@ -483,23 +509,24 @@ namespace Ageless {
 
                     getRayFromWindowPoint(ref mousePosition, out lookOrigin, out lookDirection);
 
+                    Vector3 terrain;
+                    bool hitTerrain = findTerrainWithRay(ref lookOrigin, ref lookDirection, out terrain);
+
                     Prop p;
-                    if (findPropWithRay(ref lookOrigin, ref lookDirection, out p)) {
-                        Console.WriteLine("Found prop with model: {0}", p.model.name);
+                    if (findPropWithRay(ref lookOrigin, ref lookDirection, out p, hitTerrain ? (lookOrigin - terrain).Length : FAR)) {
+                        //Console.WriteLine("Found prop with model: {0}", p.model.name);
                         if (p is PropInteractable) {
                             if ((p as PropInteractable).canHighlight) {
                                 (p as PropInteractable).highlightTimeout = 2;
                             }
                         }
                     }
-                }
-			
-				if (mouseLeftClicked) {
-                    mouseLeftClicked = false;
 
-                    Vector3 o;
-                    if (findTerrainWithRay(ref lookOrigin, ref lookDirection, out o)) {
-                        player.target = o;
+                    if (mouseLeftClicked) {
+                        mouseLeftClicked = false;
+                        if (hitTerrain) {
+                            player.target = terrain;
+                        }
                     }
                 }
 				
