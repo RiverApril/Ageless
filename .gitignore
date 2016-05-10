@@ -1,4 +1,4 @@
-#Xamarian / Visual Studio
+# Xamarian / Visual Studio
 *.userprefs
 bin/
 obj/
