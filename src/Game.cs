@@ -57,14 +57,23 @@ namespace Ageless {
 
         public KeyboardState keyboard;
 
-		private Point2 mouseClickedPosition = new Point2(-1, -1);
+		private Point2 mousePosition = new Point2(-1, -1);
 
-		private Thread heavyThread;
+        private bool mouseLeftClicked = false;
+        private bool mouseRightClicked = false;
+
+        public bool rayShouldUpdate = false;
+        public bool rayWasUpdated = false;
+
+        private Thread heavyThread;
+
+        Vector3 lookOrigin, lookDirection;
+
+        public Vector4 highlightColor = new Vector4(0, 1, 0, .5f);
 
         public Game() {
 
 			heavyThread = new Thread(heavy);
-			heavyThread.Start();
 
             settings = new Settings(dir + "settings.txt");
             settings.load();
@@ -79,6 +88,7 @@ namespace Ageless {
             gameWindow.KeyDown += onKeyDown;
             gameWindow.KeyUp += onKeyUp;
             gameWindow.MouseDown += onMouseDown;
+            gameWindow.MouseMove += onMouseMove;
 
             gameWindow.Run(60.0);
         }
@@ -122,6 +132,8 @@ namespace Ageless {
             shader.LoadAndCompileProrgam(dirShaders + "vertex." + glslVersion + ".glsl", dirShaders + "fragment." + glslVersion + ".glsl");
 
             TextureControl.loadTextures();
+
+            heavyThread.Start();
 
             loadedWorld = new World(this);
 
@@ -173,25 +185,30 @@ namespace Ageless {
 
             if (keyboard.IsKeyDown(Key.A)) {
                 camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
+                rayShouldUpdate = true;
             }
 			if (keyboard.IsKeyDown(Key.D)) {
                 camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
+                rayShouldUpdate = true;
             }
 
             if (keyboard.IsKeyDown(Key.W)) {
                 camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
+                rayShouldUpdate = true;
             }
 			if (keyboard.IsKeyDown(Key.S)) {
                 camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
+                rayShouldUpdate = true;
             }
 
 			if (keyboard.IsKeyDown(Key.Plus)) {
 				focusDistance = Math.Max(NEAR, focusDistance / settings.cameraZoomSpeed);
-			}
-
+                rayShouldUpdate = true;
+            }
 			if (keyboard.IsKeyDown(Key.Minus)) {
 				focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
-			}
+                rayShouldUpdate = true;
+            }
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
@@ -225,6 +242,7 @@ namespace Ageless {
             matrixCamera *= Matrix4.CreateRotationY(camAngle.Phi);
             matrixCamera *= Matrix4.CreateRotationX(camAngle.Theta);
 
+            resetColor();
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
@@ -235,6 +253,8 @@ namespace Ageless {
 
 
             gameWindow.SwapBuffers();
+
+            rayWasUpdated = false;
         }
 
         public void setModel() {
@@ -245,6 +265,16 @@ namespace Ageless {
 
             matrixNormal = new Matrix3(Matrix4.Transpose(Matrix4.Invert(matrixModel)));
             GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
+        }
+
+        public void setColor(Vector4 color, bool replace) {
+            GL.Uniform4(shader.GetUniformID("color"), color);
+            GL.Uniform1(shader.GetUniformID("replaceColor"), replace?1:0);
+        }
+
+        public void resetColor() {
+            GL.Uniform4(shader.GetUniformID("color"), Vector4.One);
+            GL.Uniform1(shader.GetUniformID("replaceColor"), 0);
         }
 
         bool intercectAABBRay(Vector3 min, Vector3 max, ref Vector3 origin, ref Vector3 direction) {
@@ -427,38 +457,51 @@ namespace Ageless {
         void onMouseDown(object sender, MouseButtonEventArgs e) {
             switch (e.Button) {
                 case MouseButton.Left: {
-
-					mouseClickedPosition.X = e.X;
-					mouseClickedPosition.Y = e.Y;
-
+                    mouseLeftClicked = true;
+                    break;
+                }
+                case MouseButton.Right: {
+                    mouseRightClicked = true;
                     break;
                 }
             }
         }
-        
+
+        void onMouseMove(object sender, MouseMoveEventArgs e) {
+            mousePosition.X = e.X;
+            mousePosition.Y = e.Y;
+            rayShouldUpdate = true;
+        }
+
         private void heavy() {
-			while (!exiting) {
+
+            while (!exiting) {
+
+                if (rayShouldUpdate) {
+                    rayWasUpdated = true;
+                    rayShouldUpdate = false;
+
+                    getRayFromWindowPoint(ref mousePosition, out lookOrigin, out lookDirection);
+
+                    Prop p;
+                    if (findPropWithRay(ref lookOrigin, ref lookDirection, out p)) {
+                        Console.WriteLine("Found prop with model: {0}", p.model.name);
+                        if (p is PropInteractable) {
+                            if ((p as PropInteractable).canHighlight) {
+                                (p as PropInteractable).highlightTimeout = 2;
+                            }
+                        }
+                    }
+                }
 			
-				if (mouseClickedPosition.X >= 0) {
+				if (mouseLeftClicked) {
+                    mouseLeftClicked = false;
 
-					Vector3 origin, direction;
-
-					getRayFromWindowPoint(ref mouseClickedPosition, out origin, out direction);
-					
-				
-					Vector3 o;
-                    if (findTerrainWithRay(ref origin, ref direction, out o)) {
+                    Vector3 o;
+                    if (findTerrainWithRay(ref lookOrigin, ref lookDirection, out o)) {
                         player.target = o;
                     }
-					Prop p;
-					if (findPropWithRay(ref origin, ref direction, out p)) {
-						Console.WriteLine("Found prop with model: {0}", p.model.name);
-					} else {
-						Console.WriteLine("no prop");
-					}
-					
-					mouseClickedPosition.X = -1;
-				}
+                }
 				
 			}
 		}

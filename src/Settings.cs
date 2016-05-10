@@ -137,7 +137,7 @@ namespace Ageless {
         public readonly SettingBool invertCameraX = new SettingBool("Invert Camera X", false);
         public readonly SettingBool invertCameraY = new SettingBool("Invert Camera Y", false);
         public readonly SettingFloat cameraScrollSpeed = new SettingFloat("Camera Rotation Speed", (float)(Math.PI / 180));
-		public readonly SettingFloat cameraZoomSpeed = new SettingFloat("Camera Zoom Speed", 10);
+		public readonly SettingFloat cameraZoomSpeed = new SettingFloat("Camera Zoom Speed", 1.05f);
         
         public readonly SettingInt windowWidth = new SettingInt("Window Width", 640);
         public readonly SettingInt windowHeight = new SettingInt("Window Height", 480);

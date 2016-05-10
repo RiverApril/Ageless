@@ -10,6 +10,9 @@ uniform Light light;
 uniform mat4 ModelMatrix;
 uniform mat3 NormalMatrix;
 
+uniform bool replaceColor;
+uniform vec4 color;
+
 varying vec3 transferPosition;
 varying vec2 transferUV;
 varying vec3 transferNormal;
@@ -24,7 +27,7 @@ void main() {
 
 	float brightness = max(dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)), 0.2);
 
-	vec4 surfaceColor = texture2D(Texture, transferUV);
+	vec4 surfaceColor = replaceColor ? color : texture2D(Texture, transferUV) * color;
 
 	gl_FragColor = vec4(brightness * light.color * surfaceColor.rgb, surfaceColor.a);
 }

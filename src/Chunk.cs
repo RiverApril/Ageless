@@ -51,6 +51,8 @@ namespace Ageless {
 
             Console.WriteLine("Loading Chunk: {0}, {1}", Location.X, Location.Y);
 
+            string path;
+
             float resolution = 0x08;
             string letters = "abcdefghijklmnopqrstuvwxyz";
             bool loadedLetter = true;
@@ -58,7 +60,7 @@ namespace Ageless {
                 loadedLetter = false;
                 for (int fc = 0; fc < 2; fc++) {
                     for (int st = 0; st < 2; st++) {
-                        string path = Game.dirMaps + "htmp.";
+                        path = Game.dirMaps + "htmp.";
                         path += Location.X.ToString();
                         path += ".";
                         path += Location.Y.ToString();
@@ -124,64 +126,65 @@ namespace Ageless {
                 }
             }
 
-			for (int st = 0; st < 2; st++) {
-				string path = Game.dirMaps + "props.";
-				path += Location.X.ToString();
-				path += ".";
-				path += Location.Y.ToString();
-				path += ".";
-				path += st == 0 ? "s" : "d"; //solid, decorative
-				path += ".txt";
+            path = Game.dirMaps + "props.";
+			path += Location.X.ToString();
+			path += ".";
+			path += Location.Y.ToString();
+			path += ".txt";
 
-				if (File.Exists(path)) {
+			if (File.Exists(path)) {
 
-					Console.WriteLine("Loading Prop File: {0}", path);
+				Console.WriteLine("Loading Prop File: {0}", path);
 					
-					string[] lines = File.ReadAllLines(path);
-					foreach (string line in lines) {
-						if (line.StartsWith("p ", StringComparison.Ordinal)) {
-							string[] split = line.Split(' ');
+				string[] lines = File.ReadAllLines(path);
+				foreach (string line in lines) {
+                    if (line.StartsWith("p", StringComparison.Ordinal)) {
+						string[] split = line.Split(' ');
 
-							string name = split[1];
-							float x = float.Parse(split[2]);
-							float z = float.Parse(split[4]);
-							float y = 0;
-							bool yset = false;
-							foreach (HeightMap htmp in terrain) {
-								if (htmp.letter == split[3][0]) {
+						string name = split[1];
+						float x = float.Parse(split[2]);
+						float z = float.Parse(split[4]);
+						float y = 0;
+						bool yset = false;
+						foreach (HeightMap htmp in terrain) {
+							if (htmp.letter == split[3][0]) {
 
-									htmp.getHeightAtPosition(new Vector2d(x, z), out y);
+								htmp.getHeightAtPosition(new Vector2d(x, z), out y);
 									
-									if (split[3].Substring(1).Length > 0) {
-										y += float.Parse(split[3].Substring(1));
-									}			
+								if (split[3].Substring(1).Length > 0) {
+									y += float.Parse(split[3].Substring(1));
+								}			
 									
-									yset = true;
-									break;
-								}
+								yset = true;
+								break;
 							}
-							if(!yset) {
-								y = float.Parse(split[3]);
-							}
-
-							float xr = MathHelper.DegreesToRadians(float.Parse(split[5]));
-							float yr = MathHelper.DegreesToRadians(float.Parse(split[6]));
-							float zr = MathHelper.DegreesToRadians(float.Parse(split[7]));
-
-							Prop p = new Prop(ModelControl.getModel(name), st == 0);
-							p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
-							p.rotation = new Vector3(xr, yr, zr);
-							p.setupModelMatrix();
-							//p.setupFrame(); after model loads
-							props.Add(p);
-
-							Console.WriteLine("New prop at: {0}", p.position);
-							
 						}
-					}
+						if(!yset) {
+							y = float.Parse(split[3]);
+						}
 
-					Console.WriteLine("Loaded Prop File: {0}", path);
+						float xr = MathHelper.DegreesToRadians(float.Parse(split[5]));
+						float yr = MathHelper.DegreesToRadians(float.Parse(split[6]));
+						float zr = MathHelper.DegreesToRadians(float.Parse(split[7]));
+
+                        Prop p;
+                        if (split[0].Contains("i")) {
+                            p = new PropInteractable(ModelControl.getModel(name), split[0].Contains("s"));
+                        } else {
+                            p = new Prop(ModelControl.getModel(name), split[0].Contains("s"));
+                        }
+						p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
+						p.rotation = new Vector3(xr, yr, zr);
+						p.setupModelMatrix();
+						//p.setupFrame(); after model loads
+						props.Add(p);
+
+						Console.WriteLine("New prop at: {0}", p.position);
+							
+					}
 				}
+
+				Console.WriteLine("Loaded Prop File: {0}", path);
 			}
 
             Console.WriteLine("Loaded Chunk: {0}, {1}", Location.X, Location.Y);

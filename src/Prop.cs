@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenTK;
 using System.Collections.Generic;
+using OpenTK.Graphics.OpenGL;
 
 namespace Ageless {
     public class Prop {
@@ -19,13 +20,13 @@ namespace Ageless {
 
 		public bool solid;
 
-		public Prop(Model model, bool solid) {
+        public Prop(Model model, bool solid) {
 			this.model = model;
 			this.solid = solid;
 		}
 
         public void setupModelMatrix() {
-            modelMatrix = Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z) * Matrix4.CreateTranslation(position);
+            modelMatrix = (Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z)) * Matrix4.CreateTranslation(position);
         }
 
 		public void setupFrame(ref List<Vertex> verts) {
@@ -50,14 +51,15 @@ namespace Ageless {
 			frameMade = true;
 		}
 
-		public void draw(Game game) {
-			game.matrixModel = modelMatrix;
-			game.setModel();
-			
-			if (!frameMade && model.vert != null) {
-				setupFrame(ref model.vert);
-			}
-			model.drawRender();
+		public virtual void draw(Game game) {
+            if (!frameMade && model.vert != null) {
+                setupFrame(ref model.vert);
+            }
+
+            game.matrixModel = modelMatrix;
+            game.setModel();
+            model.drawRender();
+
 		}
 
 

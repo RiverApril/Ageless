@@ -52,6 +52,7 @@
     <Compile Include="src\Point3.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Prop.cs" />
+    <Compile Include="src\PropInteractable.cs" />
     <Compile Include="src\Renderable.cs" />
     <Compile Include="src\Settings.cs" />
     <Compile Include="src\ShaderProgram.cs" />
