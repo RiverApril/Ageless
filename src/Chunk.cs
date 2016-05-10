@@ -172,6 +172,7 @@ namespace Ageless {
 							p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
 							p.rotation = new Vector3(xr, yr, zr);
 							p.setupModelMatrix();
+							//p.setupFrame(); after model loads
 							props.Add(p);
 
 							Console.WriteLine("New prop at: {0}", p.position);
@@ -268,8 +269,8 @@ namespace Ageless {
                             n3 = calcNorm(htmp, x, z + 1);
 
                             addVert(ref p1, ref n1, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-							addVert(ref p2, ref n2, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
 							addVert(ref p3, ref n3, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+							addVert(ref p2, ref n2, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
                             p1.X = x + GRID_HALF_SIZE + offset.X - 1;   p1.Y = htmp.heights[x + 1, z + 1] + offset.Y;   p1.Z = z + GRID_HALF_SIZE + offset.Z - 1;

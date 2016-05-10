@@ -9,11 +9,13 @@ namespace Ageless {
 
 		public string name;
 		public string path;
+
 	
 		public Model(string name, string path) {
 			this.name = name;
 			this.path = path;
 			compileState = COMP_STATUS.NEEDS_TO_BE_MADE;
+			keepVerts = true;
 		}
 
 		public override void makeRender() {

@@ -21,8 +21,10 @@ namespace Ageless {
         public COMP_STATUS compileState = COMP_STATUS.DO_NOT_RENDER;
         
 
-		protected List<Vertex> vert = null;
-		protected List<uint> ind = null;
+		public List<Vertex> vert = null;
+		public List<uint> ind = null;
+
+		public bool keepVerts = false;
 
 		public Thread makeThread = null;
 
@@ -94,7 +96,9 @@ namespace Ageless {
 
 			//Console.WriteLine("(Render) done");
 
-            vert = null;
+			if (!keepVerts) {
+				vert = null;
+			}
             ind = null;
 
         }

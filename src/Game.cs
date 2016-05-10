@@ -104,7 +104,7 @@ namespace Ageless {
 
             TryGL.Call(() => GL.ClearColor(0.2f, 0.0f, 0.2f, 1.0f));
             TryGL.Call(() => GL.Enable(EnableCap.DepthTest));
-            TryGL.Call(() => GL.CullFace(CullFaceMode.Front));
+            TryGL.Call(() => GL.CullFace(CullFaceMode.Back));
             TryGL.Call(() => GL.Enable(EnableCap.CullFace));
 
 
@@ -247,7 +247,7 @@ namespace Ageless {
             GL.UniformMatrix3(shader.GetUniformID("NormalMatrix"), false, ref matrixNormal);
         }
 
-        bool intercectAABBRay(Vector3 min, Vector3 max, Vector3 origin, Vector3 direction) {
+        bool intercectAABBRay(Vector3 min, Vector3 max, ref Vector3 origin, ref Vector3 direction) {
             float tmin = 0, tmax = 0;
             for (int a = 0; a < 3; a++) {
                 float invD = 1.0f / direction[a];
@@ -266,7 +266,7 @@ namespace Ageless {
             return true;
         }
 
-        bool intercectTriangleRay(Vector3 V1, Vector3 V2, Vector3 V3, Vector3 O, Vector3 D, out float outt) {
+        bool intercectTriangleRay(Vector3 V1, Vector3 V2, Vector3 V3, ref Vector3 O, ref Vector3 D, out float outt) {
             Vector3 e1, e2;  //Edge1, Edge2
             Vector3 P, Q, T;
             float det, inv_det, u, v;
@@ -328,8 +328,8 @@ namespace Ageless {
 
         }
 
-        bool getTerrainAtWindowLocation(Point2 point, out Vector3 outLocation) {
-            float aspect = (float)gameWindow.Width / (float)gameWindow.Height;
+		void getRayFromWindowPoint(ref Point2 point, out Vector3 origin, out Vector3 direction) {
+			float aspect = (float)gameWindow.Width / (float)gameWindow.Height;
             float normX = (point.X - (gameWindow.Width / 2.0f)) / (gameWindow.Width / 2.0f);
             float normY = (gameWindow.Height - point.Y - (gameWindow.Height / 2.0f)) / (gameWindow.Height / 2.0f);
 
@@ -344,8 +344,12 @@ namespace Ageless {
 
             Matrix4 mat = matrixCamera.Inverted();
 
-            Vector3 origin = Vector4.Transform(rayPoint, mat).Xyz;
-            Vector3 direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
+            origin = Vector4.Transform(rayPoint, mat).Xyz;
+            direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
+		}
+
+        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 outLocation) {
+            
 
             Vector3 p1 = new Vector3();
             Vector3 p2 = new Vector3();
@@ -370,7 +374,7 @@ namespace Ageless {
 
                         Vector3 offset = new Vector3(c.Location.X * Chunk.CHUNK_SIZE_X, 0, c.Location.Y * Chunk.CHUNK_SIZE_Z);
 
-                        if (intercectAABBRay(new Vector3(offset.X, h.min, offset.Z), new Vector3(offset.X + Chunk.CHUNK_SIZE_X, h.max, offset.Z + Chunk.CHUNK_SIZE_Z), origin, direction)) {
+                        if (intercectAABBRay(new Vector3(offset.X, h.min, offset.Z), new Vector3(offset.X + Chunk.CHUNK_SIZE_X, h.max, offset.Z + Chunk.CHUNK_SIZE_Z), ref origin, ref direction)) {
 
                             for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
                                 for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
@@ -378,11 +382,11 @@ namespace Ageless {
                                     p2.X = x + Chunk.GRID_HALF_SIZE + offset.X; p2.Y = h.heights[x + 1, z] + offset.Y; p2.Z = z - Chunk.GRID_HALF_SIZE + offset.Z;
                                     p3.X = x - Chunk.GRID_HALF_SIZE + offset.X; p3.Y = h.heights[x, z + 1] + offset.Y; p3.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
 
-                                    if (intercectTriangleRay(p1, p2, p3, origin, direction, out t)) {
+                                    if (intercectTriangleRay(p1, p2, p3, ref origin, ref direction, out t)) {
                                         closest = Math.Min(closest, t);
                                     } else {
                                         p1.X = x + Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x + 1, z + 1] + offset.Y; p1.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
-                                        if (intercectTriangleRay(p3, p2, p1, origin, direction, out t)) {
+                                        if (intercectTriangleRay(p3, p2, p1, ref origin, ref direction, out t)) {
                                             closest = Math.Min(closest, t);
                                         }
                                     }
@@ -400,6 +404,26 @@ namespace Ageless {
             return closest < FAR;
         }
 
+		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp) {
+
+			closestProp = null;
+			float close = FAR;
+		
+			foreach (Chunk c in loadedWorld.loadedChunks.Values) {
+				foreach (Prop p in c.props) {
+					if (intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
+						float l = (origin - (p.frameMax - p.frameMin)).Length;
+						if (l < close) {
+							close = l;
+							closestProp = p;
+						}
+					}
+				}
+			}
+			
+			return close < FAR;
+		}
+
         void onMouseDown(object sender, MouseButtonEventArgs e) {
             switch (e.Button) {
                 case MouseButton.Left: {
@@ -416,14 +440,28 @@ namespace Ageless {
 			while (!exiting) {
 			
 				if (mouseClickedPosition.X >= 0) {
+
+					Vector3 origin, direction;
+
+					getRayFromWindowPoint(ref mouseClickedPosition, out origin, out direction);
+					
+				
 					Vector3 o;
-                    if (getTerrainAtWindowLocation(mouseClickedPosition, out o)) {
+                    if (findTerrainWithRay(ref origin, ref direction, out o)) {
                         player.target = o;
                     }
+					Prop p;
+					if (findPropWithRay(ref origin, ref direction, out p)) {
+						Console.WriteLine("Found prop with model: {0}", p.model.name);
+					} else {
+						Console.WriteLine("no prop");
+					}
+					
 					mouseClickedPosition.X = -1;
 				}
 				
 			}
 		}
-    }
+
+}
 }
