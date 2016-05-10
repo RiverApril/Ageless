@@ -2,6 +2,7 @@
 *.userprefs
 bin/
 obj/
+.vs/
 
 
 # Heightmaps
