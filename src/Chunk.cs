@@ -12,11 +12,13 @@ using System.Threading;
 namespace Ageless {
     public class Chunk : Renderable{
 
-		public static readonly uint CHUNK_SIZE_X = 128;
-		public static readonly uint CHUNK_SIZE_Z = 128;
+		public static readonly int CHUNK_SIZE_X = 128;
+		public static readonly int CHUNK_SIZE_Z = 128;
 
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
+
+		public float resolution = 0x08;
 
         /*Vector3[] cubePoints = new Vector3[] {
             new Vector3(-0.5f, -0.5f,  0.5f),
@@ -29,7 +31,7 @@ namespace Ageless {
             new Vector3(-0.5f,  0.5f, -0.5f),
         };*/
 
-        public World world;
+        public Map map;
 
         public Point2 Location;
 
@@ -37,8 +39,8 @@ namespace Ageless {
 
         public List<Prop> props = new List<Prop>();
 
-        public Chunk(World world, Point2 location) : base() {
-            this.world = world;
+        public Chunk(Map map, Point2 location) : base() {
+            this.map = map;
             Location = location;
         }
 
@@ -51,151 +53,7 @@ namespace Ageless {
 
             Console.WriteLine("Loading Chunk: {0}, {1}", Location.X, Location.Y);
 
-            string path;
-
-            float resolution = 0x08;
-            string letters = "abcdefghijklmnopqrstuvwxyz";
-            bool loadedLetter = true;
-            for (int i = 0; i < 26 && loadedLetter; i++) {
-                loadedLetter = false;
-                for (int fc = 0; fc < 2; fc++) {
-                    for (int st = 0; st < 2; st++) {
-                        path = Game.dirMaps + "htmp.";
-                        path += Location.X.ToString();
-                        path += ".";
-                        path += Location.Y.ToString();
-                        path += ".";
-                        path += fc == 0 ? "f" : "c"; //floor, ceiling
-                        path += ".";
-                        path += st == 0 ? "s" : "d"; //solid, decorative
-                        path += ".";
-                        path += letters[i];
-                        path += ".png";
-
-                        try {
-
-
-                            if (File.Exists(path)) {
-
-                                Console.WriteLine("Try to load Heightmap: {0}", path);
-
-
-
-                                using (Image img = Image.FromFile(path)) {
-
-                                    using (Bitmap bmp = new Bitmap(img)) {
-
-                                        if (bmp.Width != CHUNK_SIZE_X + 2 || bmp.Height != CHUNK_SIZE_Z + 2) {
-                                            throw new FormatException(String.Format("Image size not equal to {0}x{1}, is instead {2}x{3}", CHUNK_SIZE_X + 2, CHUNK_SIZE_Z + 2, bmp.Width, bmp.Height));
-                                        }
-
-                                        HeightMap htmp = new HeightMap(letters[i]);
-
-                                        htmp.isFloor = fc == 0;
-                                        htmp.isCeiling = fc == 1;
-                                        htmp.isSolid = st == 0;
-
-                                        htmp.min = float.MaxValue;
-                                        htmp.max = float.MinValue;
-
-                                        for (int x = 0; x < CHUNK_SIZE_X + 2; x++) {
-                                            for (int z = 0; z < CHUNK_SIZE_Z + 2; z++) {
-                                                Color c = bmp.GetPixel(x, z);
-                                                if (x < CHUNK_SIZE_X && z < CHUNK_SIZE_Z) {
-                                                    htmp.tiles[x, z] = c.R;
-                                                }
-                                                htmp.heights[x, z] = c.B / resolution;
-                                                htmp.min = Math.Min(htmp.heights[x, z], htmp.min);
-                                                htmp.max = Math.Max(htmp.heights[x, z], htmp.max);
-                                            }
-                                        }
-
-                                        terrain.Add(htmp);
-                                        loadedLetter = true;
-                                        Console.WriteLine("Loaded Heightmap: {0}", path);
-                                    }
-                                }
-                            }
-
-
-                        } catch (OutOfMemoryException) {
-                            Console.WriteLine("Out of memory");
-                            return;
-                        }
-                    }
-                }
-            }
-
-            path = Game.dirMaps + "props.";
-			path += Location.X.ToString();
-			path += ".";
-			path += Location.Y.ToString();
-			path += ".txt";
-
-			if (File.Exists(path)) {
-
-				Console.WriteLine("Loading Prop File: {0}", path);
-
-                Dictionary<string, string> modelTex = new Dictionary<string, string>();
-					
-				string[] lines = File.ReadAllLines(path);
-				foreach (string line in lines) {
-                    if (line.StartsWith("set ", StringComparison.Ordinal)) {
-                        string[] split = line.Split(' ');
-
-                        if (split[1].Equals("tex") && split.Length == 4) {
-                            modelTex[split[2]] = split[3];
-                        }
-
-                    } else if (line.StartsWith("p", StringComparison.Ordinal)) {
-						string[] split = line.Split(' ');
-
-						string name = split[1];
-						float x = float.Parse(split[2]);
-						float z = float.Parse(split[4]);
-						float y = 0;
-						bool yset = false;
-						foreach (HeightMap htmp in terrain) {
-							if (htmp.letter == split[3][0]) {
-
-								htmp.getHeightAtPosition(new Vector2d(x, z), out y);
-									
-								if (split[3].Substring(1).Length > 0) {
-									y += float.Parse(split[3].Substring(1));
-								}			
-									
-								yset = true;
-								break;
-							}
-						}
-						if(!yset) {
-							y = float.Parse(split[3]);
-						}
-
-						float xr = MathHelper.DegreesToRadians(float.Parse(split[5]));
-						float yr = MathHelper.DegreesToRadians(float.Parse(split[6]));
-						float zr = MathHelper.DegreesToRadians(float.Parse(split[7]));
-
-                        Prop p;
-                        if (split[0].Contains("i")) {
-                            p = new PropInteractable(ModelControl.getModel(name), split[0].Contains("s"));
-                        } else {
-                            p = new Prop(ModelControl.getModel(name), split[0].Contains("s"));
-                        }
-						p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
-						p.rotation = new Vector3(xr, yr, zr);
-						p.setupModelMatrix();
-                        p.textureIndex = TextureControl.textures.IndexOf(modelTex[p.model.name]);
-						//p.setupFrame(); after model loads
-						props.Add(p);
-
-						Console.WriteLine("New prop at: {0}", p.position);
-							
-					}
-				}
-
-				Console.WriteLine("Loaded Prop File: {0}", path);
-			}
+			Data.loadChunk(this);
 
             Console.WriteLine("Loaded Chunk: {0}, {1}", Location.X, Location.Y);
 

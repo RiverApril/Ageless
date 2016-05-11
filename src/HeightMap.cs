@@ -12,7 +12,6 @@ namespace Ageless {
 		public float min, max;
 
         public bool isFloor = true;
-        public bool isCeiling = false;
         public bool isSolid = true;
         
 		public char letter;

@@ -37,7 +37,7 @@ namespace Ageless {
             }*/
 
 
-			float ch = game.loadedWorld.getFloorAtPosition(position.X, position.Y, position.Z);
+			float ch = game.loadedMap.getFloorAtPosition(position.X, position.Y, position.Z);
 			if (ch >= 0) { // Wait until chunks are loaded
 				float nh;
 
@@ -50,7 +50,7 @@ namespace Ageless {
 					diff.Normalize();
 					diff *= movementSpeed;
 
-					nh = game.loadedWorld.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
+					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
 
 					if ((nh - ch) / diff.Length <= maxSlope) {
 						position.X += diff.X;

@@ -14,7 +14,7 @@ namespace Ageless {
 		}
 
 		public override void update(Game game) {
-			//position.Y = game.loadedWorld.getFloorAtPosition(position.X, position.Y, position.Z);
+			//position.Y = game.loadedMap.getFloorAtPosition(position.X, position.Y, position.Z);
 		}
 
 		public override void makeRender() {

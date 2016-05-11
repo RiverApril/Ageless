@@ -9,7 +9,7 @@ using OpenTK.Input;
 using System.Threading;
 
 namespace Ageless {
-    public class World {
+    public class Map {
 
         public static readonly float SQRT2f = (float)Math.Sqrt(2);
         
@@ -19,6 +19,8 @@ namespace Ageless {
 		public uint nextActorID = 0;
 
         public Game game;
+
+		public string name;
         
         public bool chunksLocked = false;
 
@@ -32,8 +34,10 @@ namespace Ageless {
             return a * a;
         }
 
-        public World(Game game) {
+        public Map(Game game, string name) {
             this.game = game;
+			this.name = name;
+			Data.loadMap(this);
         }
 
 		public void lockChunks() {

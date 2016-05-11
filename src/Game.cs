@@ -39,7 +39,7 @@ namespace Ageless {
         public Matrix4 matrixView;
         public Matrix3 matrixNormal;
 
-        public World loadedWorld;
+        public Map loadedMap;
 
         public Random rand = new Random();
 
@@ -67,11 +67,15 @@ namespace Ageless {
 
         private Thread heavyThread;
 
+		private Editor editor;
+
         Vector3 lookOrigin, lookDirection;
 
         public Vector4 highlightColor = new Vector4(0, 1, 0, .5f);
 
         public Game() {
+
+			editor = new Editor(this);
 
 			heavyThread = new Thread(heavy);
 
@@ -145,12 +149,12 @@ namespace Ageless {
 
             heavyThread.Start();
 
-            loadedWorld = new World(this);
+            loadedMap = new Map(this, "debugMap");
 
             player = new ActorPlayer();
-            loadedWorld.newActor(player);
-            //loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
-            //loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
+            loadedMap.newActor(player);
+            //loadedMap.newActor(new ActorPlayer(loadedMap.actorMaker));
+            //loadedMap.newActor(new ActorPlayer(loadedMap.actorMaker));
 
             matrixProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, (float)gameWindow.Width / (float)gameWindow.Height, NEAR, FAR);
             
@@ -187,7 +191,7 @@ namespace Ageless {
 
             gameWindow.Title = string.Format("UPS: {0:F}, FPS: {0:F}", UPS, FPS);
 
-            loadedWorld.update(this);
+            loadedMap.update(this);
 
 
             if (keyboard.IsKeyDown(Key.A)) {
@@ -223,15 +227,19 @@ namespace Ageless {
                 camAngle.Theta = (float)Math.PI / 2;
             }
 
-            focusPos = player.position;
+			if (editor.active) {
+				focusPos = editor.focusPosition;
+			} else {
+				focusPos = player.position;
+			}
 
             camPos.X = focusPos.X - (float)(Math.Cos(camAngle.Theta) * Math.Sin(camAngle.Phi) * focusDistance);
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
-            lightPosition.X = player.position.X - 20000;
-            lightPosition.Y = player.position.Y - 80000;
-            lightPosition.Z = player.position.Z - 20000;
+            lightPosition.X = - 20000;
+            lightPosition.Y = - 80000;
+            lightPosition.Z = - 20000;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
@@ -255,8 +263,8 @@ namespace Ageless {
             GL.BindTexture(TextureTarget.Texture2DArray, TextureControl.textureID);
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
 
-            loadedWorld.drawActors(this);
-            loadedWorld.drawChunks(this);
+            loadedMap.drawActors(this);
+            loadedMap.drawChunks(this);
 
 
             gameWindow.SwapBuffers();
@@ -360,23 +368,6 @@ namespace Ageless {
             return false;
         }
 
-        void onKeyDown(object sender, KeyboardKeyEventArgs e) {
-            switch (e.Key) {
-                case Key.Escape: {
-                    gameWindow.Exit();
-                    break;
-                }
-				case Key.U: {
-					loadedWorld.unloadAllChunks();
-					break;
-				}
-            }
-        }
-
-        void onKeyUp(object sender, KeyboardKeyEventArgs e) {
-
-        }
-
 		void getRayFromWindowPoint(ref Point2 point, out Vector3 origin, out Vector3 direction) {
 			float aspect = (float)gameWindow.Width / (float)gameWindow.Height;
             float normX = (point.X - (gameWindow.Width / 2.0f)) / (gameWindow.Width / 2.0f);
@@ -405,9 +396,9 @@ namespace Ageless {
             Vector3 p3 = new Vector3();
 
             /*for(float i = 0; i < 20; i += 1) {
-                ActorCharacter p = new ActorCharacter(loadedWorld.actorMaker);
+                ActorCharacter p = new ActorCharacter(loadedMap.actorMaker);
                 p.position = origin + (direction * i);
-                loadedWorld.newActor(p);
+                loadedMap.newActor(p);
                 Console.WriteLine(p.position);
             }*/
 
@@ -415,9 +406,9 @@ namespace Ageless {
 
             float t;
 
-			loadedWorld.lockChunks();
+			loadedMap.lockChunks();
 
-            foreach (Chunk c in loadedWorld.loadedChunks.Values) {
+            foreach (Chunk c in loadedMap.loadedChunks.Values) {
                 foreach (HeightMap h in c.terrain) {
                     if (h.isSolid) {
 
@@ -447,9 +438,9 @@ namespace Ageless {
                 }
             }
 
-			loadedWorld.unlockChunks();
+			loadedMap.unlockChunks();
 			
-            outLocation = origin + (direction * closest);//new Vector3(close.X, loadedWorld.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
+            outLocation = origin + (direction * closest);//new Vector3(close.X, loadedMap.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
             return closest < far;
         }
 
@@ -458,7 +449,7 @@ namespace Ageless {
 			closestProp = null;
 			float close = far;
 		
-			foreach (Chunk c in loadedWorld.loadedChunks.Values) {
+			foreach (Chunk c in loadedMap.loadedChunks.Values) {
 				foreach (Prop p in c.props) {
 					if (intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
                         bool hit = false;
@@ -482,6 +473,31 @@ namespace Ageless {
 			
 			return close <= far;
 		}
+        void onKeyDown(object sender, KeyboardKeyEventArgs e) {
+            switch (e.Key) {
+                case Key.Escape: {
+                    gameWindow.Exit();
+                    break;
+                }
+				case Key.U: {
+					loadedMap.unloadAllChunks();
+					break;
+				}
+				case Key.Tab: {
+					editor.active = !editor.active;
+					break;
+				}
+            }
+
+			if (editor.active) {
+				editor.onKeyDown(sender, e);
+			}
+			
+        }
+
+        void onKeyUp(object sender, KeyboardKeyEventArgs e) {
+
+        }
 
         void onMouseDown(object sender, MouseButtonEventArgs e) {
             switch (e.Button) {
@@ -538,5 +554,5 @@ namespace Ageless {
 			}
 		}
 
-}
+	}
 }

@@ -20,4 +20,4 @@ def crop(path, name, nameformat, chunkX, chunkY, chunkW, chunkH):
                 print "Failed to save"
 
 
-crop(path, "full.png", "htmp.{}.{}.f.s.a.png", -2, -2, 128, 128)
+crop(path, "debugMap/full.png", "debugMap/htmp.{}.{}.f.s.a.png", -2, -2, 128, 128)

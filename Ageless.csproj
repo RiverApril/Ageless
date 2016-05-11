@@ -60,14 +60,19 @@
     <Compile Include="src\Tile.cs" />
     <Compile Include="src\TryGL.cs" />
     <Compile Include="src\Vertex.cs" />
-    <Compile Include="src\World.cs" />
     <Compile Include="src\ActorCharacter.cs" />
     <Compile Include="src\Model.cs" />
     <Compile Include="src\ModelControl.cs" />
+    <Compile Include="src\Editor\Editor.cs" />
+    <Compile Include="src\Data.cs" />
+    <Compile Include="src\Map.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment.330.glsl" />
     <None Include="shaders\vertex.120.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\Editor\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
