@@ -22,6 +22,8 @@ namespace Ageless {
 
         public List<Vector3> transformedPoints = new List<Vector3>();
 
+        public int textureIndex;
+
         public Prop(Model model, bool solid) {
 			this.model = model;
 			this.solid = solid;
@@ -62,6 +64,7 @@ namespace Ageless {
         public virtual void draw(Game game) {
             game.matrixModel = modelMatrix;
             game.setModel();
+            game.setTexture(textureIndex);
             model.drawRender();
         }
 

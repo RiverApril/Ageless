@@ -135,10 +135,19 @@ namespace Ageless {
 			if (File.Exists(path)) {
 
 				Console.WriteLine("Loading Prop File: {0}", path);
+
+                Dictionary<string, string> modelTex = new Dictionary<string, string>();
 					
 				string[] lines = File.ReadAllLines(path);
 				foreach (string line in lines) {
-                    if (line.StartsWith("p", StringComparison.Ordinal)) {
+                    if (line.StartsWith("set ", StringComparison.Ordinal)) {
+                        string[] split = line.Split(' ');
+
+                        if (split[1].Equals("tex") && split.Length == 4) {
+                            modelTex[split[2]] = split[3];
+                        }
+
+                    } else if (line.StartsWith("p", StringComparison.Ordinal)) {
 						string[] split = line.Split(' ');
 
 						string name = split[1];
@@ -176,6 +185,7 @@ namespace Ageless {
 						p.position = new Vector3(x + (CHUNK_SIZE_X * Location.X), y, z + (CHUNK_SIZE_Z * Location.Y));
 						p.rotation = new Vector3(xr, yr, zr);
 						p.setupModelMatrix();
+                        p.textureIndex = TextureControl.textures.IndexOf(modelTex[p.model.name]);
 						//p.setupFrame(); after model loads
 						props.Add(p);
 

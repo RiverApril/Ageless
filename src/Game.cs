@@ -166,14 +166,6 @@ namespace Ageless {
 
         }
 
-        public void resetBlending() {
-            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha));
-        }
-
-        public void additiveBlending() {
-            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One));
-        }
-
         void onUnload(object sender, EventArgs e) {
             Console.Out.WriteLine("onUnload");
             exiting = true;
@@ -259,7 +251,7 @@ namespace Ageless {
             resetColor();
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureControl.terrain);
+            GL.BindTexture(TextureTarget.Texture2DArray, TextureControl.textureID);
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
 
             loadedWorld.drawActors(this);
@@ -289,6 +281,18 @@ namespace Ageless {
         public void resetColor() {
             GL.Uniform4(shader.GetUniformID("color"), Vector4.One);
             GL.Uniform1(shader.GetUniformID("replaceColor"), 0);
+        }
+        
+        public void resetBlending() {
+            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha));
+        }
+
+        public void additiveBlending() {
+            TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One));
+        }
+
+        public void setTexture(int texIndex) {
+            GL.Uniform1(shader.GetUniformID("textureIndex"), texIndex);
         }
 
         bool intercectAABBRay(Vector3 min, Vector3 max, ref Vector3 origin, ref Vector3 direction) {
@@ -466,7 +470,7 @@ namespace Ageless {
                             }
                         }
                         if (hit) {
-                            if (d < close) {
+                            if (d <= close) {
                                 close = d;
                                 closestProp = p;
                             }
@@ -475,7 +479,7 @@ namespace Ageless {
 				}
 			}
 			
-			return close < far;
+			return close <= far;
 		}
 
         void onMouseDown(object sender, MouseButtonEventArgs e) {

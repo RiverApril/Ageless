@@ -22,5 +22,13 @@ namespace Ageless {
 		}
 
 		public abstract void update(Game game);
+
+        public void draw(Game game) {
+            game.matrixModel = Matrix4.CreateTranslation(position);
+            game.setModel();
+            game.setTexture(TextureControl.texAtlas);
+
+            drawRender();
+        }
     }
 }

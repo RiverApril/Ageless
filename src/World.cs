@@ -136,12 +136,8 @@ namespace Ageless {
         }
 
 		public void drawActors(Game game) {
-			foreach (KeyValuePair<uint, Actor> entry in loadedActors){
-
-				game.matrixModel = Matrix4.CreateTranslation(entry.Value.position);
-				game.setModel();
-
-				entry.Value.drawRender();
+			foreach (Actor actor in loadedActors.Values){
+                actor.draw(game);
 			}
 		}
 

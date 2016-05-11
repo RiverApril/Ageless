@@ -6,18 +6,40 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Collections.Generic;
 
 namespace Ageless {
     class TextureControl {
 
-		public static int terrain;
+        public const int texSize = 256;
+
+        public static int textureID;
 
         public static Vector2[,] tex16x16Coords = new Vector2[16*16, 4];
 
+        public static List<string> textures = new List<string>();
 
+        public static int texAtlas;
+        public static int texStone;
 
         public static void loadTextures() {
-			terrain = loadTexture(Game.dirTextures+"terrain.png");
+
+            textures.Add("atlas"); texAtlas = textures.Count - 1;
+            textures.Add("stone"); texStone = textures.Count - 1;
+
+            textureID = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2DArray, textureID);
+            GL.TexStorage3D(TextureTarget3d.Texture2DArray, 1, SizedInternalFormat.Rgba8, texSize, texSize, textures.Count);
+
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
+            for (int index = 0; index < textures.Count; index++) {
+                loadTexture(Game.dirTextures + textures[index] + ".png", index);
+            }
+
 
             int k = 0;
 
@@ -45,35 +67,28 @@ namespace Ageless {
 
         }
 
-        public static int loadTexture(string path) {
-            int id = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, id);
+        public static void loadTexture(string path, int index) {
+            if (File.Exists(path)) {
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+                using (Bitmap bmp = new Bitmap(path)) {
 
-			if(File.Exists(path)) {
+                    bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-				using(Bitmap bmp = new Bitmap(path)) {
+                    BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-					bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-				
-					BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpData.Width, bmpData.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
+                    //glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, layerCount, GL_RGBA, GL_UNSIGNED_BYTE, texels);
+                    GL.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, index, bmp.Width, bmp.Height, 1, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
 
-					GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpData.Width, bmpData.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
+                    bmp.UnlockBits(bmpData);
 
-					bmp.UnlockBits(bmpData);
+                    bmp.Dispose();
+                    Console.WriteLine("Texture loaded: {0}", path);
+                }
+            } else {
+                Console.WriteLine("{0} does not exist.", path);
+            }
 
-					bmp.Dispose();
-					Console.WriteLine("Texture loaded: {0}", path);
-				}
-			} else {
-				Console.WriteLine("{0} does not exist.", path);
-			}
-
-            return id;
         }
 
     }
