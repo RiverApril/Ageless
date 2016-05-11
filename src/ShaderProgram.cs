@@ -48,6 +48,7 @@ namespace Ageless {
                 ProgramID = 0;
                 throw new Exception("Failed to compile shader source, type: "+type.ToString());
             }
+            Console.WriteLine("Compiled shader, type: "+type.ToString());
 
             TryGL.Call(() => GL.AttachShader(ProgramID, shaderID));
             TryGL.Call(() => GL.DeleteShader(shaderID));
@@ -67,14 +68,14 @@ namespace Ageless {
             string info = "";
             int statusCode = -1;
 			
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 0, "vertexPosition"));
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 1, "vertexUV"));
-            TryGL.Call(() => GL.BindAttribLocation(ProgramID, 2, "vertexNormal"));
+            //TryGL.Call(() => GL.BindAttribLocation(ProgramID, 0, "vertexPosition"));
+            //TryGL.Call(() => GL.BindAttribLocation(ProgramID, 1, "vertexUV"));
+            //TryGL.Call(() => GL.BindAttribLocation(ProgramID, 2, "vertexNormal"));
 
             TryGL.Call(() => GL.LinkProgram(ProgramID));
             TryGL.Call(() => GL.GetProgramInfoLog(ProgramID, out info));
             TryGL.Call(() => GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out statusCode));
-
+            
             if (statusCode != 1) {
                 Console.WriteLine("Failed to link shader program.");
                 Console.WriteLine(info);
@@ -83,10 +84,11 @@ namespace Ageless {
                 ProgramID = 0;
                 throw new Exception("Failed to link shader program");
             }
+            Console.WriteLine("Linked shader program.");
         }
 
         public void use(){
-            TryGL.Call(() => GL.UseProgram(ProgramID));
+			TryGL.Call(() => GL.UseProgram(ProgramID));
         }
 
         public int GetUniformID(string name) {

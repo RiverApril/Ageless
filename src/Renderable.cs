@@ -82,7 +82,7 @@ namespace Ageless {
 
 			if(VBOIDs == null) {
 				VBOIDs = new uint[2];
-				GL.GenBuffers(2, VBOIDs);
+				TryGL.Call(() => GL.GenBuffers(2, VBOIDs));
 				Console.WriteLine("(Render) New Buffers: [{0}, {1}]", VBOIDs[0], VBOIDs[1]);
 			}
 
@@ -131,19 +131,19 @@ namespace Ageless {
 						Console.Out.WriteLine("Draw actor: {0}  VBO:[{1}, {2}] elCount={3}", (this as Actor).ID, VBOIDs[0], VBOIDs[1], elementCount);
 					}*/
 
-					GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]);
-					GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]);
+					TryGL.Call(() => GL.BindBuffer(BufferTarget.ArrayBuffer, VBOIDs[0]));
+					TryGL.Call(() => GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIDs[1]));
 
-                    GL.EnableVertexAttribArray(0); //Positions
-                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition);
+                    TryGL.Call(() => GL.EnableVertexAttribArray(0)); //Positions
+                    TryGL.Call(() => GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition));
 
-                    GL.EnableVertexAttribArray(1); //UV
-                    GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV);
+                    TryGL.Call(() => GL.EnableVertexAttribArray(1)); //UV
+                    TryGL.Call(() => GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV));
 
-                    GL.EnableVertexAttribArray(2); //Normals
-                    GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal);
+                    TryGL.Call(() => GL.EnableVertexAttribArray(2)); //Normals
+                    TryGL.Call(() => GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal));
 
-					GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null);
+					TryGL.Call(() => GL.DrawElements(PrimitiveType.Triangles, elementCount, DrawElementsType.UnsignedInt, (IntPtr)null));
 					//GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 					//GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 

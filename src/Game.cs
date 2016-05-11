@@ -78,7 +78,8 @@ namespace Ageless {
             settings = new Settings(dir + "settings.txt");
             settings.load();
 
-            gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight);
+            gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight, GraphicsMode.Default, "Ageless",
+        GameWindowFlags.Default, DisplayDevice.Default, 3, 2, GraphicsContextFlags.ForwardCompatible);
 
             gameWindow.Load += onLoad;
             gameWindow.Unload += onUnload;
@@ -122,7 +123,10 @@ namespace Ageless {
             TryGL.Call(() => GL.Enable(EnableCap.Blend));
             resetBlending();
             TryGL.Call(() => GL.BlendEquation(BlendEquationMode.FuncAdd));
-
+            
+            int VAO = GL.GenVertexArray();
+			GL.BindVertexArray(VAO);
+	
 
             shader = new ShaderProgram();
             Console.WriteLine("Current GLSL version: {0}", glslVersion);
@@ -149,13 +153,10 @@ namespace Ageless {
             //loadedWorld.newActor(new ActorPlayer(loadedWorld.actorMaker));
 
             matrixProjection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, (float)gameWindow.Width / (float)gameWindow.Height, NEAR, FAR);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref matrixProjection);
+            
 
             matrixModel = Matrix4.Identity;
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref matrixModel);
-
+            
             matrixCamera = Matrix4.Identity;
 
             player.position.X = 64;
@@ -172,7 +173,7 @@ namespace Ageless {
         }
 
         void onResize(object sender, EventArgs e) {
-            GL.Viewport(0, 0, gameWindow.Width, gameWindow.Height);
+            TryGL.Call(() => GL.Viewport(0, 0, gameWindow.Width, gameWindow.Height));
 
             settings.windowWidth.value = gameWindow.Width;
             settings.windowHeight.value = gameWindow.Height;
@@ -236,7 +237,7 @@ namespace Ageless {
         void onRenderFrame(object sender, FrameEventArgs e) {
             FPS = 1.0 / e.Time;
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            TryGL.Call(() => GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
 
             shader.use();
 

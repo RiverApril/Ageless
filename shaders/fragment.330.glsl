@@ -1,4 +1,6 @@
-﻿struct Light{
+﻿#version 330
+
+struct Light{
     vec3 position;
     vec3 color;
 };
@@ -16,9 +18,11 @@ uniform vec4 color;
 uniform Light light;
 
 
-varying vec3 transferPosition;
-varying vec2 transferUV;
-varying vec3 transferNormal;
+in vec3 transferPosition;
+in vec2 transferUV;
+in vec3 transferNormal;
+
+out vec4 fragColor;
 
 void main() {
 
@@ -30,7 +34,7 @@ void main() {
 
 	float brightness = max(dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)), 0.2);
 
-	vec4 surfaceColor = texture2DArray(Texture, vec3(transferUV, textureIndex));
+	vec4 surfaceColor = texture(Texture, vec3(transferUV, textureIndex));
 
-	gl_FragColor = replaceColor ? color : vec4(brightness * light.color * surfaceColor.rgb * color, surfaceColor.a);
+	fragColor = replaceColor ? color : vec4(brightness * light.color * surfaceColor.rgb * color.rgb, surfaceColor.a * color.a);
 }

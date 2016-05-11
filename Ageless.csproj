@@ -66,7 +66,7 @@
     <Compile Include="src\ModelControl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment.120.glsl" />
+    <None Include="shaders\fragment.330.glsl" />
     <None Include="shaders\vertex.120.glsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
