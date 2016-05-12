@@ -17,8 +17,10 @@ namespace Ageless {
 		}
 
 		public static void loadChunk(Chunk chunk) {
-		
-			string path;
+
+            Console.WriteLine("Loading Chunk: {0}, {1}", chunk.Location.X, chunk.Location.Y);
+
+            string path;
 			string letters = "abcdefghijklmnopqrstuvwxyz";
 			bool loadedLetter = true;
 			for (int i = 0; i < 26 && loadedLetter; i++) {
@@ -159,19 +161,23 @@ namespace Ageless {
 				}
 
 				Console.WriteLine("Loaded Prop File: {0}", path);
-			}
-			
-			
-		}
+            }
 
-		public void saveMap(Map map) {
+            Console.WriteLine("Loaded Chunk: {0}, {1}", chunk.Location.X, chunk.Location.Y);
+
+        }
+
+		public static void saveMap(Map map) {
             foreach (Chunk chunk in map.loadedChunks.Values) {
                 saveChunk(chunk);
             }
 		}
 
-		public void saveChunk(Chunk chunk) {
-			string path;
+        public static void saveChunk(Chunk chunk) {
+
+            Console.WriteLine("Saving Chunk: {0}, {1}", chunk.Location.X, chunk.Location.Y);
+
+            string path;
 			foreach (HeightMap htmp in chunk.terrain) {
 				path = Game.dirMaps + chunk.map.name + "/htmp.";
 				path += chunk.Location.X.ToString();
@@ -190,8 +196,8 @@ namespace Ageless {
 				for (int i = 0; i < Chunk.CHUNK_SIZE_X + 2; i++) {
 					for (int j = 0; j < Chunk.CHUNK_SIZE_Z + 2; j++) {
 						int t = 0;
-						if (i > 0 && i < Chunk.CHUNK_SIZE_X-1 && j > 0 && j < Chunk.CHUNK_SIZE_Z-1) {
-							t = htmp.tiles[i + 1, j + 1];
+						if (i < Chunk.CHUNK_SIZE_X && j < Chunk.CHUNK_SIZE_Z) {
+							t = htmp.tiles[i, j];
 						}
 						bmp.SetPixel(i, j, Color.FromArgb(t, 0, (int)(htmp.heights[i, j] * chunk.resolution)));
 					}
@@ -201,42 +207,54 @@ namespace Ageless {
 				
 			}
 
-            path = Game.dirMaps + chunk.map.name + "/props.";
-            path += chunk.Location.X.ToString();
-            path += ".";
-            path += chunk.Location.Y.ToString();
-            path += ".txt";
+            if (chunk.props.Count > 0) {
 
-            string text = string.Format("# Props for chunk {0}, {0}\n", chunk.Location.X, chunk.Location.Y);
+                path = Game.dirMaps + chunk.map.name + "/props.";
+                path += chunk.Location.X.ToString();
+                path += ".";
+                path += chunk.Location.Y.ToString();
+                path += ".txt";
 
-            Dictionary<string, string> modelTex = new Dictionary<string, string>();
+                string text = string.Format("# Props for chunk {0}, {1}{2}", chunk.Location.X, chunk.Location.Y, Environment.NewLine);
 
-            foreach (Prop prop in chunk.props) {
-                if (!modelTex.ContainsKey(prop.model.name) || modelTex[prop.model.name] != TextureControl.textures[prop.textureIndex]) {
-                    modelTex[prop.model.name] = TextureControl.textures[prop.textureIndex];
-                    text += string.Format("\nset tex {0} {0}\n", prop.model.name, modelTex[prop.model.name]);
-                }
-                text += "p";
-                if (prop.solid) {
-                    text += "s";
-                }
-                if (prop is PropInteractable) {
-                    text += "i";
-                }
-                float y = prop.position.Y;
-                string ys = string.Format("{0}", y);
-                foreach (HeightMap htmp in chunk.terrain) {
-                    float h;
-                    if (htmp.getHeightAtPosition(new Vector2d(prop.position.X, prop.position.Z), out h)) {
-                        if (Math.Abs(h) < Math.Abs(y)) {
-                            y = h;
-                            ys = string.Format("{0}{1}{2}", htmp.letter, y<0?"":"+", y);
+                Dictionary<string, string> modelTex = new Dictionary<string, string>();
+
+                foreach (Prop prop in chunk.props) {
+                    if (!modelTex.ContainsKey(prop.model.name) || modelTex[prop.model.name] != TextureControl.textures[prop.textureIndex]) {
+                        modelTex[prop.model.name] = TextureControl.textures[prop.textureIndex];
+                        text += string.Format("{2}set tex {0} {1}{2}{2}", prop.model.name, modelTex[prop.model.name], Environment.NewLine);
+                    }
+                    text += "p";
+                    if (prop.solid) {
+                        text += "s";
+                    }
+                    if (prop is PropInteractable) {
+                        text += "i";
+                    }
+                    float y = prop.position.Y;
+                    string ys = string.Format("{0}", y);
+                    foreach (HeightMap htmp in chunk.terrain) {
+                        float h;
+                        if (htmp.getHeightAtPosition(new Vector2d(prop.position.X, prop.position.Z), out h)) {
+                            if (Math.Abs(h) <= Math.Abs(y)) {
+                                y = prop.position.Y - h;
+                                if (y == 0) {
+                                    ys = string.Format("{0}", htmp.letter);
+                                } else {
+                                    ys = string.Format("{0}{1}{2}", htmp.letter, y < 0 ? "" : "+", y);
+                                }
+                            }
                         }
                     }
+                    text += string.Format(" {0} {1} {2} {3} {4} {5} {6}{7}", prop.model.name, prop.position.X, ys, prop.position.Z, MathHelper.RadiansToDegrees(prop.rotation.X), MathHelper.RadiansToDegrees(prop.rotation.Y), MathHelper.RadiansToDegrees(prop.rotation.Z), Environment.NewLine);
+
                 }
-                text += string.Format(" {0} {1} {2} {3} {4} {5}\n", prop.position.X, ys, prop.position.Z, MathHelper.RadiansToDegrees(prop.rotation.X), MathHelper.RadiansToDegrees(prop.rotation.Y), MathHelper.RadiansToDegrees(prop.rotation.Z));
+
+                File.WriteAllText(path, text);
 
             }
+
+            Console.WriteLine("Saved Chunk: {0}, {1}", chunk.Location.X, chunk.Location.Y);
 
         }
 		

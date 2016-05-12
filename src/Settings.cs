@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using OpenTK.Input;
 
 namespace Ageless {
 
@@ -21,7 +22,9 @@ namespace Ageless {
 
     public class SettingRange {}
 
-    public class SettingRangeBool : SettingRange {}
+    public class SettingRangeBool : SettingRange { }
+
+    public class SettingRangeKey : SettingRange { }
 
     public class SettingRangeInt : SettingRange {
         int min;
@@ -102,6 +105,107 @@ namespace Ageless {
     }
 
 
+    public class SettingKey : Setting {
+
+        public bool isMouse;
+        public MouseButton button;
+        public Key key;
+        public KeyModifiers mod;
+
+        public SettingKey(string name, Key key, KeyModifiers mod) : base(name) {
+            this.key = key;
+            this.mod = mod;
+            this.isMouse = false;
+        }
+
+        public SettingKey(string name, MouseButton button, KeyModifiers mod) : base(name) {
+            this.button = button;
+            this.mod = mod;
+            this.isMouse = true;
+        }
+
+        public override bool setValue(string c) {
+            try {
+                if (c.StartsWith(" Mouse ")) {
+                    int p1 = c.IndexOf('"');
+                    int p2 = c.IndexOf('"', p1 + 1);
+                    button = (MouseButton)Enum.Parse(button.GetType(), c.Substring(p1 + 1, p2 - p1 - 1));
+                } else {
+                    int p1 = c.IndexOf('"');
+                    int p2 = c.IndexOf('"', p1 + 1);
+                    key = (Key)Enum.Parse(key.GetType(), c.Substring(p1 + 1, p2 - p1 - 1));
+                }
+                mod = 0;
+                if (c.Contains("Shift")) {
+                    mod |= KeyModifiers.Shift;
+                }
+                if (c.Contains("Control")) {
+                    mod |= KeyModifiers.Control;
+                }
+                if (c.Contains("Alt")) {
+                    mod |= KeyModifiers.Alt;
+                }
+                return true;
+            } catch (ArgumentException) {
+                return false;
+            }
+        }
+
+        public override string valueToString() {
+            string m = "";
+            if ((mod & KeyModifiers.Shift) != 0) {
+                m += " + Shift";
+            }
+            if ((mod & KeyModifiers.Control) != 0) {
+                m += " + Control";
+            }
+            if ((mod & KeyModifiers.Alt) != 0) {
+                m += " + Alt";
+            }
+            if (isMouse) {
+                return " Mouse \"" + Enum.GetName(button.GetType(), button) + "\"" + m;
+            } else {
+                return " \"" + Enum.GetName(key.GetType(), key) + "\"" + m;
+            }
+        }
+
+        public bool testModifiers(KeyboardState ks) {
+            return ((ks.IsKeyDown(Key.ShiftLeft) || ks.IsKeyDown(Key.ShiftRight)) == ((mod & KeyModifiers.Shift) != 0)) &&
+                    ((ks.IsKeyDown(Key.ControlLeft) || ks.IsKeyDown(Key.ControlRight)) == ((mod & KeyModifiers.Control) != 0)) &&
+                    ((ks.IsKeyDown(Key.AltLeft) || ks.IsKeyDown(Key.AltRight)) == ((mod & KeyModifiers.Alt) != 0));
+        }
+
+        public bool test(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
+            if (ke != null && !isMouse) {
+                if (ke.Key == key && ke.Modifiers == mod) {
+                    return true;
+                }
+            }
+            if (me != null && isMouse) {
+                KeyboardState ks = Keyboard.GetState();
+                if (me.Button == button && testModifiers(ks)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool test(KeyboardState ks, MouseState ms) {
+            if (ks != null && !isMouse) {
+                if (ks.IsKeyDown(key) && testModifiers(ks)) {
+                    return true;
+                }
+            }
+            if (ms != null && isMouse) {
+                if (ms.IsButtonDown(button) && testModifiers(ks)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+
     public class SettingFloat : Setting {
         public float value;
 
@@ -142,18 +246,60 @@ namespace Ageless {
         public readonly SettingInt windowWidth = new SettingInt("Window Width", 640);
         public readonly SettingInt windowHeight = new SettingInt("Window Height", 480);
 
+
+        public readonly SettingKey bindCameraUp = new SettingKey("Camera Up", Key.W, 0);
+        public readonly SettingKey bindCameraDown = new SettingKey("Camera Down", Key.S, 0);
+        public readonly SettingKey bindCameraLeft = new SettingKey("Camera Left", Key.A, 0);
+        public readonly SettingKey bindCameraRight = new SettingKey("Camera Right", Key.D, 0);
+        public readonly SettingKey bindCameraIn = new SettingKey("Camera In", Key.Plus, 0);
+        public readonly SettingKey bindCameraOut = new SettingKey("Camera Out", Key.Minus, 0);
+
+        public readonly SettingKey bindMoveToMouse = new SettingKey("Move", MouseButton.Left, 0);
+        public readonly SettingKey bindExit = new SettingKey("Exit", Key.Escape, 0);
+
+        public readonly SettingKey editorBindToggle = new SettingKey("EDITOR Toggle", Key.Tab, 0);
+        public readonly SettingKey editorBindFocusOnPlayer = new SettingKey("EDITOR Focus on Player", Key.P, 0);
+        public readonly SettingKey editorBindSave = new SettingKey("EDITOR Save", Key.S, KeyModifiers.Control);
+        public readonly SettingKey editorBindLoad = new SettingKey("EDITOR Load", Key.L, KeyModifiers.Control);
+
+
         private string fileName;
 
-		public Settings(string fileName) {
+        public Settings(string fileName) {
             this.fileName = fileName;
 
-            settingList.Add(invertCameraX.name, invertCameraX); settingEditableList.Add(invertCameraX, new SettingRangeBool());
-            settingList.Add(invertCameraY.name, invertCameraY); settingEditableList.Add(invertCameraY, new SettingRangeBool());
-            settingList.Add(cameraScrollSpeed.name, cameraScrollSpeed); settingEditableList.Add(cameraScrollSpeed, new SettingRangeFloat((float)(Math.PI / 360), (float)(Math.PI / 16), 0.187622894589f, false, false));
-            settingList.Add(cameraZoomSpeed.name, cameraZoomSpeed); settingEditableList.Add(cameraZoomSpeed, new SettingRangeFloat(1, 2, 0.01f, false, false));
+            addSetting(invertCameraX, new SettingRangeBool());
+            addSetting(invertCameraY, new SettingRangeBool());
+            addSetting(cameraScrollSpeed, new SettingRangeFloat((float)(Math.PI / 360), (float)(Math.PI / 16), 0.187622894589f, false, false));
+            addSetting(cameraZoomSpeed, new SettingRangeFloat(1, 2, 0.01f, false, false));
 
-            settingList.Add(windowWidth.name, windowWidth);
-            settingList.Add(windowHeight.name, windowHeight);
+            addSetting(windowWidth);
+            addSetting(windowHeight);
+
+
+            addSetting(bindCameraUp, new SettingRangeKey());
+            addSetting(bindCameraDown, new SettingRangeKey());
+            addSetting(bindCameraLeft, new SettingRangeKey());
+            addSetting(bindCameraRight, new SettingRangeKey());
+            addSetting(bindCameraIn, new SettingRangeKey());
+            addSetting(bindCameraOut, new SettingRangeKey());
+
+            addSetting(bindMoveToMouse, new SettingRangeKey());
+            addSetting(bindExit);
+
+            addSetting(editorBindToggle, new SettingRangeKey());
+            addSetting(editorBindFocusOnPlayer, new SettingRangeKey());
+            addSetting(editorBindSave, new SettingRangeKey());
+            addSetting(editorBindLoad, new SettingRangeKey());
+        }
+
+        public void addSetting(Setting setting, SettingRange range) {
+            addSetting(setting);
+            settingEditableList.Add(setting, range);
+        }
+
+        public void addSetting(Setting setting) {
+            settingList.Add(setting.name, setting);
         }
 
         public void load() {

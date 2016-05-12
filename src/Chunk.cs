@@ -51,11 +51,7 @@ namespace Ageless {
 
         public void load() {
 
-            Console.WriteLine("Loading Chunk: {0}, {1}", Location.X, Location.Y);
-
 			Data.loadChunk(this);
-
-            Console.WriteLine("Loaded Chunk: {0}, {1}", Location.X, Location.Y);
 
             if (terrain.Count > 0) {
                 compileState = COMP_STATUS.NEEDS_TO_BE_MADE;

@@ -16,14 +16,21 @@ namespace Ageless {
 			this.game = game;
 		}
 
-		public void onKeyDown(object sender, KeyboardKeyEventArgs e) {
-			switch (e.Key) {
-                case Key.P: {
-					focusPosition = game.player.position;
-                    break;
-                }
+        public void onInputDown(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
+
+            if (game.settings.editorBindFocusOnPlayer.test(ke, me)) {
+                focusPosition = game.player.position;
+
+            } else if (game.settings.editorBindSave.test(ke, me)) {
+                Data.saveMap(game.loadedMap);
+
+            } else if (game.settings.editorBindLoad.test(ke, me)) {
+                game.loadedMap.unloadAllChunks();
+                Data.loadMap(game.loadedMap);
+
             }
-		}
-	}
+
+        }
+    }
 }
 

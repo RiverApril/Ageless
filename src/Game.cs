@@ -56,11 +56,11 @@ namespace Ageless {
         Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
 
         public KeyboardState keyboard;
+        public MouseState mouse;
 
-		private Point2 mousePosition = new Point2(-1, -1);
+        private Point2 mousePosition = new Point2(-1, -1);
 
-        private bool mouseLeftClicked = false;
-        private bool mouseRightClicked = false;
+        private bool inputMoveWasClicked = false;
 
         public bool rayShouldUpdate = false;
         public bool rayWasUpdated = false;
@@ -188,35 +188,36 @@ namespace Ageless {
         void onUpdateFrame(object sender, FrameEventArgs e) {
         	UPS = 1.0 / e.Time;
             keyboard = Keyboard.GetState();
+            mouse = Mouse.GetState();
 
             gameWindow.Title = string.Format("UPS: {0:F}, FPS: {0:F}", UPS, FPS);
 
             loadedMap.update(this);
 
 
-            if (keyboard.IsKeyDown(Key.A)) {
+            if (settings.bindCameraLeft.test(keyboard, mouse)) {
                 camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
                 rayShouldUpdate = true;
             }
-			if (keyboard.IsKeyDown(Key.D)) {
+			if (settings.bindCameraRight.test(keyboard, mouse)) {
                 camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
                 rayShouldUpdate = true;
             }
 
-            if (keyboard.IsKeyDown(Key.W)) {
+            if (settings.bindCameraUp.test(keyboard, mouse)) {
                 camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
                 rayShouldUpdate = true;
             }
-			if (keyboard.IsKeyDown(Key.S)) {
+			if (settings.bindCameraDown.test(keyboard, mouse)) {
                 camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
                 rayShouldUpdate = true;
             }
 
-			if (keyboard.IsKeyDown(Key.Plus)) {
+			if (settings.bindCameraIn.test(keyboard, mouse)) {
 				focusDistance = Math.Max(NEAR, focusDistance / settings.cameraZoomSpeed);
                 rayShouldUpdate = true;
             }
-			if (keyboard.IsKeyDown(Key.Minus)) {
+			if (settings.bindCameraOut.test(keyboard, mouse)) {
 				focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
                 rayShouldUpdate = true;
             }
@@ -388,7 +389,7 @@ namespace Ageless {
             direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
 		}
 
-        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 outLocation, float far = FAR) {
+        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 hit, float far = FAR) {
             
 
             Vector3 p1 = new Vector3();
@@ -439,12 +440,12 @@ namespace Ageless {
             }
 
 			loadedMap.unlockChunks();
-			
-            outLocation = origin + (direction * closest);//new Vector3(close.X, loadedMap.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
+
+            hit = origin + (direction * closest);//new Vector3(close.X, loadedMap.getFloorAtPosition(close.X, close.Y + player.maxSlope, close.Z), close.Z);
             return closest < far;
         }
 
-		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, float far = FAR) {
+		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, out Vector3 hitPoint, float far = FAR) {
 
 			closestProp = null;
 			float close = far;
@@ -470,29 +471,13 @@ namespace Ageless {
 					}
 				}
 			}
-			
-			return close <= far;
+
+            hitPoint = origin + (direction * close);
+
+            return close <= far;
 		}
         void onKeyDown(object sender, KeyboardKeyEventArgs e) {
-            switch (e.Key) {
-                case Key.Escape: {
-                    gameWindow.Exit();
-                    break;
-                }
-				case Key.U: {
-					loadedMap.unloadAllChunks();
-					break;
-				}
-				case Key.Tab: {
-					editor.active = !editor.active;
-					break;
-				}
-            }
-
-			if (editor.active) {
-				editor.onKeyDown(sender, e);
-			}
-			
+            onInputDown(e, null);
         }
 
         void onKeyUp(object sender, KeyboardKeyEventArgs e) {
@@ -500,24 +485,30 @@ namespace Ageless {
         }
 
         void onMouseDown(object sender, MouseButtonEventArgs e) {
-            switch (e.Button) {
-                case MouseButton.Left: {
-                    mouseLeftClicked = true;
-                    rayShouldUpdate = true;
-                    break;
-                }
-                case MouseButton.Right: {
-                    mouseRightClicked = true;
-                    rayShouldUpdate = true;
-                    break;
-                }
-            }
+            onInputDown(null, e);
         }
 
         void onMouseMove(object sender, MouseMoveEventArgs e) {
             mousePosition.X = e.X;
             mousePosition.Y = e.Y;
             rayShouldUpdate = true;
+        }
+
+        void onInputDown(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
+            if (settings.bindMoveToMouse.test(ke, me)) {
+                inputMoveWasClicked = true;
+                rayShouldUpdate = true;
+
+            } else if (settings.bindExit.test(ke, me)) {
+                gameWindow.Exit();
+
+            } else if (settings.editorBindToggle.test(ke, me)) {
+                editor.active = !editor.active;
+
+            }
+            if (editor.active) {
+                editor.onInputDown(ke, me);
+            }
         }
 
         private void heavy() {
@@ -530,23 +521,27 @@ namespace Ageless {
 
                     getRayFromWindowPoint(ref mousePosition, out lookOrigin, out lookDirection);
 
-                    Vector3 terrain;
-                    bool hitTerrain = findTerrainWithRay(ref lookOrigin, ref lookDirection, out terrain);
+                    Vector3 point;
+                    bool hitTerrain = findTerrainWithRay(ref lookOrigin, ref lookDirection, out point);
 
-                    Prop p;
-                    if (findPropWithRay(ref lookOrigin, ref lookDirection, out p, hitTerrain ? (lookOrigin - terrain).Length : FAR)) {
+                    Prop prop;
+                    if (findPropWithRay(ref lookOrigin, ref lookDirection, out prop, out point, hitTerrain ? (lookOrigin - point).Length : FAR)) {
                         //Console.WriteLine("Found prop with model: {0}", p.model.name);
-                        if (p is PropInteractable) {
-                            if ((p as PropInteractable).canHighlight) {
-                                (p as PropInteractable).highlightTimeout = 2;
+                        if (prop is PropInteractable) {
+                            if ((prop as PropInteractable).canHighlight) {
+                                (prop as PropInteractable).highlightTimeout = 2;
                             }
                         }
                     }
 
-                    if (mouseLeftClicked) {
-                        mouseLeftClicked = false;
-                        if (hitTerrain) {
-                            player.target = terrain;
+                    if (inputMoveWasClicked) {
+                        inputMoveWasClicked = false;
+                        if (hitTerrain || prop != null) {
+                            if (editor.active) {
+                                editor.focusPosition = point;
+                            } else {
+                                player.target = point;
+                            }
                         }
                     }
                 }
