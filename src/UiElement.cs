@@ -1,0 +1,4 @@
+﻿namespace Ageless {
+	class UiElement {
+	}
+}

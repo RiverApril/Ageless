@@ -67,6 +67,8 @@ namespace Ageless {
 
         private Thread heavyThread;
 
+		private HeadsUpDisplay hud;
+
 		private Editor editor;
 
         Vector3 lookOrigin, lookDirection;
@@ -74,6 +76,8 @@ namespace Ageless {
         public Vector4 highlightColor = new Vector4(0, 1, 0, .5f);
 
         public Game() {
+
+			hud = new HeadsUpDisplay(this);
 
 			editor = new Editor(this);
 
@@ -168,6 +172,8 @@ namespace Ageless {
             player.position.Z = 64;
 
             player.target = player.position;
+
+			hud.onLoad();
 
         }
 
@@ -301,7 +307,7 @@ namespace Ageless {
             TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One));
         }
 
-        public void setTexture(int texIndex) {
+        public void setTextureIndex(int texIndex) {
             GL.Uniform1(shader.GetUniformID("textureIndex"), texIndex);
         }
 

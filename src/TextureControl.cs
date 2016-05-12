@@ -11,21 +11,23 @@ using System.Collections.Generic;
 namespace Ageless {
     class TextureControl {
 
-        public const int texSize = 256;
-
-        public static int textureID;
+		public static TextureArray arrayProps = new TextureArray(256);
+		public static TextureArray arrayTerrain = new TextureArray(16);
+		public static TextureArray arrayActors = new TextureArray(16);
+		public static TextureAtlas arrayGUI = new Ageless.TextureAtlas(256, 16);
 
         public static Vector2[,] tex16x16Coords = new Vector2[16*16, 4];
 
-        public static List<string> textures = new List<string>();
-
-        public static int texAtlas;
-        public static int texStone;
+        public static List<string> textureArrayNames = new List<string>();
 
         public static void loadTextures() {
 
-            textures.Add("atlas"); texAtlas = textures.Count - 1;
-            textures.Add("stone"); texStone = textures.Count - 1;
+            arrayProps.Add("stone");
+            arrayTerrain.Add("dirt");
+            arrayTerrain.Add("grass");
+            arrayTerrain.Add("water");
+            arrayActors.Add("defaultActor");
+            arrayGUI.Add("defaultActor");
 
             textureID = GL.GenTexture();
             TryGL.Call(() => GL.BindTexture(TextureTarget.Texture2DArray, textureID));
@@ -36,8 +38,8 @@ namespace Ageless {
             TryGL.Call(() => GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder));
             TryGL.Call(() => GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder));
 
-            for (int index = 0; index < textures.Count; index++) {
-                loadTexture(Game.dirTextures + textures[index] + ".png", index);
+            for (int index = 0; index < textureArrayNames.Count; index++) {
+                loadTexture(Game.dirTextures + textureArrayNames[index] + ".png", index);
             }
 
 
@@ -87,6 +89,13 @@ namespace Ageless {
                 }
             } else {
                 Console.WriteLine("{0} does not exist.", path);
+            }
+
+        }
+
+    }
+}
+h);
             }
 
         }

@@ -180,8 +180,7 @@ namespace Ageless {
                 if (ke.Key == key && ke.Modifiers == mod) {
                     return true;
                 }
-            }
-            if (me != null && isMouse) {
+            } else if (me != null && isMouse) {
                 KeyboardState ks = Keyboard.GetState();
                 if (me.Button == button && testModifiers(ks)) {
                     return true;
@@ -191,12 +190,11 @@ namespace Ageless {
         }
 
         public bool test(KeyboardState ks, MouseState ms) {
-            if (ks != null && !isMouse) {
+            if (!isMouse) {
                 if (ks.IsKeyDown(key) && testModifiers(ks)) {
                     return true;
                 }
-            }
-            if (ms != null && isMouse) {
+            } else {
                 if (ms.IsButtonDown(button) && testModifiers(ks)) {
                     return true;
                 }

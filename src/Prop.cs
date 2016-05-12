@@ -64,7 +64,7 @@ namespace Ageless {
         public virtual void draw(Game game) {
             game.matrixModel = modelMatrix;
             game.setModel();
-            game.setTexture(textureIndex);
+            game.setTextureIndex(textureIndex);
             model.drawRender();
         }
 

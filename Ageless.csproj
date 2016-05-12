@@ -66,6 +66,10 @@
     <Compile Include="src\Editor\Editor.cs" />
     <Compile Include="src\Data.cs" />
     <Compile Include="src\Map.cs" />
+    <Compile Include="src\HeadsUpDisplay.cs" />
+    <Compile Include="src\UiElement.cs" />
+    <Compile Include="src\TextureArray.cs" />
+    <Compile Include="src\TextureAtlas.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment.330.glsl" />
