@@ -165,7 +165,9 @@ namespace Ageless {
 		}
 
 		public void saveMap(Map map) {
-
+            foreach (Chunk chunk in map.loadedChunks.Values) {
+                saveChunk(chunk);
+            }
 		}
 
 		public void saveChunk(Chunk chunk) {
@@ -194,9 +196,49 @@ namespace Ageless {
 						bmp.SetPixel(i, j, Color.FromArgb(t, 0, (int)(htmp.heights[i, j] * chunk.resolution)));
 					}
 				}
+
+                bmp.Save(path);
 				
 			}
-		}
+
+            path = Game.dirMaps + chunk.map.name + "/props.";
+            path += chunk.Location.X.ToString();
+            path += ".";
+            path += chunk.Location.Y.ToString();
+            path += ".txt";
+
+            string text = string.Format("# Props for chunk {0}, {0}\n", chunk.Location.X, chunk.Location.Y);
+
+            Dictionary<string, string> modelTex = new Dictionary<string, string>();
+
+            foreach (Prop prop in chunk.props) {
+                if (!modelTex.ContainsKey(prop.model.name) || modelTex[prop.model.name] != TextureControl.textures[prop.textureIndex]) {
+                    modelTex[prop.model.name] = TextureControl.textures[prop.textureIndex];
+                    text += string.Format("\nset tex {0} {0}\n", prop.model.name, modelTex[prop.model.name]);
+                }
+                text += "p";
+                if (prop.solid) {
+                    text += "s";
+                }
+                if (prop is PropInteractable) {
+                    text += "i";
+                }
+                float y = prop.position.Y;
+                string ys = string.Format("{0}", y);
+                foreach (HeightMap htmp in chunk.terrain) {
+                    float h;
+                    if (htmp.getHeightAtPosition(new Vector2d(prop.position.X, prop.position.Z), out h)) {
+                        if (Math.Abs(h) < Math.Abs(y)) {
+                            y = h;
+                            ys = string.Format("{0}{1}{2}", htmp.letter, y<0?"":"+", y);
+                        }
+                    }
+                }
+                text += string.Format(" {0} {1} {2} {3} {4} {5}\n", prop.position.X, ys, prop.position.Z, MathHelper.RadiansToDegrees(prop.rotation.X), MathHelper.RadiansToDegrees(prop.rotation.Y), MathHelper.RadiansToDegrees(prop.rotation.Z));
+
+            }
+
+        }
 		
 	}
 }

@@ -1,4 +1,4 @@
-version 1
+#Props for chunk 0, 0
 
 set tex cutCube stone
 set tex arch stone
