@@ -266,10 +266,6 @@ namespace Ageless {
 
             resetColor();
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2DArray, TextureControl.textureID);
-            GL.Uniform1(shader.GetUniformID("Texture"), 0);
-
             loadedMap.drawActors(this);
             loadedMap.drawChunks(this);
 
@@ -305,6 +301,14 @@ namespace Ageless {
 
         public void additiveBlending() {
             TryGL.Call(() => GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One));
+        }
+
+        public void setTexture(int texID, int index = 0) {
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2DArray, texID);
+            GL.Uniform1(shader.GetUniformID("Texture"), 0);
+
+            setTextureIndex(index);
         }
 
         public void setTextureIndex(int texIndex) {

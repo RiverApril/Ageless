@@ -18,7 +18,7 @@ namespace Ageless {
         public static readonly float GRID_HALF_SIZE = 0.5f;
         public static readonly float GRID_SIZE = GRID_HALF_SIZE*2;
 
-		public float resolution = 0x08;
+		public float resolution = 4;
 
         /*Vector3[] cubePoints = new Vector3[] {
             new Vector3(-0.5f, -0.5f,  0.5f),
@@ -135,9 +135,9 @@ namespace Ageless {
                             n2 = calcNorm(htmp, x + 1, z);
                             n3 = calcNorm(htmp, x, z + 1);
 
-                            addVert(ref p1, ref n1, ref TextureControl.tex16x16Coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-							addVert(ref p3, ref n3, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
-							addVert(ref p2, ref n2, ref TextureControl.tex16x16Coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
+							addVert(ref p3, ref n3, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
+							addVert(ref p2, ref n2, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
 
 
                             p1.X = x + GRID_HALF_SIZE + offset.X - 1;   p1.Y = htmp.heights[x + 1, z + 1] + offset.Y;   p1.Z = z + GRID_HALF_SIZE + offset.Z - 1;
@@ -153,7 +153,7 @@ namespace Ageless {
 
                             n1 = calcNorm(htmp, x + 1, z + 1);
 
-                            addVert(ref p1, ref n1, ref TextureControl.tex16x16Coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
+                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
 							addInd(ref nextI, -2);
 							addInd(ref nextI, -3);
 							//tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);

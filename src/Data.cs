@@ -151,7 +151,7 @@ namespace Ageless {
 						p.position = new Vector3(x + (Chunk.CHUNK_SIZE_X * chunk.Location.X), y, z + (Chunk.CHUNK_SIZE_Z * chunk.Location.Y));
 						p.rotation = new Vector3(xr, yr, zr);
 						p.setupModelMatrix();
-						p.textureIndex = TextureControl.textures.IndexOf(modelTex[p.model.name]);
+						p.textureIndex = TextureControl.arrayProps.names.IndexOf(modelTex[p.model.name]);
 						//p.setupFrame(); after model loads
 						chunk.props.Add(p);
 
@@ -220,8 +220,8 @@ namespace Ageless {
                 Dictionary<string, string> modelTex = new Dictionary<string, string>();
 
                 foreach (Prop prop in chunk.props) {
-                    if (!modelTex.ContainsKey(prop.model.name) || modelTex[prop.model.name] != TextureControl.textures[prop.textureIndex]) {
-                        modelTex[prop.model.name] = TextureControl.textures[prop.textureIndex];
+                    if (!modelTex.ContainsKey(prop.model.name) || modelTex[prop.model.name] != TextureControl.arrayProps.names[prop.textureIndex]) {
+                        modelTex[prop.model.name] = TextureControl.arrayProps.names[prop.textureIndex];
                         text += string.Format("{2}set tex {0} {1}{2}{2}", prop.model.name, modelTex[prop.model.name], Environment.NewLine);
                     }
                     text += "p";

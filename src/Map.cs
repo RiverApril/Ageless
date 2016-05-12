@@ -130,17 +130,24 @@ namespace Ageless {
 			game.matrixModel = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
 			game.setModel();
 
+            game.setTexture(TextureControl.arrayTerrain.id);
+
             foreach (Chunk chunk in loadedChunks.Values) {
                 chunk.drawRender();
             }
 
-			foreach (Chunk chunk in loadedChunks.Values) {
+            game.setTexture(TextureControl.arrayProps.id);
+
+            foreach (Chunk chunk in loadedChunks.Values) {
 				chunk.drawProps(game);
 			}
         }
 
 		public void drawActors(Game game) {
-			foreach (Actor actor in loadedActors.Values){
+
+            game.setTexture(TextureControl.arrayActors.id);
+
+            foreach (Actor actor in loadedActors.Values){
                 actor.draw(game);
 			}
 		}
