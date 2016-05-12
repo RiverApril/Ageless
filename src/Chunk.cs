@@ -20,17 +20,6 @@ namespace Ageless {
 
 		public float resolution = 4;
 
-        /*Vector3[] cubePoints = new Vector3[] {
-            new Vector3(-0.5f, -0.5f,  0.5f),
-            new Vector3( 0.5f, -0.5f,  0.5f),
-            new Vector3( 0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f),
-            new Vector3( 0.5f, -0.5f, -0.5f),
-            new Vector3( 0.5f,  0.5f, -0.5f),
-            new Vector3(-0.5f,  0.5f, -0.5f),
-        };*/
-
         public Map map;
 
         public Point2 Location;
