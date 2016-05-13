@@ -379,7 +379,7 @@ namespace Ageless {
             direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
 		}
 
-        bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 hit, float far = FAR) {
+        public bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 hit, float far = FAR) {
             
 
             Vector3 p1 = new Vector3();
@@ -435,27 +435,22 @@ namespace Ageless {
             return closest < far;
         }
 
-		bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, out Vector3 hitPoint, float far = FAR) {
+		public bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, out Vector3 hitPoint, float far = FAR) {
 
 			closestProp = null;
 			float close = far;
 		
 			foreach (Chunk c in loadedMap.loadedChunks.Values) {
 				foreach (Prop p in c.props) {
-					if (intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
-                        bool hit = false;
+					if (p.frameMade && intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
                         float d = FAR;
 
                         for (int i = 0; i < p.model.ind.Count; i+=3) {
                             if (intercectTriangleRay(p.transformedPoints[(int)p.model.ind[i]], p.transformedPoints[(int)p.model.ind[i+1]], p.transformedPoints[(int)p.model.ind[i+2]], ref origin, ref direction, out d)) {
-                                hit = true;
-                                break;
-                            }
-                        }
-                        if (hit) {
-                            if (d <= close) {
-                                close = d;
-                                closestProp = p;
+								if (d <= close) {
+									close = d;
+									closestProp = p;
+								}
                             }
                         }
 					}
@@ -464,7 +459,7 @@ namespace Ageless {
 
             hitPoint = origin + (direction * close);
 
-            return close <= far;
+            return close < far;
 		}
         void onKeyDown(object sender, KeyboardKeyEventArgs e) {
             onInputDown(e, null);

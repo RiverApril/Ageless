@@ -53,12 +53,15 @@ namespace Ageless {
 
 					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
 
-					if (ch >= nh || (nh - ch) / diff.Length <= maxSlope) {
+					Vector3 direction = new Vector3(diff.X, nh - position.Y, diff.Y);
+					float far = direction.Length;
+					direction.Normalize();
+					Prop prop; Vector3 hit;
+
+					if(!game.findPropWithRay(ref position, ref direction, out prop, out hit, far)) {
 						position.X += diff.X;
 						position.Z += diff.Y;
-                    }else {
-                        Console.WriteLine();
-                    }
+					}
 
 				} else {
 					nh = ch;

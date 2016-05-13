@@ -192,7 +192,6 @@ namespace Ageless {
                     for (int i = 0; i < prop.model.ind.Count; i += 3) {
                         if (Game.intercectTriangleRay(prop.transformedPoints[(int)prop.model.ind[i]], prop.transformedPoints[(int)prop.model.ind[i + 1]], prop.transformedPoints[(int)prop.model.ind[i + 2]], ref origin, ref direction, out d)) {
                             heights.Add((origin + (direction * d)).Y);
-                            break;
                         }
                     }
                 }
