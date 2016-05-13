@@ -26,7 +26,6 @@ namespace Ageless {
         public void draw(Game game) {
             game.matrixModel = Matrix4.CreateTranslation(position);
             game.setModel();
-            game.setTextureIndex(0);
 
             drawRender();
         }

@@ -40,9 +40,9 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			addVert(ref p1, ref normal, ref TextureControl.arrayActors.coords[0], ref vert, ref ind, ref nextI);
-			addVert(ref p3, ref normal, ref TextureControl.arrayActors.coords[2], ref vert, ref ind, ref nextI);
-			addVert(ref p2, ref normal, ref TextureControl.arrayActors.coords[1], ref vert, ref ind, ref nextI);
+			addVert(ref p1, ref normal, ref TextureControl.arrayActors.coords[UVIndex, 0, 0, 0], ref vert, ref ind, ref nextI);
+			addVert(ref p3, ref normal, ref TextureControl.arrayActors.coords[UVIndex, 0, 0, 2], ref vert, ref ind, ref nextI);
+			addVert(ref p2, ref normal, ref TextureControl.arrayActors.coords[UVIndex, 0, 0, 1], ref vert, ref ind, ref nextI);
 
 
 
@@ -57,7 +57,7 @@ namespace Ageless {
 			normal.Y = (u.Z * v.X) - (u.X * v.Z);
 			normal.Z = (u.X * v.Y) - (u.Y * v.X);
 
-			addVert(ref p1, ref normal, ref TextureControl.arrayActors.coords[3], ref vert, ref ind, ref nextI);
+			addVert(ref p1, ref normal, ref TextureControl.arrayActors.coords[UVIndex, 0, 0, 3], ref vert, ref ind, ref nextI);
 			addInd(ref nextI, -2);
 			addInd(ref nextI, -3);
 			//tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[UVIndex, 2], ref vert, ref ind, ref nextI);

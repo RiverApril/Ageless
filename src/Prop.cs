@@ -55,7 +55,7 @@ namespace Ageless {
         }
 
         public virtual void update(Game game) {
-            if (!frameMade && model.vert != null) {
+            if (!frameMade && model.compileState == COMP_STATUS.READY_TO_RENDER) {
                 setupFrame(ref model.vert);
             }
         }
@@ -64,7 +64,7 @@ namespace Ageless {
         public virtual void draw(Game game) {
             game.matrixModel = modelMatrix;
             game.setModel();
-            game.setTextureIndex(textureIndex);
+            game.setTextureIndexOffset(textureIndex);
             model.drawRender();
         }
 

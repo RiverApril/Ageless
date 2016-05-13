@@ -158,7 +158,7 @@ namespace Ageless {
             x += 0.5f;
             z += 0.5f;
             Point2 c = new Point2((int)Math.Floor(x / Chunk.CHUNK_SIZE_X), (int)Math.Floor(z / Chunk.CHUNK_SIZE_Z));
-            Vector2d p = new Vector2d(x - (c.X * Chunk.CHUNK_SIZE_X), z - (c.Y * Chunk.CHUNK_SIZE_Z));
+            Vector2 p = new Vector2(x - (c.X * Chunk.CHUNK_SIZE_X), z - (c.Y * Chunk.CHUNK_SIZE_Z));
 
             //Console.WriteLine("Chunk = {0}, {1}", c.X, c.Y);
             //Console.WriteLine("Pos = {0}, {1}", p.X, p.Y);

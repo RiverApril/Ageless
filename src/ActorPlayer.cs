@@ -41,21 +41,25 @@ namespace Ageless {
 			if (ch >= 0) { // Wait until chunks are loaded
 				float nh;
 
-				if (diff.Length > movementSpeed) {
-					/*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
+				if (diff.Length > 0) {
+                    /*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
 
 					diff.X = (float)(Math.Cos(angle) * movementSpeed);
 					diff.Y = (float)(Math.Sin(angle) * movementSpeed);*/
-
-					diff.Normalize();
-					diff *= movementSpeed;
+                    if (diff.Length > movementSpeed) {
+                        diff.Normalize();
+                        diff *= movementSpeed;
+                    }
 
 					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
 
-					if ((nh - ch) / diff.Length <= maxSlope) {
+					if (ch >= nh || (nh - ch) / diff.Length <= maxSlope) {
 						position.X += diff.X;
 						position.Z += diff.Y;
-					}
+                    }else {
+                        Console.WriteLine();
+                    }
+
 				} else {
 					nh = ch;
 				}

@@ -108,18 +108,7 @@ namespace Ageless {
             gameWindow.VSync = VSyncMode.On;
 
             Console.WriteLine("OpenGL version: {0}", GL.GetString(StringName.Version));
-            //Console.WriteLine("GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
-            string glslVersionS = GL.GetString(StringName.ShadingLanguageVersion);
-            if (glslVersionS.Contains(" ")) {
-                glslVersionS = glslVersionS.Substring(0, glslVersionS.IndexOf(" ", StringComparison.CurrentCulture));
-            }
-            int glslVersion = int.Parse(glslVersionS.Replace(".", ""));
-
-            Version version = new Version(GL.GetString(StringName.Version).Substring(0, 3));
-            Version target = new Version(2, 0);
-            if (version < target) {
-                throw new NotSupportedException(String.Format("OpenGL {0} is required. Current version is {1}.", target, version));
-            }
+            Console.WriteLine("Current GLSL version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
 
             TryGL.Call(() => GL.ClearColor(0.2f, 0.0f, 0.2f, 1.0f));
 
@@ -137,17 +126,8 @@ namespace Ageless {
 	
 
             shader = new ShaderProgram();
-            Console.WriteLine("Current GLSL version: {0}", glslVersion);
 
-            while (!File.Exists(dirShaders + "vertex." + glslVersion + ".glsl")) {
-                glslVersion--;
-                if (glslVersion <= 0) {
-                    Console.WriteLine("Shader with required version not found.");
-                    throw new NotSupportedException(String.Format("Please create shader files with version {0} or lower.", GL.GetString(StringName.ShadingLanguageVersion)));
-                }
-            }
-            Console.WriteLine("Using shader with GLSL version: {0}", glslVersion);
-            shader.LoadAndCompileProrgam(dirShaders + "vertex." + glslVersion + ".glsl", dirShaders + "fragment." + glslVersion + ".glsl");
+            shader.LoadAndCompileProrgam(dirShaders + "world.vert.glsl", dirShaders + "world.frag.glsl");
 
             TextureControl.loadTextures();
 
@@ -308,14 +288,14 @@ namespace Ageless {
             GL.BindTexture(TextureTarget.Texture2DArray, texID);
             GL.Uniform1(shader.GetUniformID("Texture"), 0);
 
-            setTextureIndex(index);
+            setTextureIndexOffset(index);
         }
 
-        public void setTextureIndex(int texIndex) {
-            GL.Uniform1(shader.GetUniformID("textureIndex"), texIndex);
+        public void setTextureIndexOffset(int texIndexOffset) {
+            GL.Uniform1(shader.GetUniformID("textureIndexOffset"), texIndexOffset);
         }
 
-        bool intercectAABBRay(Vector3 min, Vector3 max, ref Vector3 origin, ref Vector3 direction) {
+        public static bool intercectAABBRay(Vector3 min, Vector3 max, ref Vector3 origin, ref Vector3 direction) {
             float tmin = 0, tmax = 0;
             for (int a = 0; a < 3; a++) {
                 float invD = 1.0f / direction[a];
@@ -334,7 +314,7 @@ namespace Ageless {
             return true;
         }
 
-        bool intercectTriangleRay(Vector3 V1, Vector3 V2, Vector3 V3, ref Vector3 O, ref Vector3 D, out float outt) {
+        public static bool intercectTriangleRay(Vector3 V1, Vector3 V2, Vector3 V3, ref Vector3 O, ref Vector3 D, out float outt) {
             Vector3 e1, e2;  //Edge1, Edge2
             Vector3 P, Q, T;
             float det, inv_det, u, v;

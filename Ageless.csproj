@@ -69,15 +69,12 @@
     <Compile Include="src\HeadsUpDisplay.cs" />
     <Compile Include="src\UiElement.cs" />
     <Compile Include="src\TextureArray.cs" />
-    <Compile Include="src\TextureAtlas.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment.330.glsl" />
-    <None Include="shaders\vertex.120.glsl" />
+    <None Include="shaders\world.frag.glsl" />
+    <None Include="shaders\world.vert.glsl" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="src\Editor\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,7 +7,7 @@ namespace Ageless {
         
         public float[,] heights = new float[Chunk.CHUNK_SIZE_X + 2, Chunk.CHUNK_SIZE_Z + 2];
 
-        public byte[,] tiles = new byte[Chunk.CHUNK_SIZE_X, Chunk.CHUNK_SIZE_Z];
+        public byte[,] tiles = new byte[Chunk.CHUNK_SIZE_X + 2, Chunk.CHUNK_SIZE_Z + 2];
 
 		public float min, max;
 
@@ -28,7 +28,7 @@ namespace Ageless {
             return tiles[x, z];
         }
 
-		public bool getHeightAtPosition(Vector2d p, out float height) {
+		public bool getHeightAtPosition(Vector2 p, out float height) {
             int x1 = (int)Math.Floor(p.X);
             int x2 = (int)Math.Floor(p.X + 1);
             int y1 = (int)Math.Floor(p.Y);
@@ -36,7 +36,7 @@ namespace Ageless {
             //f1-f2
             //| / |
             //f3-f4
-            if (getTile(x1, y1).solid) {
+            if (getTile(x1, y1).renderType != RenderType.None) {
                 float f1 = heights[x1, y1];
                 float f2 = heights[x2, y1];
                 float f3 = heights[x1, y2];

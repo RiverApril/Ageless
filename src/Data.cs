@@ -67,9 +67,7 @@ namespace Ageless {
 										for (int x = 0; x < Chunk.CHUNK_SIZE_X + 2; x++) {
 											for (int z = 0; z < Chunk.CHUNK_SIZE_Z + 2; z++) {
 												Color c = bmp.GetPixel(x, z);
-												if (x < Chunk.CHUNK_SIZE_X && z < Chunk.CHUNK_SIZE_Z) {
-													htmp.tiles[x, z] = c.R;
-												}
+												htmp.tiles[x, z] = c.R;
 												htmp.heights[x, z] = c.B / chunk.resolution;
 												htmp.min = Math.Min(htmp.heights[x, z], htmp.min);
 												htmp.max = Math.Max(htmp.heights[x, z], htmp.max);
@@ -124,7 +122,7 @@ namespace Ageless {
 						foreach (HeightMap htmp in chunk.terrain) {
 							if (htmp.letter == split[3][0]) {
 
-								htmp.getHeightAtPosition(new Vector2d(x, z), out y);
+								htmp.getHeightAtPosition(new Vector2(x, z), out y);
 
 								if (split[3].Substring(1).Length > 0) {
 									y += float.Parse(split[3].Substring(1));
@@ -196,9 +194,7 @@ namespace Ageless {
 				for (int i = 0; i < Chunk.CHUNK_SIZE_X + 2; i++) {
 					for (int j = 0; j < Chunk.CHUNK_SIZE_Z + 2; j++) {
 						int t = 0;
-						if (i < Chunk.CHUNK_SIZE_X && j < Chunk.CHUNK_SIZE_Z) {
-							t = htmp.tiles[i, j];
-						}
+						t = htmp.tiles[i, j];
 						bmp.SetPixel(i, j, Color.FromArgb(t, 0, (int)(htmp.heights[i, j] * chunk.resolution)));
 					}
 				}
@@ -235,7 +231,7 @@ namespace Ageless {
                     string ys = string.Format("{0}", y);
                     foreach (HeightMap htmp in chunk.terrain) {
                         float h;
-                        if (htmp.getHeightAtPosition(new Vector2d(prop.position.X, prop.position.Z), out h)) {
+                        if (htmp.getHeightAtPosition(new Vector2(prop.position.X, prop.position.Z), out h)) {
                             if (Math.Abs(h) <= Math.Abs(y)) {
                                 y = prop.position.Y - h;
                                 if (y == 0) {

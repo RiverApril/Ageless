@@ -44,7 +44,7 @@ namespace Ageless {
 
         abstract public void makeRender();
 
-		public void addVert(ref Vector3 p, ref Vector3 normal, ref Vector2 UV, ref List<Vertex> vert, ref List<uint> ind, ref uint nextI) {
+		public void addVert(ref Vector3 p, ref Vector3 normal, ref Vector3 UV, ref List<Vertex> vert, ref List<uint> ind, ref uint nextI) {
 			Vertex v = new Vertex(p, UV, normal);
 			vert.Add(v);
 			ind.Add(nextI);
@@ -138,7 +138,7 @@ namespace Ageless {
                     TryGL.Call(() => GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToPosition));
 
                     TryGL.Call(() => GL.EnableVertexAttribArray(1)); //UV
-                    TryGL.Call(() => GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV));
+                    TryGL.Call(() => GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToUV));
 
                     TryGL.Call(() => GL.EnableVertexAttribArray(2)); //Normals
                     TryGL.Call(() => GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.StrideToEnd, Vertex.StrideToNormal));

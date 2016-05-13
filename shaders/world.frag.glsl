@@ -10,7 +10,7 @@ uniform mat3 NormalMatrix;
 
 
 uniform sampler2DArray Texture;
-uniform int textureIndex;
+uniform int textureIndexOffset;
 
 uniform bool replaceColor;
 uniform vec4 color;
@@ -19,7 +19,7 @@ uniform Light light;
 
 
 in vec3 transferPosition;
-in vec2 transferUV;
+in vec3 transferUV;
 in vec3 transferNormal;
 
 out vec4 fragColor;
@@ -34,7 +34,7 @@ void main() {
 
 	float brightness = max(dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)), 0.2);
 
-	vec4 surfaceColor = texture(Texture, vec3(transferUV, textureIndex));
+	vec4 surfaceColor = texture(Texture, transferUV+vec3(0, 0, textureIndexOffset));
 
 	fragColor = replaceColor ? color : vec4(brightness * light.color * surfaceColor.rgb * color.rgb, surfaceColor.a * color.a);
 }

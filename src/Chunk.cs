@@ -92,7 +92,7 @@ namespace Ageless {
             Tile tile;
             Vector3 n1 = new Vector3(), n2 = new Vector3(), n3 = new Vector3();
             Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
-            //Vector3 u = new Vector3(), v = new Vector3();
+            Vector3 t = new Vector3();
 
             int htmpi = 0;
 
@@ -105,7 +105,7 @@ namespace Ageless {
                 for (int x = 1; x <= CHUNK_SIZE_X; x++) {
                     for (int z = 1; z <= CHUNK_SIZE_Z; z++) {
 
-                        tile = htmp.getTile(x - 1, z - 1);
+                        tile = htmp.getTile(x, z);
 
                         if (tile.renderType == RenderType.Terrain) {
 							
@@ -124,14 +124,14 @@ namespace Ageless {
                             n2 = calcNorm(htmp, x + 1, z);
                             n3 = calcNorm(htmp, x, z + 1);
 
-                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 0], ref vert, ref ind, ref nextI);
-							addVert(ref p3, ref n3, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
-							addVert(ref p2, ref n2, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 1], ref vert, ref ind, ref nextI);
+                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, x % TextureControl.arrayTerrain.scale, z % TextureControl.arrayTerrain.scale, 0], ref vert, ref ind, ref nextI);
+							addVert(ref p3, ref n3, ref TextureControl.arrayTerrain.coords[tile.UVIndex, x % TextureControl.arrayTerrain.scale, z % TextureControl.arrayTerrain.scale, 2], ref vert, ref ind, ref nextI);
+							addVert(ref p2, ref n2, ref TextureControl.arrayTerrain.coords[tile.UVIndex, x % TextureControl.arrayTerrain.scale, z % TextureControl.arrayTerrain.scale, 1], ref vert, ref ind, ref nextI);
 
 
                             p1.X = x + GRID_HALF_SIZE + offset.X - 1;   p1.Y = htmp.heights[x + 1, z + 1] + offset.Y;   p1.Z = z + GRID_HALF_SIZE + offset.Z - 1;
-							p2.X = x - GRID_HALF_SIZE + offset.X - 1;   p2.Y = htmp.heights[x, z + 1] + offset.Y;       p2.Z = z + GRID_HALF_SIZE + offset.Z - 1;
-							p3.X = x + GRID_HALF_SIZE + offset.X - 1;   p3.Y = htmp.heights[x + 1, z] + offset.Y;       p3.Z = z - GRID_HALF_SIZE + offset.Z - 1;
+							//p2.X = x - GRID_HALF_SIZE + offset.X - 1;   p2.Y = htmp.heights[x, z + 1] + offset.Y;       p2.Z = z + GRID_HALF_SIZE + offset.Z - 1;
+							//p3.X = x + GRID_HALF_SIZE + offset.X - 1;   p3.Y = htmp.heights[x + 1, z] + offset.Y;       p3.Z = z - GRID_HALF_SIZE + offset.Z - 1;
 
                             //u.X = p2.X - p1.X;   u.Y = p2.Y - p1.Y;   u.Z = p2.Z - p1.Z;
                             //v.X = p3.X - p1.X;   v.Y = p3.Y - p1.Y;   v.Z = p3.Z - p1.Z;
@@ -142,7 +142,7 @@ namespace Ageless {
 
                             n1 = calcNorm(htmp, x + 1, z + 1);
 
-                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, 3], ref vert, ref ind, ref nextI);
+                            addVert(ref p1, ref n1, ref TextureControl.arrayTerrain.coords[tile.UVIndex, x % TextureControl.arrayTerrain.scale, z % TextureControl.arrayTerrain.scale, 3], ref vert, ref ind, ref nextI);
 							addInd(ref nextI, -2);
 							addInd(ref nextI, -3);
 							//tryToAdd(ref p2, ref normal, ref TextureControl.tex16x16Coords[tile.UVIndex, 2], ref vert, ref ind, ref nextI);
@@ -172,7 +172,7 @@ namespace Ageless {
             }
         }
 
-		public float getFloorAtPosition(Vector2d p, float y) {
+		public float getFloorAtPosition(Vector2 p, float y) {
             List<float> heights = new List<float>();
 
             foreach (HeightMap htmp in terrain) {
@@ -181,8 +181,31 @@ namespace Ageless {
 					heights.Add(o);
 				}
             }
+            
+            Vector3 origin = new Vector3(p.X, Game.FAR, p.Y);
+            Vector3 direction = new Vector3(0, -1, 0);
+
+            foreach (Prop prop in props) {
+                if (prop.solid && Game.intercectAABBRay(prop.frameMin, prop.frameMax, ref origin, ref direction)) {
+                    float d = 0;
+
+                    for (int i = 0; i < prop.model.ind.Count; i += 3) {
+                        if (Game.intercectTriangleRay(prop.transformedPoints[(int)prop.model.ind[i]], prop.transformedPoints[(int)prop.model.ind[i + 1]], prop.transformedPoints[(int)prop.model.ind[i + 2]], ref origin, ref direction, out d)) {
+                            heights.Add((origin + (direction * d)).Y);
+                            break;
+                        }
+                    }
+                }
+            }
 
             float h = 0;
+
+            if (heights.Count >= 2) {
+                Console.WriteLine("Height: {0}", y);
+                foreach (float f in heights) {
+                    Console.WriteLine(f);
+                }
+            }
 
             foreach (float f in heights) {
                 if (f > h && f <= y) {

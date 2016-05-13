@@ -9,4 +9,8 @@ psi cutCube 1.4 a+0.7999992 4.4 20 30 50
 
 set tex arch stone
 
-psi arch 20 a 20 0 90 0
+ps arch 20 a 20 0 90 0
+
+set tex cabin stone
+
+ps cabin 30 a 40 0 45 0

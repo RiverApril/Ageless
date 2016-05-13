@@ -3,11 +3,11 @@
 uniform mat4 ViewMatrix;
 
 layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in vec2 vertexUV;
+layout(location = 1) in vec3 vertexUV;
 layout(location = 2) in vec3 vertexNormal;
 
 out vec3 transferPosition;
-out vec2 transferUV;
+out vec3 transferUV;
 out vec3 transferNormal;
 
 

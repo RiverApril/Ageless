@@ -11,10 +11,10 @@ using System.Collections.Generic;
 namespace Ageless {
     class TextureControl {
 
-		public static TextureArray arrayProps = new TextureArray(256, "props");
-		public static TextureArray arrayActors = new TextureArray(16, "actors");
-        public static TextureAtlas arrayTerrain = new TextureAtlas(256, 16, "terrain");
-        public static TextureAtlas arrayGUI = new TextureAtlas(256, 16, "gui");
+		public static TextureArray arrayProps = new TextureArray(256, "props", 4, false);
+		public static TextureArray arrayActors = new TextureArray(16, "actors", 1, false);
+        public static TextureArray arrayTerrain = new TextureArray(256, "terrain", 16, true);
+        public static TextureArray arrayGUI = new TextureArray(256, "gui", 16, true);
 
         public static List<string> textureArrayNames = new List<string>();
 
@@ -25,8 +25,7 @@ namespace Ageless {
 
             arrayTerrain.add("grass");
             arrayTerrain.add("dirt");
-            arrayTerrain.add("water");
-            arrayTerrain.add("cobble");
+
             arrayGUI.add("hud");
 
             arrayProps.make();
