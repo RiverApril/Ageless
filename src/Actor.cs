@@ -13,7 +13,7 @@ namespace Ageless {
 		public uint ID;
 
         protected float movementSpeed = 1.0f / 2.0f;
-        public float maxSlope = 1.0f;
+        public float maxHeightChange = 2.0f;
 
         public Vector3 position;
 

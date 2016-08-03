@@ -21,6 +21,7 @@ namespace Ageless {
         public static void loadTextures() {
 
             arrayProps.add("stone");
+            arrayProps.add("wood");
             arrayActors.add("default");
 
             arrayTerrain.add("grass");

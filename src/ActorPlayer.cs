@@ -51,17 +51,20 @@ namespace Ageless {
                         diff *= movementSpeed;
                     }
 
-					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxSlope, position.Z + diff.Y);
+					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxHeightChange, position.Z + diff.Y);
 
 					Vector3 direction = new Vector3(diff.X, nh - position.Y, diff.Y);
 					float far = direction.Length;
 					direction.Normalize();
-					Prop prop; Vector3 hit;
+                    Vector3 hp = new Vector3(position.X, position.Y + maxHeightChange, position.Z);
+                    Prop prop; Vector3 hit;
 
-					if(!game.findPropWithRay(ref position, ref direction, out prop, out hit, far)) {
+                    bool isHit = game.findPropWithRay(ref hp, ref direction, out prop, out hit, far);
+
+                    if (!isHit) {
 						position.X += diff.X;
 						position.Z += diff.Y;
-					}
+                    }
 
 				} else {
 					nh = ch;

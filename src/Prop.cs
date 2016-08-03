@@ -24,6 +24,9 @@ namespace Ageless {
 
         public int textureIndex;
 
+        public bool canHighlight = true;
+        public int highlightTimeout = 0;
+
         public Prop(Model model, bool solid) {
 			this.model = model;
 			this.solid = solid;
@@ -70,7 +73,24 @@ namespace Ageless {
 
 
         public virtual void secondaryDraw(Game game) {
+            if (highlightTimeout > 0) {
 
+                GL.Disable(EnableCap.DepthTest);
+                game.setColor(game.highlightColor, true);
+                game.additiveBlending();
+
+                game.matrixModel = modelMatrix;
+                game.setModel();
+                model.drawRender();
+
+                GL.Enable(EnableCap.DepthTest);
+                game.resetColor();
+                game.resetBlending();
+
+                if (game.rayWasUpdated) {
+                    highlightTimeout--;
+                }
+            }
         }
 
 

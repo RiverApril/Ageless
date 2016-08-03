@@ -13,4 +13,17 @@ ps arch 20 a 20 0 90 0
 
 set tex cabin stone
 
-ps cabin 30 a 40 0 45 0
+ps cabin 63.19803 b+11.54951 8.964706 0 101.0001 0
+
+set tex loop stone
+
+ps loop 0 38 70 0 0 0
+ps loop 10 36.75 70 0 0 0
+ps loop 20 36.75 70 0 0 0
+
+set tex barrel wood
+
+psi barrel 54.46512 b+11.82378 5.204858 0 0 0
+psi barrel 54.13634 b+11.50568 7.477262 0 0 0
+psi barrel 56.86662 a+0.03334427 8.877943 0 0 0
+psi barrel 57.20267 b+11.75 5.707285 0 0 0

@@ -71,7 +71,7 @@ namespace Ageless {
 
 		private Editor editor;
 
-        Vector3 lookOrigin, lookDirection;
+        public Vector3 lookOrigin, lookDirection;
 
         public Vector4 highlightColor = new Vector4(0, 1, 0, .5f);
 
@@ -216,6 +216,7 @@ namespace Ageless {
 
 			if (editor.active) {
 				focusPos = editor.focusPosition;
+                editor.update();
 			} else {
 				focusPos = player.position;
 			}

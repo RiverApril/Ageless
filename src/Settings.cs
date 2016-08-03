@@ -170,14 +170,15 @@ namespace Ageless {
         }
 
         public bool testModifiers(KeyboardState ks) {
-            return ((ks.IsKeyDown(Key.ShiftLeft) || ks.IsKeyDown(Key.ShiftRight)) == ((mod & KeyModifiers.Shift) != 0)) &&
+            return (((ks.IsKeyDown(Key.ShiftLeft) || ks.IsKeyDown(Key.ShiftRight)) == ((mod & KeyModifiers.Shift) != 0)) &&
                     ((ks.IsKeyDown(Key.ControlLeft) || ks.IsKeyDown(Key.ControlRight)) == ((mod & KeyModifiers.Control) != 0)) &&
-                    ((ks.IsKeyDown(Key.AltLeft) || ks.IsKeyDown(Key.AltRight)) == ((mod & KeyModifiers.Alt) != 0));
+                    ((ks.IsKeyDown(Key.AltLeft) || ks.IsKeyDown(Key.AltRight)) == ((mod & KeyModifiers.Alt) != 0))
+                    ) || (mod == 0);
         }
 
         public bool test(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
             if (ke != null && !isMouse) {
-                if (ke.Key == key && ke.Modifiers == mod) {
+                if (ke.Key == key && (ke.Modifiers == mod || mod == 0)) {
                     return true;
                 }
             } else if (me != null && isMouse) {
@@ -259,6 +260,16 @@ namespace Ageless {
         public readonly SettingKey editorBindFocusOnPlayer = new SettingKey("EDITOR Focus on Player", Key.P, 0);
         public readonly SettingKey editorBindSave = new SettingKey("EDITOR Save", Key.S, KeyModifiers.Control);
         public readonly SettingKey editorBindLoad = new SettingKey("EDITOR Load", Key.L, KeyModifiers.Control);
+        public readonly SettingKey editorBindSelectProp = new SettingKey("EDITOR Select Prop", MouseButton.Right, 0);
+
+        public readonly SettingKey editorBindPropMoveForward = new SettingKey("EDITOR Prop Move Forward", Key.I, 0);
+        public readonly SettingKey editorBindPropMoveBackward = new SettingKey("EDITOR Prop Move Backward", Key.K, 0);
+        public readonly SettingKey editorBindPropMoveLeft = new SettingKey("EDITOR Prop Move Forward", Key.J, 0);
+        public readonly SettingKey editorBindPropMoveRight = new SettingKey("EDITOR Prop Move Forward", Key.L, 0);
+        public readonly SettingKey editorBindPropMoveUp = new SettingKey("EDITOR Prop Move Forward", Key.O, 0);
+        public readonly SettingKey editorBindPropMoveDown = new SettingKey("EDITOR Prop Move Forward", Key.U, 0);
+        public readonly SettingKey editorBindPropReset = new SettingKey("EDITOR Prop Reset", Key.Y, 0);
+        public readonly SettingKey editorBindPropMoveToMouse = new SettingKey("EDITOR Prop Move To Mouse", Key.H, 0);
 
 
         private string fileName;
