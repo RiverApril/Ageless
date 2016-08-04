@@ -30,6 +30,8 @@ namespace Ageless {
 
         double FPS, UPS;
 
+		double elapsedTime = 0;
+
         public ShaderProgram shader;
 
         public Matrix4 matrixProjection;
@@ -259,9 +261,11 @@ namespace Ageless {
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
-            lightPosition.X = - 20000;
-            lightPosition.Y = - 80000;
-            lightPosition.Z = - 20000;
+			elapsedTime += e.Time;
+
+			lightPosition.X = (float)Math.Sin(elapsedTime) * 80000;
+            lightPosition.Y = -80000;
+			lightPosition.Z = (float)Math.Cos(elapsedTime) * 80000;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
