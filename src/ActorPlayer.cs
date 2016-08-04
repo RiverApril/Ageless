@@ -48,13 +48,14 @@ namespace Ageless {
 					diff.Y = (float)(Math.Sin(angle) * movementSpeed);*/
                     if (diff.Length > movementSpeed) {
                         diff.Normalize();
-                        diff *= movementSpeed;
                     }
+                    Vector2 boundry = diff * radius;
+                    diff *= movementSpeed;
 
-					nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxHeightChange, position.Z + diff.Y);
+                    nh = game.loadedMap.getFloorAtPosition(position.X + diff.X, position.Y + maxHeightChange, position.Z + diff.Y);
 
-					Vector3 direction = new Vector3(diff.X, nh - position.Y, diff.Y);
-					float far = direction.Length;
+					Vector3 direction = new Vector3(boundry.X, nh - position.Y, boundry.Y);
+                    float far = direction.Length;
 					direction.Normalize();
                     Vector3 hp = new Vector3(position.X, position.Y + maxHeightChange, position.Z);
                     Prop prop; Vector3 hit;

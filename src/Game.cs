@@ -207,6 +207,40 @@ namespace Ageless {
 				focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
                 rayShouldUpdate = true;
             }
+            if (settings.bindConsole.test(keyboard, mouse)) {
+                bool inConsole = true;
+                Console.WriteLine("Console Active");
+                while (inConsole) {
+                    Console.Write(">> ");
+                    string line = Console.ReadLine();
+                    if (line.Equals("`")) {
+                        inConsole = false;
+                    }else if (line.StartsWith("p")) {
+                        string[] words = line.Split(' ');
+                        if (words.Length == 3) {
+                            string modelName = words[1];
+                            
+                            Prop p;
+                            if (words[0].Contains("i")) {
+                                p = new PropInteractable(ModelControl.getModel(modelName), words[0].Contains("s"));
+                            } else {
+                                p = new Prop(ModelControl.getModel(modelName), words[0].Contains("s"));
+                            }
+
+                            Vector3 hit; Chunk chunk;
+
+                            if (findTerrainWithRay(ref lookOrigin, ref lookDirection, out hit, out chunk)) {
+                                p.position = hit;
+                                p.setupModelMatrix();
+                                p.textureIndex = TextureControl.arrayProps.names.IndexOf(words[2]);
+                                chunk.props.Add(p);
+                            }
+
+
+                        }
+                    }
+                }
+            }
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
@@ -378,9 +412,14 @@ namespace Ageless {
 
             origin = Vector4.Transform(rayPoint, mat).Xyz;
             direction = Vector4.Transform(rayVector, mat).Xyz.Normalized();
-		}
+        }
 
         public bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 hit, float far = FAR) {
+            Chunk chunk;
+            return findTerrainWithRay(ref origin, ref direction, out hit, out chunk, far);
+        }
+
+        public bool findTerrainWithRay(ref Vector3 origin, ref Vector3 direction, out Vector3 hit, out Chunk chunk, float far = FAR) {
             
 
             Vector3 p1 = new Vector3();
@@ -395,6 +434,8 @@ namespace Ageless {
             }*/
 
             float closest = far;
+
+            chunk = null;
 
             float t;
 
@@ -416,10 +457,12 @@ namespace Ageless {
 
                                     if (intercectTriangleRay(p1, p2, p3, ref origin, ref direction, out t)) {
                                         closest = Math.Min(closest, t);
+                                        chunk = c;
                                     } else {
                                         p1.X = x + Chunk.GRID_HALF_SIZE + offset.X; p1.Y = h.heights[x + 1, z + 1] + offset.Y; p1.Z = z + Chunk.GRID_HALF_SIZE + offset.Z;
                                         if (intercectTriangleRay(p3, p2, p1, ref origin, ref direction, out t)) {
                                             closest = Math.Min(closest, t);
+                                            chunk = c;
                                         }
                                     }
                                 }
@@ -436,15 +479,18 @@ namespace Ageless {
             return closest < far;
         }
 
-		public bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, out Vector3 hitPoint, float far = FAR) {
+
+        public bool findPropWithRay(ref Vector3 origin, ref Vector3 direction, out Prop closestProp, out Vector3 hitPoint, float far = FAR, bool onlySolid = true) {
 
 			closestProp = null;
 			float close = far;
-		
-			foreach (Chunk c in loadedMap.loadedChunks.Values) {
+            Vector3[] t = new Vector3[3];
+
+
+            foreach (Chunk c in loadedMap.loadedChunks.Values) {
 				foreach (Prop p in c.props) {
-					if (p.frameMade && intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
-                        float d = FAR;
+					if ((!onlySolid || p.solid) && p.frameMade && intercectAABBRay(p.frameMin, p.frameMax, ref origin, ref direction)) {
+                        float d = far;
 
                         for (int i = 0; i < p.model.ind.Count; i+=3) {
                             if (intercectTriangleRay(p.transformedPoints[(int)p.model.ind[i]], p.transformedPoints[(int)p.model.ind[i+1]], p.transformedPoints[(int)p.model.ind[i+2]], ref origin, ref direction, out d)) {

@@ -199,12 +199,12 @@ namespace Ageless {
 
             float h = 0;
 
-            if (heights.Count >= 2) {
+            /*if (heights.Count >= 2) {
                 Console.WriteLine("Height: {0}", y);
                 foreach (float f in heights) {
                     Console.WriteLine(f);
                 }
-            }
+            }*/
 
             foreach (float f in heights) {
                 if (f > h && f <= y) {

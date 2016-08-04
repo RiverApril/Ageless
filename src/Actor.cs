@@ -14,6 +14,7 @@ namespace Ageless {
 
         protected float movementSpeed = 1.0f / 2.0f;
         public float maxHeightChange = 2.0f;
+        protected float radius = 1.0f;
 
         public Vector3 position;
 

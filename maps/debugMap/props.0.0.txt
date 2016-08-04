@@ -23,7 +23,20 @@ ps loop 20 36.75 70 0 0 0
 
 set tex barrel wood
 
-psi barrel 54.46512 b+11.82378 5.204858 0 0 0
-psi barrel 54.13634 b+11.50568 7.477262 0 0 0
-psi barrel 56.86662 a+0.03334427 8.877943 0 0 0
-psi barrel 57.20267 b+11.75 5.707285 0 0 0
+psi barrel 54.46512 a 5.204858 0 0 0
+psi barrel 54.13634 a 7.477262 0 0 0
+psi barrel 56.86662 a 8.877943 0 0 0
+psi barrel 57.20267 a 5.707285 0 0 0
+psi barrel 56.52382 a 3.096941 0 0 0
+
+set tex wall stone
+
+ps wall 91.92091 b+10.25 42.44666 0 0 0
+ps wall 83.92091 b+9.25 52.44666 0 -72.00001 0
+
+set tex pillar stone
+
+ps pillar 91.67091 b+11.25 49.82166 0 -38 0
+ps wall 70.73255 b+8.875 49.30868 0 45.99998 0
+ps pillar 76.48255 b+10.375 54.93368 0 0 0
+ps pillar 72.76453 a+0.3161316 36.824 0 0 0

@@ -34,6 +34,7 @@ namespace Ageless {
 
             if (selectedProp != null) {
                 if (ke != null) {
+                    bool changed = false;
                     Vector3 propMove = new Vector3();
                     if (game.settings.editorBindPropMoveForward.test(ke, me)) {
                         propMove.Z += -1;
@@ -58,17 +59,24 @@ namespace Ageless {
                     }
                     if (ke.Alt) {
                         selectedProp.rotation += propMove * (float)(Math.PI / 90f);
+                        changed = true;
                     } else {
                         selectedProp.position += propMove;
+                        changed = true;
                     }
                     if (game.settings.editorBindPropReset.test(ke, me)) {
                         selectedProp.position = Vector3.Zero;
                         selectedProp.rotation = Vector3.Zero;
+                        changed = true;
                     }
                     if (game.settings.editorBindPropMoveToMouse.test(ke, me)) {
                         game.findTerrainWithRay(ref game.lookOrigin, ref game.lookDirection, out selectedProp.position);
+                        changed = true;
                     }
-                    selectedProp.setupModelMatrix();
+                    if (changed) {
+                        selectedProp.frameMade = false;
+                        selectedProp.setupModelMatrix();
+                    }
                 }
             }
 
