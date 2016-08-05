@@ -51,31 +51,47 @@ namespace Ageless {
 		public Vector3 calcNorm(HeightMap htmp, int x, int z) {
             Vector3 sum = Vector3.Zero;
 
-            Vector3 side1 = new Vector3(x + 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
-            Vector3 side2 = new Vector3(x, htmp.heights[x, z], z + 1) - new Vector3(x + 1, htmp.heights[x, z], z);
+			Vector3 side1;
+			Vector3 side2;
+
+			try{
+            	side1 = new Vector3(x + 1, htmp.heights[x+1, z], z) - new Vector3(x, htmp.heights[x, z], z);
+            	side2 = new Vector3(x, htmp.heights[x, z+1], z + 1) - new Vector3(x + 1, htmp.heights[x+1, z], z);
+            	sum += Vector3.Cross(side1, side2);
+			}catch(IndexOutOfRangeException){
+				side1 = new Vector3(x + 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
+				side2 = new Vector3(x, htmp.heights[x, z], z + 1) - new Vector3(x + 1, htmp.heights[x, z], z);
+				sum += Vector3.Cross(side1, side2);
+			};
+
+			try{
+            	side1 = new Vector3(x + 1, htmp.heights[x+1, z], z) - new Vector3(x, htmp.heights[x, z], z);
+            	side2 = new Vector3(x, htmp.heights[x, z-1], z - 1) - new Vector3(x + 1, htmp.heights[x+1, z], z);
+            	sum += Vector3.Cross(side1, side2);
+			}catch(IndexOutOfRangeException){};
+
+			try{
+            	side1 = new Vector3(x + 1, htmp.heights[x+1, z-1], z - 1) - new Vector3(x, htmp.heights[x, z], z);
+            	side2 = new Vector3(x, htmp.heights[x, z-1], z - 1) - new Vector3(x + 1, htmp.heights[x+1, z-1], z - 1);
+            	sum += Vector3.Cross(side1, side2);
+			}catch(IndexOutOfRangeException){};
+
+            side1 = new Vector3(x - 1, htmp.heights[x-1, z], z) - new Vector3(x, htmp.heights[x, z], z);
+            side2 = new Vector3(x, htmp.heights[x, z-1], z - 1) - new Vector3(x - 1, htmp.heights[x-1, z], z);
             sum += Vector3.Cross(side1, side2);
 
-            side1 = new Vector3(x + 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
-            side2 = new Vector3(x, htmp.heights[x, z], z - 1) - new Vector3(x + 1, htmp.heights[x, z], z);
+            side1 = new Vector3(x - 1, htmp.heights[x-1, z], z) - new Vector3(x, htmp.heights[x, z], z);
+            side2 = new Vector3(x, htmp.heights[x, z-1], z - 1) - new Vector3(x - 1, htmp.heights[x-1, z], z);
             sum += Vector3.Cross(side1, side2);
 
-            side1 = new Vector3(x + 1, htmp.heights[x, z], z - 1) - new Vector3(x, htmp.heights[x, z], z);
-            side2 = new Vector3(x, htmp.heights[x, z], z - 1) - new Vector3(x + 1, htmp.heights[x, z], z - 1);
-            sum += Vector3.Cross(side1, side2);
-
-            side1 = new Vector3(x - 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
-            side2 = new Vector3(x, htmp.heights[x, z], z - 1) - new Vector3(x - 1, htmp.heights[x, z], z);
-            sum += Vector3.Cross(side1, side2);
-
-            side1 = new Vector3(x - 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
-            side2 = new Vector3(x, htmp.heights[x, z], z - 1) - new Vector3(x - 1, htmp.heights[x, z], z);
-            sum += Vector3.Cross(side1, side2);
-
-            side1 = new Vector3(x, htmp.heights[x, z], z + 1) - new Vector3(x, htmp.heights[x, z], z);
-            side2 = new Vector3(x - 1, htmp.heights[x, z], z - 1) - new Vector3(x, htmp.heights[x, z], z + 1);
-            sum += Vector3.Cross(side1, side2);
+			try{
+           		side1 = new Vector3(x, htmp.heights[x, z+1], z + 1) - new Vector3(x, htmp.heights[x, z], z);
+            	side2 = new Vector3(x - 1, htmp.heights[x-1, z-1], z - 1) - new Vector3(x, htmp.heights[x, z+1], z + 1);
+            	sum += Vector3.Cross(side1, side2);
+			}catch(IndexOutOfRangeException){};
 
             sum.Normalize();
+
             return sum;
         }
 
@@ -92,7 +108,6 @@ namespace Ageless {
             Tile tile;
             Vector3 n1 = new Vector3(), n2 = new Vector3(), n3 = new Vector3();
             Vector3 p1 = new Vector3(), p2 = new Vector3(), p3 = new Vector3();
-            Vector3 t = new Vector3();
 
             int htmpi = 0;
 

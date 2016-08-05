@@ -1,6 +1,7 @@
 ﻿#version 330
 
 struct Light{
+	bool directional;
     vec3 position;
     vec3 color;
 };
@@ -30,7 +31,15 @@ void main() {
 
 	vec3 position = vec3(ModelMatrix * vec4(transferPosition, 1));
 
-	vec3 surfaceToLight = light.position - position;
+	vec3 surfaceToLight;
+
+	if(light.directional){
+
+		surfaceToLight = normalize(light.position);
+
+	}else{
+		surfaceToLight = light.position - position;
+	}
 
 	float brightness = max(dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal)), 0.2);
 

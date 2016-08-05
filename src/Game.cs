@@ -55,7 +55,7 @@ namespace Ageless {
         public ActorPlayer player;
 
         Vector3 lightPosition = new Vector3(0, 0, 0);
-        Vector3 lightColor = new Vector3(1.0f, 1.0f, 1.0f);
+        Vector3 lightColor = new Vector3(2.0f, 2.0f, 2.0f);
 
         public KeyboardState keyboard;
         public MouseState mouse;
@@ -263,9 +263,9 @@ namespace Ageless {
 
 			elapsedTime += e.Time;
 
-			lightPosition.X = (float)Math.Sin(elapsedTime) * 80000;
-            lightPosition.Y = -80000;
-			lightPosition.Z = (float)Math.Cos(elapsedTime) * 80000;
+			lightPosition.X = (float)Math.Sin(elapsedTime);
+			lightPosition.Y = (float)Math.Cos(elapsedTime);
+			lightPosition.Z = 0;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
@@ -275,8 +275,9 @@ namespace Ageless {
 
             shader.use();
 
+			GL.Uniform1(shader.GetUniformID("light.directional"), 1);
             GL.Uniform3(shader.GetUniformID("light.position"), lightPosition);
-            GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
+			GL.Uniform3(shader.GetUniformID("light.color"), lightColor);
 
             //matrixCamera = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
             matrixCamera = Matrix4.CreateTranslation(-camPos.X, -camPos.Y, -camPos.Z);
