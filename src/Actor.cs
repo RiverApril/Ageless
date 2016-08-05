@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Ageless {
-	public abstract class Actor : Renderable {
+	public abstract class Actor {
 
 		public static readonly float GRAVITY = 0.1f;
 
@@ -18,17 +18,24 @@ namespace Ageless {
 
         public Vector3 position;
 
-        public Actor() : base() {
+
+		public List<Bone> bones = new List<Bone>();
+
+
+        public Actor() {
 
 		}
 
 		public abstract void update(Game game);
 
         public void draw(Game game) {
-            game.matrixModel = Matrix4.CreateTranslation(position);
-            game.setModel();
-
-            drawRender();
-        }
+			Matrix4 pos = Matrix4.CreateTranslation(position);
+			foreach(Bone bone in bones){
+				game.matrixModel = bone.getTotalMatrix() * pos;
+	            game.setModel();
+				game.setTextureIndexOffset(bone.textureIndex);
+				bone.model.drawRender();
+			}
+		}
     }
 }

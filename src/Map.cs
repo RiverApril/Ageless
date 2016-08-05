@@ -68,7 +68,6 @@ namespace Ageless {
         }
 
         public void newActor(Actor actor) {
-            actor.compileState = COMP_STATUS.NEEDS_TO_BE_MADE;
             actor.ID = nextActorID;
             loadedActors.Add(nextActorID, actor);
             nextActorID++;

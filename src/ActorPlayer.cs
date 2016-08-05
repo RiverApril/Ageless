@@ -14,7 +14,27 @@ namespace Ageless {
 		public Vector3 target = new Vector3();
 
 		public ActorPlayer() : base() {
-			
+			Bone torso = new Bone(null, ModelControl.getModel("limb"), 0);
+			torso.matrix = Matrix4.CreateTranslation(0, 3, 0);
+
+			Bone legUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
+			legUpperLeft.matrix = Matrix4.CreateRotationX((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(0, 0, 0);
+
+			Bone legLowerLeft = new Bone(legUpperLeft, ModelControl.getModel("limb"), 0);
+			legLowerLeft.matrix = Matrix4.CreateRotationX((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(0, 3f, 0);
+
+
+			Bone legUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
+			legUpperRight.matrix = Matrix4.CreateRotationX((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(0, 0, 0);
+
+			Bone legLowerRight = new Bone(legUpperRight, ModelControl.getModel("limb"), 0);
+			legLowerRight.matrix = Matrix4.CreateRotationX((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(0, 3f, 0);
+
+			bones.Add(torso);
+			bones.Add(legUpperLeft);
+			bones.Add(legLowerLeft);
+			bones.Add(legUpperRight);
+			bones.Add(legLowerRight);
         }
 
         public override void update(Game game) {

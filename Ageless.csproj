@@ -73,6 +73,7 @@
     <Compile Include="src\HeadsUpDisplay.cs" />
     <Compile Include="src\UiElement.cs" />
     <Compile Include="src\TextureArray.cs" />
+    <Compile Include="src\Bone.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\world.frag.glsl" />
