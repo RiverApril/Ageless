@@ -254,8 +254,9 @@ namespace Ageless {
         public readonly SettingKey bindCameraOut = new SettingKey("Camera Out", Key.Minus, 0);
 
         public readonly SettingKey bindMoveToMouse = new SettingKey("Move", MouseButton.Left, 0);
-        public readonly SettingKey bindExit = new SettingKey("Exit", Key.Escape, 0);
-        public readonly SettingKey bindConsole = new SettingKey("Console", Key.Tilde, 0);
+		public readonly SettingKey bindExit = new SettingKey("Exit", Key.Escape, 0);
+		public readonly SettingKey bindConsole = new SettingKey("Console", Key.Tilde, 0);
+		public readonly SettingKey bindAdvanceTime = new SettingKey("Advance Time", Key.T, 0);
 
         public readonly SettingKey editorBindToggle = new SettingKey("EDITOR Toggle", Key.Tab, 0);
         public readonly SettingKey editorBindFocusOnPlayer = new SettingKey("EDITOR Focus on Player", Key.P, 0);

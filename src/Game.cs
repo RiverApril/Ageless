@@ -30,7 +30,7 @@ namespace Ageless {
 
         double FPS, UPS;
 
-		double elapsedTime = 0;
+		double elapsedTime = Math.PI * .75;
 
         public ShaderProgram shader;
 
@@ -88,8 +88,8 @@ namespace Ageless {
             settings = new Settings(dir + "settings.txt");
             settings.load();
 
-            gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight, GraphicsMode.Default, "Ageless",
-        GameWindowFlags.Default, DisplayDevice.Default, 3, 2, GraphicsContextFlags.ForwardCompatible);
+            gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight, GraphicsMode.Default, "Ageless", 
+				GameWindowFlags.Default, DisplayDevice.Default, 3, 2, GraphicsContextFlags.ForwardCompatible);
 
             gameWindow.Load += onLoad;
             gameWindow.Unload += onUnload;
@@ -100,6 +100,7 @@ namespace Ageless {
             gameWindow.KeyUp += onKeyUp;
             gameWindow.MouseDown += onMouseDown;
             gameWindow.MouseMove += onMouseMove;
+
 
             gameWindow.Run(60.0);
         }
@@ -261,11 +262,13 @@ namespace Ageless {
             camPos.Y = focusPos.Y + (float)(Math.Sin(camAngle.Theta) * focusDistance);
             camPos.Z = focusPos.Z + (float)(Math.Cos(camAngle.Theta) * Math.Cos(camAngle.Phi) * focusDistance);
 
-			elapsedTime += e.Time;
+			if(settings.bindAdvanceTime.test(keyboard, mouse)){
+				elapsedTime += e.Time;
+			}
 
 			lightPosition.X = (float)Math.Sin(elapsedTime);
 			lightPosition.Y = (float)Math.Cos(elapsedTime);
-			lightPosition.Z = 0;
+			lightPosition.Z = (float)Math.Sin(elapsedTime);
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
