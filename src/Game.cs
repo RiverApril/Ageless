@@ -77,6 +77,10 @@ namespace Ageless {
 
         public Vector4 highlightColor = new Vector4(0, 1, 0, .5f);
 
+		int markerCooldown = 0;
+
+		Model markerModel;
+
         public Game() {
 
 			hud = new HeadsUpDisplay(this);
@@ -90,6 +94,7 @@ namespace Ageless {
 
             gameWindow = new GameWindow(settings.windowWidth, settings.windowHeight, GraphicsMode.Default, "Ageless", 
 				GameWindowFlags.Default, DisplayDevice.Default, 3, 2, GraphicsContextFlags.ForwardCompatible);
+
 
             gameWindow.Load += onLoad;
             gameWindow.Unload += onUnload;
@@ -158,6 +163,8 @@ namespace Ageless {
 
 			hud.onLoad();
 
+			markerModel = ModelControl.getModel("marker");
+
         }
 
         void onUnload(object sender, EventArgs e) {
@@ -183,6 +190,10 @@ namespace Ageless {
 
             loadedMap.update(this);
 
+			if (settings.bindMoveToMouse.test(keyboard, mouse)) {
+				inputMoveWasClicked = true;
+				rayShouldUpdate = true;
+			}
 
             if (settings.bindCameraLeft.test(keyboard, mouse)) {
                 camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
@@ -292,10 +303,26 @@ namespace Ageless {
             loadedMap.drawActors(this);
             loadedMap.drawChunks(this);
 
+			if(markerCooldown > 0){
 
-            gameWindow.SwapBuffers();
+				GL.Disable(EnableCap.DepthTest);
+				setColor(highlightColor, true);
 
-            rayWasUpdated = false;
+				matrixModel = Matrix4.CreateTranslation(editor.active ? editor.focusPosition : player.target);
+				setModel();
+				markerModel.drawRender();
+
+				GL.Enable(EnableCap.DepthTest);
+				resetColor();
+				resetBlending();
+
+				markerCooldown--;
+			}
+
+
+			gameWindow.SwapBuffers();
+
+			rayWasUpdated = false;
         }
 
         public void setModel() {
@@ -535,11 +562,7 @@ namespace Ageless {
         }
 
         void onInputDown(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
-            if (settings.bindMoveToMouse.test(ke, me)) {
-                inputMoveWasClicked = true;
-                rayShouldUpdate = true;
-
-            } else if (settings.bindExit.test(ke, me)) {
+            if (settings.bindExit.test(ke, me)) {
                 gameWindow.Exit();
 
             } else if (settings.editorBindToggle.test(ke, me)) {
@@ -582,6 +605,7 @@ namespace Ageless {
                             } else {
                                 player.target = point;
                             }
+							markerCooldown = 20;
                         }
                     }
                 }

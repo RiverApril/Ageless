@@ -13,7 +13,7 @@ ps arch 20 a 20 0 90 0
 
 set tex cabin stone
 
-ps cabin 63.19803 b+11.54951 8.964706 0 101.0001 0
+ps cabin 63.19803 a 8.964706 0 101.0001 0
 
 set tex loop stone
 
@@ -31,12 +31,12 @@ psi barrel 56.52382 a 3.096941 0 0 0
 
 set tex wall stone
 
-ps wall 91.92091 b+10.25 42.44666 0 0 0
-ps wall 83.92091 b+9.25 52.44666 0 -72.00001 0
+ps wall 91.92091 a 42.44666 0 0 0
+ps wall 83.92091 a 52.44666 0 -72.00001 0
 
 set tex pillar stone
 
-ps pillar 91.67091 b+11.25 49.82166 0 -38 0
-ps wall 70.73255 b+8.875 49.30868 0 45.99998 0
-ps pillar 76.48255 b+10.375 54.93368 0 0 0
-ps pillar 72.76453 a+0.3161316 36.824 0 0 0
+ps pillar 91.67091 a 49.82166 0 -38 0
+ps wall 70.73255 a 49.30868 0 45.99998 0
+ps pillar 76.48255 a 54.93368 0 0 0
+ps pillar 72.76453 a 36.824 0 0 0

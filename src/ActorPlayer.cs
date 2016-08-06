@@ -13,31 +13,106 @@ namespace Ageless {
 
 		public Vector3 target = new Vector3();
 
+		Bone torso;
+		Bone legUpperLeft;
+		Bone legUpperRight;
+		Bone legLowerLeft;
+		Bone legLowerRight;
+		Bone armUpperLeft;
+		Bone armUpperRight;
+		Bone armLowerLeft;
+		Bone armLowerRight;
+
+		int animTick = 0;
+
+		const int ANIM_STAND = 0;
+		const int ANIM_RUN = 1;
+
+		int animation = ANIM_STAND;
+
 		public ActorPlayer() : base() {
-			Bone torso = new Bone(null, ModelControl.getModel("limb"), 0);
-			torso.matrix = Matrix4.CreateTranslation(0, 3, 0);
+			torso = new Bone(null, ModelControl.getModel("limb"), 0);
 
-			Bone legUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
-			legUpperLeft.matrix = Matrix4.CreateRotationX((float)Math.PI * 0.75f) * Matrix4.CreateTranslation(0, 0, 0);
+			legUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
+			legLowerLeft = new Bone(legUpperLeft, ModelControl.getModel("limb"), 0);
+			legUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
+			legLowerRight = new Bone(legUpperRight, ModelControl.getModel("limb"), 0);
 
-			Bone legLowerLeft = new Bone(legUpperLeft, ModelControl.getModel("limb"), 0);
-			legLowerLeft.matrix = Matrix4.CreateRotationX((float)Math.PI * 0.25f) * Matrix4.CreateTranslation(0, 1.5f, 0);
-
-
-			Bone legUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
-			legUpperRight.matrix = Matrix4.CreateRotationX((float)Math.PI * -0.75f) * Matrix4.CreateTranslation(0, 0, 0);
-
-			Bone legLowerRight = new Bone(legUpperRight, ModelControl.getModel("limb"), 0);
-			legLowerRight.matrix = Matrix4.CreateRotationX((float)Math.PI * -0.25f) * Matrix4.CreateTranslation(0, 1.5f, 0);
+			armUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
+			armLowerLeft = new Bone(armUpperLeft, ModelControl.getModel("limb"), 0);
+			armUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
+			armLowerRight = new Bone(armUpperRight, ModelControl.getModel("limb"), 0);
 
 			bones.Add(torso);
 			bones.Add(legUpperLeft);
 			bones.Add(legLowerLeft);
 			bones.Add(legUpperRight);
 			bones.Add(legLowerRight);
+			bones.Add(armUpperLeft);
+			bones.Add(armLowerLeft);
+			bones.Add(armUpperRight);
+			bones.Add(armLowerRight);
         }
 
+		//Legs
+		public float animUpperLegRZ(bool left){
+			if(animation == ANIM_RUN) {
+				return (float)(Math.PI * (left ? 1 : -1) * Math.Cos(animTick / 7.0f) * -0.2f + Math.PI);
+			}else{
+				return (float)(Math.PI);
+			}
+		}
+
+		public float animLowerLegRZ(bool left){
+			if(animation == ANIM_RUN){
+				return (float)(Math.PI * (left ? 1 : -1) * Math.Sin(animTick / 7.0) * -0.1 + Math.PI * -0.2);
+			}else{
+				return 0;
+			}
+		}
+
+		//Arms
+		public float animUpperArmRZ(bool left){
+			if(animation == ANIM_RUN) {
+				return (float)(Math.PI * (left ? 1 : -1) * Math.Sin(animTick / 7.0) * -0.2 + Math.PI);
+			}else{
+				return (float)(Math.PI);
+			}
+		}
+
+		public float animLowerArmRZ(bool left){
+			if(animation == ANIM_RUN){
+				return (float)(Math.PI * (left ? 1 : -1) * Math.Cos(animTick / 7.0) * -0.1 + Math.PI * 0.2);
+			}else{
+				return 0;
+			}
+		}
+
+		//Torso
+		public float animTorsoRZ(){
+			if(animation == ANIM_RUN){
+				return (float)(Math.PI * -0.05);
+			}else{
+				return 0;
+			}
+		}
+
+
         public override void update(Game game) {
+
+			animTick += 1;
+
+			torso.matrix         = Matrix4.CreateRotationZ(animTorsoRZ())         * Matrix4.CreateTranslation(0, 3, 0);
+
+			legUpperLeft.matrix  = Matrix4.CreateRotationZ(animUpperLegRZ(true))  * Matrix4.CreateTranslation(0, 0   , 0.5f);
+			legLowerLeft.matrix  = Matrix4.CreateRotationZ(animLowerLegRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0);
+			legUpperRight.matrix = Matrix4.CreateRotationZ(animUpperLegRZ(false)) * Matrix4.CreateTranslation(0, 0   ,-0.5f);
+			legLowerRight.matrix = Matrix4.CreateRotationZ(animLowerLegRZ(false)) * Matrix4.CreateTranslation(0, 1.5f, 0);
+
+			armUpperLeft.matrix  = Matrix4.CreateRotationZ(animUpperArmRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0.75f);
+			armLowerLeft.matrix  = Matrix4.CreateRotationZ(animLowerArmRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0);
+			armUpperRight.matrix = Matrix4.CreateRotationZ(animUpperArmRZ(false)) * Matrix4.CreateTranslation(0, 1.5f,-0.75f);
+			armLowerRight.matrix = Matrix4.CreateRotationZ(animLowerArmRZ(false)) * Matrix4.CreateTranslation(0, 1.5f, 0);
 
             Vector2 diff = new Vector2();
 
@@ -55,6 +130,23 @@ namespace Ageless {
             if (game.keyboard.IsKeyDown(Key.Down)) {
                 diff.Y += 1;
             }*/
+
+			if(diff.LengthSquared > 1) {
+				animation = ANIM_RUN;
+				float next = -(float)Math.Atan2(diff.Y, diff.X);
+				if(this.rotation.Y > Math.PI * 2) {
+					this.rotation.Y -= (float)Math.PI * 2;
+				}
+				if(this.rotation.Y < 0) {
+					this.rotation.Y += (float)Math.PI * 2;
+				}
+				if(Math.Abs(this.rotation.Y - next) > (float)Math.PI) {
+					next += (float)Math.PI * 2;
+				}
+				this.rotation.Y += (next - this.rotation.Y) / 8;
+			} else {
+				animation = ANIM_STAND;
+			}
 
 
 			float ch = game.loadedMap.getFloorAtPosition(position.X, position.Y, position.Z);

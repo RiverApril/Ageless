@@ -58,11 +58,7 @@ namespace Ageless {
             	side1 = new Vector3(x + 1, htmp.heights[x+1, z], z) - new Vector3(x, htmp.heights[x, z], z);
             	side2 = new Vector3(x, htmp.heights[x, z+1], z + 1) - new Vector3(x + 1, htmp.heights[x+1, z], z);
             	sum += Vector3.Cross(side1, side2);
-			}catch(IndexOutOfRangeException){
-				side1 = new Vector3(x + 1, htmp.heights[x, z], z) - new Vector3(x, htmp.heights[x, z], z);
-				side2 = new Vector3(x, htmp.heights[x, z], z + 1) - new Vector3(x + 1, htmp.heights[x, z], z);
-				sum += Vector3.Cross(side1, side2);
-			};
+			}catch(IndexOutOfRangeException){return sum;};
 
 			try{
             	side1 = new Vector3(x + 1, htmp.heights[x+1, z], z) - new Vector3(x, htmp.heights[x, z], z);
