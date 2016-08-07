@@ -52,7 +52,16 @@ namespace Ageless {
 			bones.Add(armLowerLeft);
 			bones.Add(armUpperRight);
 			bones.Add(armLowerRight);
-        }
+		}
+
+		//Torso
+		public float animTorsoRZ(){
+			if(animation == ANIM_RUN){
+				return (float)(Math.PI * -0.05);
+			}else{
+				return 0;
+			}
+		}
 
 		//Legs
 		public float animUpperLegRZ(bool left){
@@ -62,7 +71,6 @@ namespace Ageless {
 				return (float)(Math.PI);
 			}
 		}
-
 		public float animLowerLegRZ(bool left){
 			if(animation == ANIM_RUN){
 				return (float)(Math.PI * (left ? 1 : -1) * Math.Sin(animTick / 7.0) * -0.1 + Math.PI * -0.2);
@@ -79,19 +87,9 @@ namespace Ageless {
 				return (float)(Math.PI);
 			}
 		}
-
 		public float animLowerArmRZ(bool left){
 			if(animation == ANIM_RUN){
 				return (float)(Math.PI * (left ? 1 : -1) * Math.Cos(animTick / 7.0) * -0.1 + Math.PI * 0.2);
-			}else{
-				return 0;
-			}
-		}
-
-		//Torso
-		public float animTorsoRZ(){
-			if(animation == ANIM_RUN){
-				return (float)(Math.PI * -0.05);
 			}else{
 				return 0;
 			}
@@ -153,7 +151,7 @@ namespace Ageless {
 			if (ch >= 0) { // Wait until chunks are loaded
 				float nh;
 
-				if (diff.Length > 0) {
+				if (diff.LengthSquared > 1) {
                     /*double angle = game.camAngle.Phi + Math.Atan2(diff.Y, diff.X);
 
 					diff.X = (float)(Math.Cos(angle) * movementSpeed);

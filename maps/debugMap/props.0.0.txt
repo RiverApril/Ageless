@@ -17,9 +17,9 @@ ps cabin 63.19803 a 8.964706 0 101.0001 0
 
 set tex loop stone
 
-ps loop 0 38 70 0 0 0
-ps loop 10 36.75 70 0 0 0
-ps loop 20 36.75 70 0 0 0
+ps loop 0 a-3 70 0 0 0
+ps loop 10 a-2 70 0 0 0
+ps loop 20 a-1 70 0 0 0
 
 set tex barrel wood
 
@@ -36,7 +36,8 @@ ps wall 83.92091 a 52.44666 0 -72.00001 0
 
 set tex pillar stone
 
-ps pillar 91.67091 a 49.82166 0 -38 0
+ps pillar 91.67091 a-2 49.82166 0 -38 0
 ps wall 70.73255 a 49.30868 0 45.99998 0
-ps pillar 76.48255 a 54.93368 0 0 0
+ps pillar 76.48255 a-1 54.93368 0 0 0
 ps pillar 72.76453 a 36.824 0 0 0
+ps pillar 64.30637 a-2 43.12571 0 0 0

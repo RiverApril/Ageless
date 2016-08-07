@@ -103,7 +103,9 @@ namespace Ageless {
 
         public void update(Game game) {
             if (!chunksLocked) {
-                revaluateChunks(); //TODO make this happen less often
+				if(game.udpateTick % 100 == 0){
+                	revaluateChunks(); //TODO make this happen less often
+				}
 
                 if (unloadAll) {
                     while (loadedChunks.Count > 0) {

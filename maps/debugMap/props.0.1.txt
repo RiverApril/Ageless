@@ -1,0 +1,5 @@
+# Props for chunk 0, 1
+
+set tex cabin wood
+
+ps cabin 33.9868 14.6217 163.5189 0 0 0

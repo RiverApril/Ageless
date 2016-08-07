@@ -146,7 +146,7 @@ namespace Ageless {
 						} else {
 							p = new Prop(ModelControl.getModel(name), split[0].Contains("s"));
 						}
-						p.position = new Vector3(x + (Chunk.CHUNK_SIZE_X * chunk.Location.X), y, z + (Chunk.CHUNK_SIZE_Z * chunk.Location.Y));
+						p.position = new Vector3(x, y, z);
 						p.rotation = new Vector3(xr, yr, zr);
 						p.setupModelMatrix();
 						p.textureIndex = TextureControl.arrayProps.names.IndexOf(modelTex[p.model.name]);
@@ -232,13 +232,13 @@ namespace Ageless {
                     foreach (HeightMap htmp in chunk.terrain) {
                         float h;
                         if (htmp.getHeightAtPosition(new Vector2(prop.position.X, prop.position.Z), out h)) {
-                            if (Math.Abs(h) <= Math.Abs(y)) {
+							if (Math.Abs(y) > Math.Abs(prop.position.Y - h)) {
                                 y = prop.position.Y - h;
                                 if (y == 0) {
                                     ys = string.Format("{0}", htmp.letter);
-                                } else {
+								} else {
                                     ys = string.Format("{0}{1}{2}", htmp.letter, y < 0 ? "" : "+", y);
-                                }
+								}
                             }
                         }
                     }

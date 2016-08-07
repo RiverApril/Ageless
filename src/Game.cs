@@ -28,7 +28,9 @@ namespace Ageless {
 
         public GameWindow gameWindow;
 
-        double FPS, UPS;
+		public double FPS, UPS;
+
+		public int udpateTick = 0;
 
 		double elapsedTime = Math.PI * .75;
 
@@ -81,6 +83,9 @@ namespace Ageless {
 
 		Model markerModel;
 
+		bool inConsole = false;
+		string consoleInput = "";
+
         public Game() {
 
 			hud = new HeadsUpDisplay(this);
@@ -102,6 +107,7 @@ namespace Ageless {
             gameWindow.UpdateFrame += onUpdateFrame;
             gameWindow.RenderFrame += onRenderFrame;
             gameWindow.KeyDown += onKeyDown;
+			gameWindow.KeyPress += onKeyPress;
             gameWindow.KeyUp += onKeyUp;
             gameWindow.MouseDown += onMouseDown;
             gameWindow.MouseMove += onMouseMove;
@@ -186,75 +192,45 @@ namespace Ageless {
             keyboard = Keyboard.GetState();
             mouse = Mouse.GetState();
 
-            gameWindow.Title = string.Format("UPS: {0:F}, FPS: {0:F}", UPS, FPS);
+			gameWindow.Title = string.Format("UPS: {0}, FPS: {0}", (int)UPS, (int)FPS);
 
             loadedMap.update(this);
 
-			if (settings.bindMoveToMouse.test(keyboard, mouse)) {
-				inputMoveWasClicked = true;
-				rayShouldUpdate = true;
+			if(!inConsole) {
+
+				if (settings.bindMoveToMouse.test(keyboard, mouse)) {
+					inputMoveWasClicked = true;
+					rayShouldUpdate = true;
+				}
+
+	            if (settings.bindCameraLeft.test(keyboard, mouse)) {
+	                camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
+	                rayShouldUpdate = true;
+	            }
+				if (settings.bindCameraRight.test(keyboard, mouse)) {
+	                camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
+	                rayShouldUpdate = true;
+	            }
+
+	            if (settings.bindCameraUp.test(keyboard, mouse)) {
+	                camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
+	                rayShouldUpdate = true;
+	            }
+				if (settings.bindCameraDown.test(keyboard, mouse)) {
+	                camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
+	                rayShouldUpdate = true;
+	            }
+
+				if (settings.bindCameraIn.test(keyboard, mouse)) {
+					focusDistance = Math.Max(NEAR, focusDistance / settings.cameraZoomSpeed);
+	                rayShouldUpdate = true;
+	            }
+				if (settings.bindCameraOut.test(keyboard, mouse)) {
+					focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
+	                rayShouldUpdate = true;
+	            }
+
 			}
-
-            if (settings.bindCameraLeft.test(keyboard, mouse)) {
-                camAngle.Phi += settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
-                rayShouldUpdate = true;
-            }
-			if (settings.bindCameraRight.test(keyboard, mouse)) {
-                camAngle.Phi -= settings.cameraScrollSpeed * (settings.invertCameraX ? -1 : 1);
-                rayShouldUpdate = true;
-            }
-
-            if (settings.bindCameraUp.test(keyboard, mouse)) {
-                camAngle.Theta += settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
-                rayShouldUpdate = true;
-            }
-			if (settings.bindCameraDown.test(keyboard, mouse)) {
-                camAngle.Theta -= settings.cameraScrollSpeed * (settings.invertCameraY ? -1 : 1);
-                rayShouldUpdate = true;
-            }
-
-			if (settings.bindCameraIn.test(keyboard, mouse)) {
-				focusDistance = Math.Max(NEAR, focusDistance / settings.cameraZoomSpeed);
-                rayShouldUpdate = true;
-            }
-			if (settings.bindCameraOut.test(keyboard, mouse)) {
-				focusDistance = Math.Min(FAR, focusDistance * settings.cameraZoomSpeed);
-                rayShouldUpdate = true;
-            }
-            if (settings.bindConsole.test(keyboard, mouse)) {
-                bool inConsole = true;
-                Console.WriteLine("Console Active");
-                while (inConsole) {
-                    Console.Write(">> ");
-                    string line = Console.ReadLine();
-                    if (line.Equals("`")) {
-                        inConsole = false;
-                    }else if (line.StartsWith("p")) {
-                        string[] words = line.Split(' ');
-                        if (words.Length == 3) {
-                            string modelName = words[1];
-                            
-                            Prop p;
-                            if (words[0].Contains("i")) {
-                                p = new PropInteractable(ModelControl.getModel(modelName), words[0].Contains("s"));
-                            } else {
-                                p = new Prop(ModelControl.getModel(modelName), words[0].Contains("s"));
-                            }
-
-                            Vector3 hit; Chunk chunk;
-
-                            if (findTerrainWithRay(ref lookOrigin, ref lookDirection, out hit, out chunk)) {
-                                p.position = hit;
-                                p.setupModelMatrix();
-                                p.textureIndex = TextureControl.arrayProps.names.IndexOf(words[2]);
-                                chunk.props.Add(p);
-                            }
-
-
-                        }
-                    }
-                }
-            }
 
             if (camAngle.Theta < 0) {
                 camAngle.Theta = 0;
@@ -280,6 +256,8 @@ namespace Ageless {
 			sunPosition.X = (float)Math.Sin(elapsedTime);
 			sunPosition.Y = (float)Math.Cos(elapsedTime);
 			sunPosition.Z = (float)Math.Sin(elapsedTime);
+
+			udpateTick++;
         }
 
         void onRenderFrame(object sender, FrameEventArgs e) {
@@ -562,17 +540,78 @@ namespace Ageless {
         }
 
         void onInputDown(KeyboardKeyEventArgs ke, MouseButtonEventArgs me) {
-            if (settings.bindExit.test(ke, me)) {
-                gameWindow.Exit();
+			if(inConsole){
+				if (settings.bindConsole.test(ke, me)) {
+					inConsole = false;
+					Console.WriteLine("Console exit");
+				}
+				if(ke != null){
+					if(ke.Key == Key.Enter){
+						consoleExecute(consoleInput);
+						consoleInput = "";
+						Console.WriteLine("");
+					}else if (ke.Key == Key.BackSpace){
+						if(consoleInput.Length > 0){
+							consoleInput = consoleInput.Substring(0, consoleInput.Length-1);
+							Console.WriteLine("");
+							Console.Write(consoleInput);
+						}
+					}
+				}
+			}else{
+				if (settings.bindConsole.test(ke, me)) {
+					inConsole = true;
+					Console.WriteLine("Console enter");
+				}else if (settings.bindExit.test(ke, me)) {
+	                gameWindow.Exit();
 
-            } else if (settings.editorBindToggle.test(ke, me)) {
-                editor.active = !editor.active;
+	            } else if (settings.editorBindToggle.test(ke, me)) {
+	                editor.active = !editor.active;
 
-            }
-            if (editor.active) {
-                editor.onInputDown(ke, me);
-            }
-        }
+	            }
+	            if (editor.active) {
+	                editor.onInputDown(ke, me);
+	            }
+			}
+		}
+
+		void onKeyPress(object sender, KeyPressEventArgs e){
+			if(inConsole && e.KeyChar != '`'){
+				consoleInput += e.KeyChar;
+				Console.Write(e.KeyChar);
+			}
+		}
+
+		void consoleExecute(string line){
+			if (line.StartsWith("p")) {
+				string[] words = line.Split(' ');
+				if (words.Length == 3) {
+					string modelName = words[1];
+
+					Prop p;
+					if (words[0].Contains("i")) {
+						p = new PropInteractable(ModelControl.getModel(modelName), words[0].Contains("s"));
+					} else {
+						p = new Prop(ModelControl.getModel(modelName), words[0].Contains("s"));
+					}
+
+					Vector3 hit; Chunk chunk;
+
+					if (findTerrainWithRay(ref lookOrigin, ref lookDirection, out hit, out chunk)) {
+						p.position = hit;
+						p.setupModelMatrix();
+						p.textureIndex = TextureControl.arrayProps.names.IndexOf(words[2]);
+						chunk.props.Add(p);
+						Console.WriteLine("Success");
+						return;
+					}
+					Console.WriteLine("Failed: Mouse in sky");
+					return;
+
+				}
+			}
+			Console.WriteLine("Unknown command");
+		}
 
         private void heavy() {
 

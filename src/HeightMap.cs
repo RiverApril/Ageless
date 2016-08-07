@@ -36,7 +36,14 @@ namespace Ageless {
             //f1-f2
             //| / |
             //f3-f4
-            if (getTile(x1, y1).renderType != RenderType.None) {
+			Tile tile;
+			try{
+				tile = getTile(x1, y1);
+			}catch(IndexOutOfRangeException){
+				height = 0;
+				return false;
+			}
+            if (tile.renderType != RenderType.None) {
                 float f1 = heights[x1, y1];
                 float f2 = heights[x2, y1];
                 float f3 = heights[x1, y2];

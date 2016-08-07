@@ -24,7 +24,8 @@ namespace Ageless {
             arrayProps.add("wood");
             arrayActors.add("default");
 
-            arrayTerrain.add("grass");
+			arrayTerrain.add("grass");
+			arrayTerrain.add("dirty grass");
             arrayTerrain.add("dirt");
 
             arrayGUI.add("hud");
