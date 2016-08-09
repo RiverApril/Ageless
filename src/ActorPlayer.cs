@@ -14,7 +14,8 @@ namespace Ageless {
 		public Vector3 target = new Vector3();
 
 		Bone torso;
-		Bone legUpperLeft;
+        Bone head;
+        Bone legUpperLeft;
 		Bone legUpperRight;
 		Bone legLowerLeft;
 		Bone legLowerRight;
@@ -31,20 +32,25 @@ namespace Ageless {
 		int animation = ANIM_STAND;
 
 		public ActorPlayer() : base() {
-			torso = new Bone(null, ModelControl.getModel("limb"), 0);
+			torso = new Bone(null, ModelControl.getModel("human/torso"), 0);
+            head = new Bone(torso, ModelControl.getModel("human/head"), 0);
 
-			legUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
-			legLowerLeft = new Bone(legUpperLeft, ModelControl.getModel("limb"), 0);
-			legUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
-			legLowerRight = new Bone(legUpperRight, ModelControl.getModel("limb"), 0);
+            legUpperLeft = new Bone(torso, ModelControl.getModel("human/upperLeg"), 0);
+			legLowerLeft = new Bone(legUpperLeft, ModelControl.getModel("human/lowerLeg"), 0);
+			legUpperRight = new Bone(torso, ModelControl.getModel("human/upperLeg"), 0);
+			legLowerRight = new Bone(legUpperRight, ModelControl.getModel("human/lowerLeg"), 0);
 
-			armUpperLeft = new Bone(torso, ModelControl.getModel("limb"), 0);
-			armLowerLeft = new Bone(armUpperLeft, ModelControl.getModel("limb"), 0);
-			armUpperRight = new Bone(torso, ModelControl.getModel("limb"), 0);
-			armLowerRight = new Bone(armUpperRight, ModelControl.getModel("limb"), 0);
+			armUpperLeft = new Bone(torso, ModelControl.getModel("human/upperArm"), 0);
+			armLowerLeft = new Bone(armUpperLeft, ModelControl.getModel("human/lowerArm"), 0);
+			armUpperRight = new Bone(torso, ModelControl.getModel("human/upperArm"), 0);
+			armLowerRight = new Bone(armUpperRight, ModelControl.getModel("human/lowerArm"), 0);
 
-			bones.Add(torso);
-			bones.Add(legUpperLeft);
+            updateMatrices();
+
+
+            bones.Add(torso);
+            bones.Add(head);
+            bones.Add(legUpperLeft);
 			bones.Add(legLowerLeft);
 			bones.Add(legUpperRight);
 			bones.Add(legLowerRight);
@@ -61,10 +67,19 @@ namespace Ageless {
 			}else{
 				return 0;
 			}
-		}
+        }
 
-		//Legs
-		public float animUpperLegRZ(bool left){
+        //Head
+        public float animHeadRZ() {
+            if (animation == ANIM_RUN) {
+                return (float)(Math.PI * 0.05);
+            } else {
+                return 0;
+            }
+        }
+
+        //Legs
+        public float animUpperLegRZ(bool left){
 			if(animation == ANIM_RUN) {
 				return (float)(Math.PI * (left ? 1 : -1) * Math.Cos(animTick / 7.0f) * -0.2f + Math.PI);
 			}else{
@@ -95,22 +110,30 @@ namespace Ageless {
 			}
 		}
 
+        public void updateMatrices() {
+
+            const int size = 3;
+
+            torso.matrix = Matrix4.CreateRotationZ(animTorsoRZ()) * Matrix4.CreateTranslation(0, size * .43f, 0);
+            head.matrix = Matrix4.CreateRotationZ(animHeadRZ()) * Matrix4.CreateTranslation(0, size * .38f, 0);
+
+            legUpperLeft.matrix = Matrix4.CreateRotationZ(animUpperLegRZ(true)) * Matrix4.CreateTranslation(0, 0, size * .055f);
+            legLowerLeft.matrix = Matrix4.CreateRotationZ(animLowerLegRZ(true)) * Matrix4.CreateTranslation(0, size * .17f, 0);
+            legUpperRight.matrix = Matrix4.CreateRotationZ(animUpperLegRZ(false)) * Matrix4.CreateTranslation(0, 0, size * -.055f);
+            legLowerRight.matrix = Matrix4.CreateRotationZ(animLowerLegRZ(false)) * Matrix4.CreateTranslation(0, size * .17f, 0);
+
+            armUpperLeft.matrix = Matrix4.CreateRotationZ(animUpperArmRZ(true)) * Matrix4.CreateTranslation(0, size * .38f, size * .26f * .5f);
+            armLowerLeft.matrix = Matrix4.CreateRotationZ(animLowerArmRZ(true)) * Matrix4.CreateTranslation(0, size * .19f, 0);
+            armUpperRight.matrix = Matrix4.CreateRotationZ(animUpperArmRZ(false)) * Matrix4.CreateTranslation(0, size * .38f, size * -.26f * .5f);
+            armLowerRight.matrix = Matrix4.CreateRotationZ(animLowerArmRZ(false)) * Matrix4.CreateTranslation(0, size * .19f, 0);
+        }
+
 
         public override void update(Game game) {
 
-			animTick += 1;
+            updateMatrices();
 
-			torso.matrix         = Matrix4.CreateRotationZ(animTorsoRZ())         * Matrix4.CreateTranslation(0, 3, 0);
-
-			legUpperLeft.matrix  = Matrix4.CreateRotationZ(animUpperLegRZ(true))  * Matrix4.CreateTranslation(0, 0   , 0.5f);
-			legLowerLeft.matrix  = Matrix4.CreateRotationZ(animLowerLegRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0);
-			legUpperRight.matrix = Matrix4.CreateRotationZ(animUpperLegRZ(false)) * Matrix4.CreateTranslation(0, 0   ,-0.5f);
-			legLowerRight.matrix = Matrix4.CreateRotationZ(animLowerLegRZ(false)) * Matrix4.CreateTranslation(0, 1.5f, 0);
-
-			armUpperLeft.matrix  = Matrix4.CreateRotationZ(animUpperArmRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0.75f);
-			armLowerLeft.matrix  = Matrix4.CreateRotationZ(animLowerArmRZ(true))  * Matrix4.CreateTranslation(0, 1.5f, 0);
-			armUpperRight.matrix = Matrix4.CreateRotationZ(animUpperArmRZ(false)) * Matrix4.CreateTranslation(0, 1.5f,-0.75f);
-			armLowerRight.matrix = Matrix4.CreateRotationZ(animLowerArmRZ(false)) * Matrix4.CreateTranslation(0, 1.5f, 0);
+            animTick += 1;
 
             Vector2 diff = new Vector2();
 
