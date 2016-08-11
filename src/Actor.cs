@@ -19,8 +19,7 @@ namespace Ageless {
 		public Vector3 position;
 		public Vector3 rotation;
 
-
-		public List<Bone> bones = new List<Bone>();
+        public Skeleton skeleton;
 
 
         public Actor() {
@@ -30,13 +29,8 @@ namespace Ageless {
 		public abstract void update(Game game);
 
         public void draw(Game game) {
-			Matrix4 pos = Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z) * Matrix4.CreateTranslation(position);
-			foreach(Bone bone in bones){
-				game.matrixModel = bone.getTotalMatrix() * pos;
-	            game.setModel();
-				game.setTextureIndexOffset(bone.textureIndex);
-				bone.model.drawRender();
-			}
+            Matrix4 pos = Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationZ(rotation.Z) * Matrix4.CreateTranslation(position);
+            skeleton.draw(game, pos);
 		}
     }
 }

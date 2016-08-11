@@ -60,6 +60,8 @@
     <Compile Include="src\Renderable.cs" />
     <Compile Include="src\Settings.cs" />
     <Compile Include="src\ShaderProgram.cs" />
+    <Compile Include="src\Skeleton.cs" />
+    <Compile Include="src\SkeletonHuman.cs" />
     <Compile Include="src\TextureControl.cs" />
     <Compile Include="src\Tile.cs" />
     <Compile Include="src\TryGL.cs" />
