@@ -3,7 +3,8 @@
 bin/
 obj/
 .vs/
-
+*.config
+packages/
 
 # Ageless
 settings.txt
@@ -11,3 +12,7 @@ settings.txt
 # Blender extras
 *.blend1
 *.mtl
+
+# Mac
+.DS_Store
+
